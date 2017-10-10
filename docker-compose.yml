@@ -1,0 +1,22 @@
+version: '3'
+services:
+  postgres:
+    build: ./postgis
+    volumes:
+      - "pgdata:/var/lib/postgresql/data"
+    environment:
+     - POSTGRES_DB=gis
+     - POSTGRES_USER=gis
+  cassandra:
+    image: cassandra:latest
+  tileserv:
+    build: ./tileserv
+  tilegen:
+    build: ./tilegen
+    volumes:
+    - ./data:/data
+    depends_on:
+      - postgres
+
+volumes:
+  pgdata:
