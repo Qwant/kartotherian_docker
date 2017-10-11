@@ -1,0 +1,6 @@
+osmdb-user: gis
+osmdb-pswd: <xxx> # TBD
+cassandra-servers: cassandra # Docker container
+cassandra-user: gis
+cassandra-pswd: <xxx> # TBD
+

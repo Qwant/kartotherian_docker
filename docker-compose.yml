@@ -11,6 +11,15 @@ services:
     image: cassandra:latest
   tileserv:
     build: ./tileserv
+    environment:
+      - NODE_PATH='/opt/tilerator/node_modules'
+      - TILERATOR_PORT=16354
+    depends_on:
+      - cassandra
+      - tilegen
+      - redis
+  redis:
+    image: redis:latest
   tilegen:
     build: ./tilegen
     volumes:

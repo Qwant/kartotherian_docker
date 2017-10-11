@@ -43,8 +43,8 @@ RUN apt update && \
              osmctools \
              nmap \
              postgis && \
-    curl -sL https://deb.nodesource.com/setup_6.x && \
-    apt-get install -y nodejs npm
+    curl -sL https://deb.nodesource.com/setup_6.x | bash - && \
+    apt-get install -y nodejs
 
 COPY import_data.sh /
 RUN chmod +x /import_data.sh
