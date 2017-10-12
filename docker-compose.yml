@@ -9,8 +9,8 @@ services:
      - POSTGRES_USER=gis
   cassandra:
     image: cassandra:latest
-  tileserv:
-    build: ./tileserv
+  tilerator:
+    build: ./tilerator
     environment:
       - NODE_PATH='/opt/tilerator/node_modules'
       - TILERATOR_PORT=16354
@@ -28,6 +28,16 @@ services:
     - ./data:/data
     depends_on:
       - postgres
+  kartotherian:
+    build: ./kartotherian
+    environment:
+      - NODE_PATH='/opt/kartotherian/node_modules'
+      - KARTOTHERIAN_PORT=6533
+    depends_on:
+      - tilerator
+    ports:
+      - "6533:6533"
+
 
 volumes:
   pgdata:
