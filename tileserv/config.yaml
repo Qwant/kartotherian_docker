@@ -39,7 +39,7 @@ services:
 
       # more per-service config settings
       # the location of the spec, defaults to spec.yaml if not specified
-      spec: ./spec.template.yaml
+      spec: /opt/tilerator/spec.template.yaml
       # allow cross-domain requests to the API (default '*')
       cors: '*'
       # to disable use:
