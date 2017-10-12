@@ -18,6 +18,8 @@ services:
       - cassandra
       - tilegen
       - redis
+    ports:
+      - "16534:16534"
   redis:
     image: redis:latest
   tilegen:

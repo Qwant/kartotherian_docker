@@ -35,7 +35,7 @@ services:
       port: 16534
 
       # restrict to localhost access only
-      interface: '*'
+      # interface: '*'
 
       # more per-service config settings
       # the location of the spec, defaults to spec.yaml if not specified
@@ -75,4 +75,7 @@ services:
       # This could be good for queue management
       uiOnly: false
 
-      redis: 'redis://redis:1234'
+      redis: {
+        'host': 'redis',
+        'port': 6379
+      }
