@@ -30,8 +30,9 @@ RUN cd /opt/tilerator && npm install --production && npm dedupe
 COPY variables.yaml /opt/tilerator
 COPY sources.yaml /opt/tilerator
 COPY config.yaml /opt/tilerator
-
-
+COPY config.yaml /opt/tilerator
+COPY gen_tiles.sh /gen_tiles.sh
+RUN chmod +x /gen_tiles.sh
 RUN chmod 600 /opt/tilerator/variables.yaml
 
 RUN mkdir -p /etc/tilerator
@@ -42,4 +43,4 @@ RUN ln -sf /opt/tilerator/sources.yaml /etc/tilerator
 RUN ln -sf /opt/tilerator/dist/init-scripts/cassandra.wait /usr/local/bin
 
 
-
+ENTRYPOINT ["/bin/sh", "-c", "while true; do sleep 1; done"]
