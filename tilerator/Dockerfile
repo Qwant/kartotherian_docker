@@ -43,4 +43,7 @@ RUN ln -sf /opt/tilerator/sources.yaml /etc/tilerator
 RUN ln -sf /opt/tilerator/dist/init-scripts/cassandra.wait /usr/local/bin
 
 
-ENTRYPOINT ["/bin/sh", "-c", "while true; do sleep 1; done"]
+#ENTRYPOINT ["/bin/sh", "-c", "while true; do sleep 1; done"]
+
+CMD /usr/local/bin/cassandra.wait && \
+    /usr/bin/nodejs /opt/tilerator/server.js -c /etc/tilerator/config.yaml

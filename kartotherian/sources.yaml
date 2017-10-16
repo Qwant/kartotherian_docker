@@ -1,6 +1,6 @@
 #Tilerator service with OSM Postgis source
 gen:
-  uri: http://tilerator:16534/gen/{z}/{x}/{y}.pbf
+  uri: http://tilerator:16534/oz/{z}/{x}/{y}.pbf
 
 # Tiles storage
 v2:

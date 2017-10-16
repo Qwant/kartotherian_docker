@@ -3,8 +3,8 @@ gen:
   public: true
   formats: [pbf]
   uri: bridge://
-  xml:
-    npm: ["@kartotherian/osm-bright-source", "data.xml"]
+  xml: '/data.xml'
+    # npm: ["@kartotherian/osm-bright-source", "data.xml"]
   xmlSetDataSource:
     if:
       dbname: gis
@@ -14,6 +14,13 @@ gen:
       host: postgres
       user: {var: osmdb-user}
       password: {var: osmdb-pswd}
+
+ozgen:
+  public: true
+  formats: [pbf]
+  uri: overzoom://
+  params:
+    source: {ref: gen}
 
 # View tiles as generated directly from the database. Don't view zoom0-5
 genview:
@@ -84,9 +91,10 @@ osm-intl:
   maxwidth: 2048
   uri: vector://
   xml:
-    loader: "@kartotherian/osm-bright-style"
+    #loader: "@kartotherian/osm-bright-style"
+    loader: "https://github.com/openmaptiles/mapbox-studio-light.tm2"
   xmlSetParams:
-    source: {ref: oz}
+    source: {ref: ozgen}
 
 mix:
   uri: demultiplexer://
