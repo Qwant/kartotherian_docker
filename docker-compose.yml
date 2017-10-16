@@ -1,0 +1,43 @@
+version: '3'
+services:
+  postgres:
+    build: ./postgis
+    volumes:
+      - "pgdata:/var/lib/postgresql/data"
+    environment:
+     - POSTGRES_DB=gis
+     - POSTGRES_USER=gis
+  cassandra:
+    image: cassandra:latest
+  tilerator:
+    build: ./tilerator
+    environment:
+      - NODE_PATH='/opt/tilerator/node_modules'
+      - TILERATOR_PORT=16354
+    depends_on:
+      - cassandra
+      - tilegen
+      - redis
+    ports:
+      - "16534:16534"
+  redis:
+    image: redis:latest
+  tilegen:
+    build: ./tilegen
+    volumes:
+    - ./data:/data
+    depends_on:
+      - postgres
+  kartotherian:
+    build: ./kartotherian
+    environment:
+      - NODE_PATH='/opt/kartotherian/node_modules'
+      - KARTOTHERIAN_PORT=6533
+    depends_on:
+      - tilerator
+    ports:
+      - "6533:6533"
+
+
+volumes:
+  pgdata:
