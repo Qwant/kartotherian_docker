@@ -1,3 +1,3 @@
-FROM mdillon/postgis:9.5-alpine
+FROM openmaptiles/postgis
 
-RUN echo 'psql -c "create extension hstore"' > /docker-entrypoint-initdb.d/z_hstoire.sh
+RUN echo 'psql -c "create extension hstore; create extension osml10n;"' > /docker-entrypoint-initdb.d/z_hstore.sh

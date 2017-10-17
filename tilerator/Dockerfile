@@ -35,6 +35,8 @@ COPY gen_tiles.sh /gen_tiles.sh
 RUN chmod +x /gen_tiles.sh
 RUN chmod 600 /opt/tilerator/variables.yaml
 
+COPY data_tm2source.xml /etc/tilerator/data_tm2source.xml
+
 RUN mkdir -p /etc/tilerator
 RUN ln -sf /opt/tilerator/config.yaml /etc/tilerator
 RUN ln -sf /opt/tilerator/variables.yaml /etc/tilerator

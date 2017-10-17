@@ -3,12 +3,11 @@ gen:
   public: true
   formats: [pbf]
   uri: bridge://
-  xml:
-    npm: ["@kartotherian/osm-bright-source", "data.xml"]
+  xml: "/etc/tilerator/data_tm2source.xml"
   xmlSetDataSource:
     if:
       dbname: gis
-      host: ''
+      host: 'localhost'
       type: postgis
     set:
       host: postgres

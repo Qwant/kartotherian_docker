@@ -1,6 +1,6 @@
 #!/bin/bash
 set -e
-set +x
+set -x
 
 osm_file='/data/*.pbf'
 
@@ -8,32 +8,59 @@ user='gis'
 database='gis'
 host='postgres'
 
+readonly PGCONN="dbname=$database user=$user host=$host"
+
 echo 'importing osm data in postgres'
-time /usr/local/bin/osm2pgsql \
-    --create \
-    --database $database \
-    --username $user \
-    --slim \
-    --style /usr/local/share/osm2pgsql/default.style \
-    --hstore \
-    --cache 16000 \
-    --number-processes 6 \
-    --flat-nodes /node.cache \
-    --host $host \
-    $osm_file
  
+time /usr/local/bin/imposm3 \
+  import \
+  -write --connection "postgis://$user@$host/$database" \
+  -read $osm_file \
+  -diff \
+  -mapping /imposm3_mapping.yml \
+  -deployproduction -overwritecache \
+  -diffdir ./diff -cachedir ./cache
+
+wget https://raw.githubusercontent.com/openmaptiles/import-sql/master/language.sql
+psql -Xq -h postgres -U $user -d $database --set ON_ERROR_STOP="1" -f language.sql
+psql -Xq -h postgres -U $user -d $database --set ON_ERROR_STOP="1" -f /postgis-vt-util/postgis-vt-util.sql
+
+echo 'importing natural earth shapes in postgres'
+PGCLIENTENCODING=LATIN1 ogr2ogr \
+    -progress \
+    -f Postgresql \
+    -s_srs EPSG:4326 \
+    -t_srs EPSG:3857 \
+    -clipsrc -180.1 -85.0511 180.1 85.0511 \
+    PG:"$PGCONN" \
+    -lco GEOMETRY_NAME=geometry \
+    -lco DIM=2 \
+    -nlt GEOMETRY \
+    -overwrite \
+    /import/natural_earth_vector.sqlite
+
+
 echo 'importing ocean shapes in postgres'
+psql -Xq -h postgres -U $user -d $database --set ON_ERROR_STOP="1" -f /mapnik-german-l10n/plpgsql/get_localized_name.sql
+psql -Xq -h postgres -U $user -d $database --set ON_ERROR_STOP="1" -f /mapnik-german-l10n/plpgsql/get_localized_name_from_tags.sql
+psql -Xq -h postgres -U $user -d $database --set ON_ERROR_STOP="1" -f /mapnik-german-l10n/plpgsql/get_country.sql
+psql -Xq -h postgres -U $user -d $database --set ON_ERROR_STOP="1" -f /mapnik-german-l10n/plpgsql/get_country_name.sql
+psql -Xq -h postgres -U $user -d $database --set ON_ERROR_STOP="1" -f /mapnik-german-l10n/plpgsql/geo_transliterate.sql
 
-curl -O http://data.openstreetmapdata.com/water-polygons-split-3857.zip
-unzip water-polygons-split-3857.zip && rm water-polygons-split-3857.zip
+/import_water.sh
 
-shp2pgsql -I -s 3857 -g way water-polygons-split-3857/water_polygons | psql -Xqd gis -h postgres -U $user -d $database
 
-psql -Xq -h postgres -U $user -d $database -c "select UpdateGeometrySRID('', 'water_polygons', 'way', 3857);"
+echo 'importing the lakes border'
+PGCLIENTENCODING=UTF8 ogr2ogr \
+    -f Postgresql \
+    -s_srs EPSG:4326 \
+    -t_srs EPSG:3857 \
+    PG:"$PGCONN" \
+    /import/lake_centerline.geojson \
+    -nln "lake_centerline"
 
-psql -Xq -h postgres -U $user -d $database -f /opt/osm-bright.tm2source/node_modules/postgis-vt-util/lib.sql
-psql -Xq -h postgres -U $user -d $database -f /opt/osm-bright.tm2source/sql/admin.sql
-psql -Xq -h postgres -U $user -d $database -f /opt/osm-bright.tm2source/sql/functions.sql
-psql -Xq -h postgres -U $user -d $database -f /opt/osm-bright.tm2source/sql/create-indexes.sql
-psql -h postgres -U $user -d $database -c 'select populate_admin();'
-psql -h postgres -U $user -d $database -c 'ALTER TABLE water_polygons OWNER TO gis; ALTER TABLE admin OWNER TO gis;'
+echo 'importing the borders'
+POSTGRES_PASSWORD= POSTGRES_PORT=5432 IMPORT_DIR=/import POSTGRES_HOST=postgres POSTGRES_DB=gis POSTGRES_USER=gis import_osmborder_lines.sh
+
+# additional function needed by tilegen
+psql -Xq -h postgres -U $user -d $database --set ON_ERROR_STOP="1" -f /generated_sql.sql

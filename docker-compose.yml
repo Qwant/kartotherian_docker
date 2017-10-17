@@ -1,12 +1,15 @@
 version: '3'
 services:
   postgres:
-    build: ./postgis
+    # build: ./postgis
+    image: openmaptiles/postgis
     volumes:
       - "pgdata:/var/lib/postgresql/data"
     environment:
      - POSTGRES_DB=gis
      - POSTGRES_USER=gis
+    ports:
+     - "12345:5432"
   cassandra:
     image: cassandra:latest
   tilerator:
