@@ -20,9 +20,11 @@ RUN apt update && \
 
 RUN git clone https://bitbucket.org/qmap/demultiplexer.git /opt/demultiplexer
 
-RUN git clone https://bitbucket.org/qmap/osm-bright.tm2source.git /opt/osm-bright.tm2source 
+RUN git clone https://bitbucket.org/qmap/osm-bright.tm2source.git /opt/osm-bright.tm2source
 
-RUN git clone https://bitbucket.org/qmap/tilerator.git /opt/tilerator
+RUN git clone https://bitbucket.org/qmap/tilerator.git  /opt/tilerator && \
+    cd /opt/tilerator && \
+    git checkout 18c39cc
 
 
 RUN cd /opt/tilerator && npm install --production && npm dedupe

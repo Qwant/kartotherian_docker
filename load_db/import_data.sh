@@ -70,7 +70,7 @@ fi
 if [ ! -f "${DATA_DIR}/simplified_water_polygons.shp" ]; then
     wget --quiet http://data.openstreetmapdata.com/simplified-water-polygons-complete-3857.zip \
     && unzip -oj simplified-water-polygons-complete-3857.zip -d ${DATA_DIR} \
-    && rm simplified-water-polygons-complete-3857.zip 
+    && rm simplified-water-polygons-complete-3857.zip
 fi
 POSTGRES_PASSWORD= POSTGRES_PORT=5432 IMPORT_DATA_DIR=${DATA_DIR} POSTGRES_HOST=postgres POSTGRES_DB=gis POSTGRES_USER=gis ${MAIN_DIR}/import-water.sh
 
@@ -89,7 +89,7 @@ PGCLIENTENCODING=UTF8 ogr2ogr \
     -nln "lake_centerline"
 
 # borders
-if [ ! -f "${DATA_DIR}/osmborder_lines.csv"]; then
+if [ ! -f "${DATA_DIR}/osmborder_lines.csv" ]; then
     wget -P ${DATA_DIR} https://github.com/openmaptiles/import-osmborder/releases/download/v0.1/osmborder_lines.csv
 fi
 echo 'importing the borders'
