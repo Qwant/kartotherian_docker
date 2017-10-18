@@ -3,7 +3,7 @@ gen:
   public: true
   formats: [pbf]
   uri: bridge://
-  xml: '/data.xml'
+  xml: '/housenumber.xml'
     # npm: ["@kartotherian/osm-bright-source", "data.xml"]
   xmlSetDataSource:
     if:
@@ -90,9 +90,10 @@ osm-intl:
   maxheight: 2048
   maxwidth: 2048
   uri: vector://
-  xml:
-    #loader: "@kartotherian/osm-bright-style"
-    loader: "https://github.com/openmaptiles/mapbox-studio-light.tm2"
+  xml: '/omt_osm_bright.xml'
+  # xml:
+  #   # loader: "@kartotherian/osm-bright-style"
+  #   # npmpath: ["@mapbox/mapbox-studio-osm-bright", "project.xml"]
   xmlSetParams:
     source: {ref: ozgen}
 

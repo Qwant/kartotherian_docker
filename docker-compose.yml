@@ -14,7 +14,7 @@ services:
     environment:
       - NODE_PATH='/opt/tilerator/node_modules'
       - TILERATOR_PORT=16354
-      - MAPNIK_FONT_PATH='/usr/share/fonts'
+      # - MAPNIK_FONT_PATH=/usr/share/fonts
     depends_on:
       - cassandra
       - tilegen

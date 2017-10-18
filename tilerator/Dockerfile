@@ -27,11 +27,17 @@ RUN git clone https://bitbucket.org/qmap/tilerator.git /opt/tilerator
 
 RUN cd /opt/tilerator && npm install --production && npm dedupe
 
+# RUN cd /opt/tilerator && npm install git+https://github.com/openmaptiles/mapbox-studio-osm-bright.tm2.git
+
 COPY variables.yaml /opt/tilerator
 COPY sources.yaml /opt/tilerator
 COPY config.yaml /opt/tilerator
 COPY config.yaml /opt/tilerator
 COPY gen_tiles.sh /gen_tiles.sh
+
+COPY housenumber.xml /housenumber.xml
+COPY omt_osm_bright.xml /omt_osm_bright.xml
+
 RUN chmod +x /gen_tiles.sh
 RUN chmod 600 /opt/tilerator/variables.yaml
 
