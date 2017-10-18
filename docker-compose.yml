@@ -19,14 +19,14 @@ services:
       - TILERATOR_PORT=16354
     depends_on:
       - cassandra
-      - tilegen
+      - load_db
       - redis
     ports:
       - "16534:16534"
   redis:
     image: redis:latest
-  tilegen:
-    build: ./tilegen
+  load_db:
+    build: ./load_db
     volumes:
     - ./data:/data
     depends_on:
