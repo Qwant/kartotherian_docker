@@ -40,7 +40,10 @@ services:
       - tilerator
     ports:
       - "6533:6533"
-
+  tileview:
+    build: ./tileview
+    ports:
+      - 8585:80
 
 volumes:
   pgdata:

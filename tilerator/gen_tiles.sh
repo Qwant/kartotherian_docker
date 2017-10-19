@@ -1,9 +1,10 @@
 #!/bin/bash
+
+# bash script used to generate all tiles from 0 to 11 zoom level
+# this script needs to be run explicitly if needed
+
 set -e
 set +x
-
-/usr/local/bin/cassandra.wait && \
-/usr/bin/nodejs /opt/tilerator/server.js -c /etc/tilerator/config.yaml &
 
 node /opt/tilerator/scripts/tileshell.js \
 	--config /etc/tilerator/config.yaml \
