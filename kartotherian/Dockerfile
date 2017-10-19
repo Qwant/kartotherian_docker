@@ -46,6 +46,7 @@ RUN ln -sf /opt/kartotherian/config.yaml /etc/kartotherian
 RUN ln -sf /opt/kartotherian/variables.yaml /etc/kartotherian
 RUN ln -sf /opt/kartotherian/sources.yaml /etc/kartotherian
 
-RUN ln -sf /opt/kartotherian/dist/init-scripts/cassandra.wait /usr/local/bin
+COPY cassandra.wait .
+RUN chmod +x cassandra.wait
 
-CMD /usr/local/bin/cassandra.wait && /usr/bin/nodejs /opt/kartotherian/server.js -c /etc/kartotherian/config.yaml
+CMD ./cassandra.wait && /usr/bin/nodejs /opt/kartotherian/server.js -c /etc/kartotherian/config.yaml

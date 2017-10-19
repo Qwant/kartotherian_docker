@@ -15,7 +15,7 @@
     },
     "openmaptiles": {
       "type": "vector",
-      "tiles": ["http://localhost:16534/oz/{z}/{x}/{y}.pbf"]
+      "tiles": ["http://localhost:6533/oz/{z}/{x}/{y}.pbf"]
     }
   },
   "sprite": "https://rawgit.com/lukasmartinelli/osm-liberty/gh-pages/sprites/osm-liberty",
