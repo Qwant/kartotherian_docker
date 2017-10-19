@@ -11,7 +11,7 @@ Many data sources are used:
 * [natural earth](http://www.naturalearthdata.com/) data
 * a [precise water polygon](http://data.openstreetmapdata.com/water-polygons-split-3857.zip) from openstreetmap
 * some [precise lake borders](https://github.com/lukasmartinelli/osm-lakelines/releases/download/v0.9/lake_centerline.geojson)
-* some borders (in .csv), either computed from the osm .pbf file, or a [precomputed file](). The generation/import of a generated file can be found [here](https://github.com/openmaptiles/import-osmborder)
+* some borders (in .csv), either computed from the osm .pbf file, or a [precomputed file](https://github.com/openmaptiles/import-osmborder/releases/download/v0.1/osmborder_lines.csv). The generation/import of a generated file can be found [here](https://github.com/openmaptiles/import-osmborder)
 * some [country shapes](http://www.nominatim.org/data/country_grid.sql.gz) from nominatim.
 
 TODO: understand the differences between the country shapes and the borders.

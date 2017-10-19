@@ -31,6 +31,7 @@ services:
     - ./data:/data
     depends_on:
       - postgres
+      - redis  # used to tell tilerator the db is loaded
   kartotherian:
     build: ./kartotherian
     environment:
