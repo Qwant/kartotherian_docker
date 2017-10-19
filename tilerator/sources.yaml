@@ -83,7 +83,8 @@ osm-intl:
   maxwidth: 2048
   uri: vector://
   xml:
-    loader: "@kartotherian/osm-bright-style"
+    npmpath: ["@mapbox/mapbox-studio-osm-bright", "project.xml"]
+    # loader: "@kartotherian/osm-bright-style"
   xmlSetParams:
     source: {ref: oz}
 

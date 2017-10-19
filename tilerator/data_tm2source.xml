@@ -6,7 +6,7 @@
   <Parameter name="attribution"><![CDATA[<a href="http://www.openmaptiles.org/" target="_blank">&copy; OpenMapTiles</a> <a href="http://www.openstreetmap.org/about/" target="_blank">&copy; OpenStreetMap contributors</a>]]></Parameter>
   <Parameter name="center">-12.2168,28.6135,4</Parameter>
   <Parameter name="description"><![CDATA[A tileset showcasing all layers in OpenMapTiles. http://openmaptiles.org]]></Parameter>
-  <Parameter name="maxzoom">14</Parameter>
+  <Parameter name="maxzoom">20</Parameter>
   <Parameter name="minzoom">0</Parameter>
   <Parameter name="name"><![CDATA[OpenMapTiles]]></Parameter>
   <Parameter name="pixel_scale">256</Parameter>
