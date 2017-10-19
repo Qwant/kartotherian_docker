@@ -31,6 +31,8 @@ RUN cd /opt/kartotherian && npm install --production && npm dedupe
 
 RUN cd /opt/kartotherian && \
     npm install git+https://github.com/openmaptiles/mapbox-studio-osm-bright.tm2.git
+
+# .xml style is overridden to use system fonts (DejaVu instead of Arial)
 COPY omt_osm_bright.xml /opt/kartotherian/node_modules/\@mapbox/mapbox-studio-osm-bright/project.xml
 
 COPY variables.yaml /opt/kartotherian
