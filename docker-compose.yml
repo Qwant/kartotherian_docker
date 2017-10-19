@@ -1,12 +1,15 @@
 version: '3'
 services:
   postgres:
-    build: ./postgis
+    # build: ./postgis
+    image: openmaptiles/postgis
     volumes:
       - "pgdata:/var/lib/postgresql/data"
     environment:
      - POSTGRES_DB=gis
      - POSTGRES_USER=gis
+    ports:
+     - "12345:5432"
   cassandra:
     image: cassandra:latest
   tilerator:
@@ -16,14 +19,14 @@ services:
       - TILERATOR_PORT=16354
     depends_on:
       - cassandra
-      - tilegen
+      - load_db
       - redis
     ports:
       - "16534:16534"
   redis:
     image: redis:latest
-  tilegen:
-    build: ./tilegen
+  load_db:
+    build: ./load_db
     volumes:
     - ./data:/data
     depends_on:
