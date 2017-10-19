@@ -29,6 +29,10 @@ RUN git clone https://bitbucket.org/qmap/kartotherian.git /opt/kartotherian
 
 RUN cd /opt/kartotherian && npm install --production && npm dedupe
 
+RUN cd /opt/kartotherian && \
+    npm install git+https://github.com/openmaptiles/mapbox-studio-osm-bright.tm2.git
+COPY omt_osm_bright.xml /opt/kartotherian/node_modules/\@mapbox/mapbox-studio-osm-bright/project.xml
+
 COPY variables.yaml /opt/kartotherian
 COPY sources.yaml /opt/kartotherian
 COPY config.yaml /opt/kartotherian
