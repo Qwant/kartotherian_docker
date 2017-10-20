@@ -27,11 +27,8 @@ For example to generate the tiles from 7 to 16 zoom level only on Köln:
 
 `curl -XPOST "http://localhost:16534/add?generatorId=gen&storageId=v2&zoom=7&x=66&y=42&fromZoom=7&beforeZoom=16&keepJob=true&parts=8&deleteEmpty=true"`
 
-You can check the tilegeneration at http://localhost:16534
+You can check the tilegeneration at `http://localhost:16534/jobs` and check a vector tile based map on `http://localhost:8585/index.html`
 
-And you can check the vector tiles at:
-
-`http://localhost:8585/index.html`
 
 # archi
 
@@ -48,3 +45,4 @@ The `data_tm2source.xml` generation is a bit more complex.
 
 we use `generate-tm2source` to generate a `Carto` project `.yml` file.
 This file is transformed manually to a Mapnik `.xml` project using [kosmtik](https://github.com/kosmtik/kosmtik).
+

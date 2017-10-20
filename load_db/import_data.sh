@@ -98,3 +98,6 @@ POSTGRES_PASSWORD= POSTGRES_PORT=5432 IMPORT_DIR=${DATA_DIR} POSTGRES_HOST=postg
 # load the sql file with all the functions to generate the layers
 # this file has been generated using https://github.com/openmaptiles/openmaptiles-tools generate-sql
 psql -Xq -h postgres -U $user -d $database --set ON_ERROR_STOP="1" -f ${SQL_DIR}/generated_sql.sql
+
+# we tell redis that the import is finished so tilerator can start
+redis-cli -h redis set 'data_imported' 'true'

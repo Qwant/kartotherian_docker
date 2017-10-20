@@ -19,15 +19,15 @@ RUN apt update && \
              nmap \
              sqlite3 \
              gdal-bin \
-             postgis && \
-    curl -sL https://deb.nodesource.com/setup_6.x | bash - && \
-    apt-get install -y nodejs
-
-RUN wget https://imposm.org/static/rel/imposm3-0.4.0dev-20170519-3f00374-linux-x86-64.tar.gz && \
+             postgis \
+             redis-tools \
+    && curl -sL https://deb.nodesource.com/setup_6.x | bash - \
+    && apt-get install -y nodejs \
+    # install imposm
+    && wget https://imposm.org/static/rel/imposm3-0.4.0dev-20170519-3f00374-linux-x86-64.tar.gz && \
     tar xvfz imposm3-0.4.0dev-20170519-3f00374-linux-x86-64.tar.gz && \
-    ln -sf /imposm3-0.4.0dev-20170519-3f00374-linux-x86-64/imposm3 /usr/local/bin/imposm3 
-
-RUN wget -O /usr/local/bin/pgfutter https://github.com/lukasmartinelli/pgfutter/releases/download/v1.1/pgfutter_linux_amd64 \
+    ln -sf /imposm3-0.4.0dev-20170519-3f00374-linux-x86-64/imposm3 /usr/local/bin/imposm3 \
+    && wget -O /usr/local/bin/pgfutter https://github.com/lukasmartinelli/pgfutter/releases/download/v1.1/pgfutter_linux_amd64 \
     && chmod +x /usr/local/bin/pgfutter \
     # a script to import the osm borders
     && wget -P ${MAIN_DIR} https://raw.githubusercontent.com/openmaptiles/import-osmborder/master/import/import_osmborder_lines.sh \
@@ -56,4 +56,4 @@ ENV LANG en_US.UTF-8
 ENV LANGUAGE en_US:en  
 ENV LC_ALL en_US.UTF-8
 
-ENTRYPOINT ["/bin/sh", "-c", "while true; do sleep 1; done"]
+CMD ["sleep", "infinity"]
