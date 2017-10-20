@@ -86,6 +86,7 @@ PGCLIENTENCODING=UTF8 ogr2ogr \
     -t_srs EPSG:3857 \
     PG:"$PGCONN" \
     ${DATA_DIR}/lake_centerline.geojson \
+    -overwrite \
     -nln "lake_centerline"
 
 # borders
