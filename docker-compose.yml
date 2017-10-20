@@ -31,6 +31,7 @@ services:
     - ./data:/data
     depends_on:
       - postgres
+      - redis  # used to tell tilerator the db is loaded
   kartotherian:
     build: ./kartotherian
     environment:
@@ -40,7 +41,10 @@ services:
       - tilerator
     ports:
       - "6533:6533"
-
+  tileview:
+    build: ./tileview
+    ports:
+      - 8585:80
 
 volumes:
   pgdata:
