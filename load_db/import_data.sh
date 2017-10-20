@@ -52,14 +52,6 @@ PGCLIENTENCODING=LATIN1 ogr2ogr \
     -overwrite \
     ${DATA_DIR}/natural_earth_vector.sqlite
 
-# country shapes
-# if [ ! -f "${DATA_DIR}/country_grid.sql" ]; then
-#     wget --quiet http://www.nominatim.org/data/country_grid.sql.gz \
-#     && gunzip -oj country_grid.sql -d ${DATA_DIR} \
-#     && rm country_grid.sql.gz
-# fi
-# psql -Xq -h postgres -U $user -d $database --set ON_ERROR_STOP="1" -f ${DATA_DIR}/country_grid.sql
-
 # water polygons
 echo 'importing the water polyons'
 if [ ! -f "${DATA_DIR}/water_polygons.shp" ]; then
