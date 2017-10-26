@@ -15,13 +15,13 @@
     },
     "openmaptiles": {
       "type": "vector",
+      "format": "pbf",
       "tiles": ["http://localhost:6533/oz/{z}/{x}/{y}.pbf"]
     }
   },
   "sprite": "https://rawgit.com/lukasmartinelli/osm-liberty/gh-pages/sprites/osm-liberty",
   "glyphs": "https://orangemug.github.io/font-glyphs/glyphs/{fontstack}/{range}.pbf",
-  "layers": [
-    {
+  "layers": [{
       "id": "background",
       "type": "background",
       "paint": {
@@ -122,8 +122,7 @@
       "source": "openmaptiles",
       "source-layer": "landcover",
       "filter": [
-        "all",
-        [
+        "all", [
           "==",
           "class",
           "wood"
@@ -142,8 +141,7 @@
       "source": "openmaptiles",
       "source-layer": "landcover",
       "filter": [
-        "all",
-        [
+        "all", [
           "==",
           "class",
           "grass"
@@ -241,8 +239,7 @@
       "source": "openmaptiles",
       "source-layer": "waterway",
       "filter": [
-        "all",
-        [
+        "all", [
           "!=",
           "class",
           "river"
@@ -303,8 +300,7 @@
       "source-layer": "aeroway",
       "minzoom": 11,
       "filter": [
-        "all",
-        [
+        "all", [
           "==",
           "$type",
           "LineString"
@@ -340,8 +336,7 @@
       "source-layer": "aeroway",
       "minzoom": 11,
       "filter": [
-        "all",
-        [
+        "all", [
           "==",
           "$type",
           "LineString"
@@ -376,8 +371,7 @@
       "source": "openmaptiles",
       "source-layer": "transportation",
       "filter": [
-        "all",
-        [
+        "all", [
           "==",
           "class",
           "motorway"
@@ -434,8 +428,7 @@
       "source": "openmaptiles",
       "source-layer": "transportation",
       "filter": [
-        "all",
-        [
+        "all", [
           "==",
           "brunnel",
           "tunnel"
@@ -482,8 +475,7 @@
       "source": "openmaptiles",
       "source-layer": "transportation",
       "filter": [
-        "all",
-        [
+        "all", [
           "==",
           "ramp",
           "1"
@@ -530,8 +522,7 @@
       "source": "openmaptiles",
       "source-layer": "transportation",
       "filter": [
-        "all",
-        [
+        "all", [
           "==",
           "brunnel",
           "tunnel"
@@ -590,8 +581,7 @@
       "source": "openmaptiles",
       "source-layer": "transportation",
       "filter": [
-        "all",
-        [
+        "all", [
           "==",
           "brunnel",
           "tunnel"
@@ -631,8 +621,7 @@
       "source": "openmaptiles",
       "source-layer": "transportation",
       "filter": [
-        "all",
-        [
+        "all", [
           "==",
           "brunnel",
           "tunnel"
@@ -679,8 +668,7 @@
       "source": "openmaptiles",
       "source-layer": "transportation",
       "filter": [
-        "all",
-        [
+        "all", [
           "==",
           "class",
           "motorway"
@@ -731,8 +719,7 @@
       "source": "openmaptiles",
       "source-layer": "transportation",
       "filter": [
-        "all",
-        [
+        "all", [
           "==",
           "$type",
           "LineString"
@@ -777,8 +764,7 @@
       "source": "openmaptiles",
       "source-layer": "transportation",
       "filter": [
-        "all",
-        [
+        "all", [
           "==",
           "class",
           "motorway_link"
@@ -830,8 +816,7 @@
       "source": "openmaptiles",
       "source-layer": "transportation",
       "filter": [
-        "all",
-        [
+        "all", [
           "==",
           "brunnel",
           "tunnel"
@@ -874,8 +859,7 @@
       "source": "openmaptiles",
       "source-layer": "transportation",
       "filter": [
-        "all",
-        [
+        "all", [
           "==",
           "ramp",
           "1"
@@ -921,8 +905,7 @@
       "source": "openmaptiles",
       "source-layer": "transportation",
       "filter": [
-        "all",
-        [
+        "all", [
           "==",
           "brunnel",
           "tunnel"
@@ -965,8 +948,7 @@
       "source": "openmaptiles",
       "source-layer": "transportation",
       "filter": [
-        "all",
-        [
+        "all", [
           "==",
           "brunnel",
           "tunnel"
@@ -1009,8 +991,7 @@
       "source": "openmaptiles",
       "source-layer": "transportation",
       "filter": [
-        "all",
-        [
+        "all", [
           "==",
           "brunnel",
           "tunnel"
@@ -1053,8 +1034,7 @@
       "source": "openmaptiles",
       "source-layer": "transportation",
       "filter": [
-        "all",
-        [
+        "all", [
           "==",
           "class",
           "motorway"
@@ -1097,8 +1077,7 @@
       "source": "openmaptiles",
       "source-layer": "transportation",
       "filter": [
-        "all",
-        [
+        "all", [
           "==",
           "brunnel",
           "tunnel"
@@ -1137,8 +1116,7 @@
       "source": "openmaptiles",
       "source-layer": "transportation",
       "filter": [
-        "all",
-        [
+        "all", [
           "==",
           "brunnel",
           "tunnel"
@@ -1181,8 +1159,7 @@
       "source": "openmaptiles",
       "source-layer": "transportation",
       "filter": [
-        "all",
-        [
+        "all", [
           "==",
           "$type",
           "Polygon"
@@ -1203,8 +1180,7 @@
       "source-layer": "transportation",
       "minzoom": 12,
       "filter": [
-        "all",
-        [
+        "all", [
           "!in",
           "brunnel",
           "bridge",
@@ -1258,8 +1234,7 @@
       "source": "openmaptiles",
       "source-layer": "transportation",
       "filter": [
-        "all",
-        [
+        "all", [
           "!in",
           "brunnel",
           "bridge",
@@ -1305,8 +1280,7 @@
       "source-layer": "transportation",
       "minzoom": 13,
       "filter": [
-        "all",
-        [
+        "all", [
           "!in",
           "brunnel",
           "bridge",
@@ -1364,8 +1338,7 @@
       "source": "openmaptiles",
       "source-layer": "transportation",
       "filter": [
-        "all",
-        [
+        "all", [
           "==",
           "$type",
           "LineString"
@@ -1435,8 +1408,7 @@
       "source": "openmaptiles",
       "source-layer": "transportation",
       "filter": [
-        "all",
-        [
+        "all", [
           "!in",
           "brunnel",
           "bridge",
@@ -1484,8 +1456,7 @@
       "source": "openmaptiles",
       "source-layer": "transportation",
       "filter": [
-        "all",
-        [
+        "all", [
           "!in",
           "brunnel",
           "bridge",
@@ -1542,8 +1513,7 @@
       "source-layer": "transportation",
       "minzoom": 5,
       "filter": [
-        "all",
-        [
+        "all", [
           "!in",
           "brunnel",
           "bridge",
@@ -1598,8 +1568,7 @@
       "source-layer": "transportation",
       "minzoom": 14,
       "filter": [
-        "all",
-        [
+        "all", [
           "==",
           "$type",
           "LineString"
@@ -1649,8 +1618,7 @@
       "source-layer": "transportation",
       "minzoom": 12,
       "filter": [
-        "all",
-        [
+        "all", [
           "!in",
           "brunnel",
           "bridge",
@@ -1703,8 +1671,7 @@
       "source": "openmaptiles",
       "source-layer": "transportation",
       "filter": [
-        "all",
-        [
+        "all", [
           "!in",
           "brunnel",
           "bridge",
@@ -1750,8 +1717,7 @@
       "source-layer": "transportation",
       "minzoom": 13,
       "filter": [
-        "all",
-        [
+        "all", [
           "!in",
           "brunnel",
           "bridge",
@@ -1808,8 +1774,7 @@
       "source": "openmaptiles",
       "source-layer": "transportation",
       "filter": [
-        "all",
-        [
+        "all", [
           "!in",
           "brunnel",
           "bridge",
@@ -1855,8 +1820,7 @@
       "source": "openmaptiles",
       "source-layer": "transportation",
       "filter": [
-        "all",
-        [
+        "all", [
           "!in",
           "brunnel",
           "bridge",
@@ -1903,8 +1867,7 @@
       "source-layer": "transportation",
       "minzoom": 5,
       "filter": [
-        "all",
-        [
+        "all", [
           "!in",
           "brunnel",
           "bridge",
@@ -1966,8 +1929,7 @@
       "source": "openmaptiles",
       "source-layer": "transportation",
       "filter": [
-        "all",
-        [
+        "all", [
           "!in",
           "brunnel",
           "bridge",
@@ -2007,8 +1969,7 @@
       "source": "openmaptiles",
       "source-layer": "transportation",
       "filter": [
-        "all",
-        [
+        "all", [
           "!in",
           "brunnel",
           "bridge",
@@ -2052,15 +2013,13 @@
       "source": "openmaptiles",
       "source-layer": "transportation",
       "filter": [
-        "all",
-        [
+        "all", [
           "==",
           "$type",
           "LineString"
         ],
         [
-          "all",
-          [
+          "all", [
             "!in",
             "brunnel",
             "bridge",
@@ -2157,8 +2116,7 @@
       "source": "openmaptiles",
       "source-layer": "transportation",
       "filter": [
-        "all",
-        [
+        "all", [
           "==",
           "class",
           "motorway_link"
@@ -2210,8 +2168,7 @@
       "source": "openmaptiles",
       "source-layer": "transportation",
       "filter": [
-        "all",
-        [
+        "all", [
           "==",
           "brunnel",
           "bridge"
@@ -2254,8 +2211,7 @@
       "source": "openmaptiles",
       "source-layer": "transportation",
       "filter": [
-        "all",
-        [
+        "all", [
           "==",
           "class",
           "link"
@@ -2302,8 +2258,7 @@
       "source": "openmaptiles",
       "source-layer": "transportation",
       "filter": [
-        "all",
-        [
+        "all", [
           "==",
           "brunnel",
           "bridge"
@@ -2362,8 +2317,7 @@
       "source": "openmaptiles",
       "source-layer": "transportation",
       "filter": [
-        "all",
-        [
+        "all", [
           "==",
           "$type",
           "LineString"
@@ -2412,8 +2366,7 @@
       "source": "openmaptiles",
       "source-layer": "transportation",
       "filter": [
-        "all",
-        [
+        "all", [
           "==",
           "brunnel",
           "bridge"
@@ -2453,8 +2406,7 @@
       "source": "openmaptiles",
       "source-layer": "transportation",
       "filter": [
-        "all",
-        [
+        "all", [
           "==",
           "brunnel",
           "bridge"
@@ -2501,8 +2453,7 @@
       "source": "openmaptiles",
       "source-layer": "transportation",
       "filter": [
-        "all",
-        [
+        "all", [
           "==",
           "class",
           "motorway"
@@ -2548,8 +2499,7 @@
       "source": "openmaptiles",
       "source-layer": "transportation",
       "filter": [
-        "all",
-        [
+        "all", [
           "==",
           "$type",
           "LineString"
@@ -2594,8 +2544,7 @@
       "source": "openmaptiles",
       "source-layer": "transportation",
       "filter": [
-        "all",
-        [
+        "all", [
           "==",
           "class",
           "motorway_link"
@@ -2646,8 +2595,7 @@
       "source": "openmaptiles",
       "source-layer": "transportation",
       "filter": [
-        "all",
-        [
+        "all", [
           "==",
           "brunnel",
           "bridge"
@@ -2690,8 +2638,7 @@
       "source": "openmaptiles",
       "source-layer": "transportation",
       "filter": [
-        "all",
-        [
+        "all", [
           "==",
           "class",
           "link"
@@ -2737,8 +2684,7 @@
       "source": "openmaptiles",
       "source-layer": "transportation",
       "filter": [
-        "all",
-        [
+        "all", [
           "==",
           "brunnel",
           "bridge"
@@ -2781,8 +2727,7 @@
       "source": "openmaptiles",
       "source-layer": "transportation",
       "filter": [
-        "all",
-        [
+        "all", [
           "==",
           "brunnel",
           "bridge"
@@ -2825,8 +2770,7 @@
       "source": "openmaptiles",
       "source-layer": "transportation",
       "filter": [
-        "all",
-        [
+        "all", [
           "==",
           "brunnel",
           "bridge"
@@ -2869,8 +2813,7 @@
       "source": "openmaptiles",
       "source-layer": "transportation",
       "filter": [
-        "all",
-        [
+        "all", [
           "==",
           "class",
           "motorway"
@@ -2912,8 +2855,7 @@
       "source": "openmaptiles",
       "source-layer": "transportation",
       "filter": [
-        "all",
-        [
+        "all", [
           "==",
           "class",
           "rail"
@@ -2952,8 +2894,7 @@
       "source": "openmaptiles",
       "source-layer": "transportation",
       "filter": [
-        "all",
-        [
+        "all", [
           "==",
           "class",
           "rail"
@@ -2996,8 +2937,7 @@
       "source": "openmaptiles",
       "source-layer": "boundary",
       "filter": [
-        "all",
-        [
+        "all", [
           "in",
           "admin_level",
           3,
@@ -3039,8 +2979,7 @@
       "source": "openmaptiles",
       "source-layer": "boundary",
       "filter": [
-        "all",
-        [
+        "all", [
           "==",
           "admin_level",
           2
@@ -3092,8 +3031,7 @@
       "source-layer": "water_name",
       "minzoom": 0,
       "filter": [
-        "all",
-        [
+        "all", [
           "==",
           "$type",
           "LineString"
@@ -3148,8 +3086,7 @@
       "source-layer": "poi",
       "minzoom": 16,
       "filter": [
-        "all",
-        [
+        "all", [
           "==",
           "$type",
           "Point"
@@ -3190,8 +3127,7 @@
       "source-layer": "poi",
       "minzoom": 15,
       "filter": [
-        "all",
-        [
+        "all", [
           "==",
           "$type",
           "Point"
@@ -3237,8 +3173,7 @@
       "source-layer": "poi",
       "minzoom": 14,
       "filter": [
-        "all",
-        [
+        "all", [
           "==",
           "$type",
           "Point"
@@ -3283,8 +3218,7 @@
       "source": "openmaptiles",
       "source-layer": "poi",
       "filter": [
-        "all",
-        [
+        "all", [
           "in",
           "class",
           "bus",
@@ -3363,8 +3297,7 @@
       "source-layer": "transportation_name",
       "minzoom": 7,
       "filter": [
-        "all",
-        [
+        "all", [
           "<=",
           "ref_length",
           6
@@ -3408,8 +3341,7 @@
       "source": "openmaptiles",
       "source-layer": "place",
       "filter": [
-        "all",
-        [
+        "all", [
           "in",
           "class",
           "hamlet",
@@ -3454,8 +3386,7 @@
       "source": "openmaptiles",
       "source-layer": "place",
       "filter": [
-        "all",
-        [
+        "all", [
           "==",
           "class",
           "village"
@@ -3494,8 +3425,7 @@
       "source": "openmaptiles",
       "source-layer": "place",
       "filter": [
-        "all",
-        [
+        "all", [
           "==",
           "class",
           "town"
@@ -3553,8 +3483,7 @@
       "source-layer": "place",
       "minzoom": 5,
       "filter": [
-        "all",
-        [
+        "all", [
           "==",
           "class",
           "city"
@@ -3614,8 +3543,7 @@
       "source-layer": "place",
       "maxzoom": 6,
       "filter": [
-        "all",
-        [
+        "all", [
           "==",
           "class",
           "state"
@@ -3653,8 +3581,7 @@
       "source": "openmaptiles",
       "source-layer": "place",
       "filter": [
-        "all",
-        [
+        "all", [
           ">=",
           "rank",
           3
@@ -3699,8 +3626,7 @@
       "source": "openmaptiles",
       "source-layer": "place",
       "filter": [
-        "all",
-        [
+        "all", [
           "==",
           "rank",
           2
@@ -3745,8 +3671,7 @@
       "source": "openmaptiles",
       "source-layer": "place",
       "filter": [
-        "all",
-        [
+        "all", [
           "==",
           "rank",
           1
@@ -3792,8 +3717,7 @@
       "source-layer": "place",
       "maxzoom": 1,
       "filter": [
-        "all",
-        [
+        "all", [
           "==",
           "class",
           "continent"
