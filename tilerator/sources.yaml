@@ -52,3 +52,58 @@ oz:
   uri: overzoom://
   params:
     source: {ref: dyn}
+
+# gen lite tiles for mobile (Dor2Doc POC)
+gen-lite:
+  public: true
+  formats: [pbf]
+  uri: bridge://
+  xml: "/etc/tilerator/data_tm2source_lite.xml"
+  xmlSetDataSource:
+    if:
+      dbname: gis
+      host: 'localhost'
+      type: postgis
+    set:
+      host: postgres
+      user: {var: osmdb-user}
+      password: {var: osmdb-pswd}
+
+ozgen-lite:
+  public: true
+  formats: [pbf]
+  uri: overzoom://
+  params:
+    source: {ref: gen-lite}
+
+v2-lite:
+  public: true
+  formats: [pbf]
+  uri: cassandra://
+  params:
+    maxzoom: 15
+    keyspace: v2lite
+    cp: {var: cassandra-servers}
+    username: {var: cassandra-user}
+    password: {var: cassandra-pswd}
+    repfactor: 4
+    durablewrite: 0
+    createIfMissing: true
+
+dyn-lite:
+  uri: autogen://
+  params:
+    storage: {ref: v2-lite}
+    generator: {ref: ozgen-lite}
+    # Optional:
+    mingen: 10  # Only generate tiles if missing within this zoom range
+    maxgen: 13
+    minstore: 10  # if generated, only store them if within this zoom range 
+    maxstore: 13
+
+oz-lite:
+  public: true
+  formats: [pbf]
+  uri: overzoom://
+  params:
+    source: {ref: dyn-lite}

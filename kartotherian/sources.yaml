@@ -51,3 +51,24 @@ osm-intl:  # This name is the default Kartotherian leaflet test app layer name
     # loader: "@kartotherian/osm-bright-style"  
   xmlSetParams:
     source: {ref: oz}
+
+v2-lite:
+  public: true
+  formats: [pbf]
+  uri: cassandra://
+  params:
+    maxzoom: 14 # Exclusive: stores up to 13 only
+    keyspace: v2lite
+    cp: {var: cassandra-servers}
+    username: {var: cassandra-user}
+    password: {var: cassandra-pswd}
+    repfactor: 4
+    durablewrite: 0
+    createIfMissing: true
+
+oz-lite:
+  public: true
+  formats: [pbf]
+  uri: overzoom://
+  params:
+    source: {ref: v2-lite}
