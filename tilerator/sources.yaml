@@ -53,7 +53,7 @@ oz:
   params:
     source: {ref: dyn}
 
-# gen lite tiles for mobile (Dor2Doc POC)
+# gen lite tiles for mobile
 gen-lite:
   public: true
   formats: [pbf]

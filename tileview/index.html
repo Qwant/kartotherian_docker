@@ -54,6 +54,15 @@
     form {
       margin: 5px auto;
     }
+
+    #layers {
+        position: absolute;
+        background: #fff;
+        padding: 10px;
+        right: 10px;
+        font-family: 'Open Sans', sans-serif;
+    }
+
   </style>
 </head>
 
@@ -65,6 +74,14 @@
   </pre>
   <pre id='info'>
   </pre>
+
+<div id='layers'>
+  <input id='basic' type='radio' name='rtoggle' value='basic' checked='checked'>
+  <label for='basic'>basic</label>
+  <input id='lite' type='radio' name='rtoggle' value='lite'>
+  <label for='lite'>lite</label>
+</div>
+
   <script>
     var map = new mapboxgl.Map({
       container: 'map',
@@ -78,7 +95,20 @@
     var nav_control = new mapboxgl.NavigationControl();
     map.addControl(nav_control, 'bottom-right');
 
+    var inputs = document.getElementById('layers').getElementsByTagName('input');
 
+    function switchLayer(layer) {
+        var layerId = layer.target.id;
+        if (layerId === 'lite') {
+          map.setStyle('osm-liberty_lite.json');
+        } else {
+          map.setStyle('osm-liberty.json');
+        }
+    }
+
+    for (var i = 0; i < inputs.length; i++) {
+        inputs[i].onclick = switchLayer;
+    }
 
 
     $("#search").autocomplete({
