@@ -13,6 +13,9 @@ readonly PGCONN="dbname=$database user=$user host=$host"
 echo 'importing osm data in postgres'
 mkdir -p ${MAIN_DIR}/imposm
 
+# if there is a backup schema imposm cannot delete the tables in to (with the -deployproduction, so we delete them to be able to reload the data several times
+psql -Xq -h postgres -U $user -d $database --set ON_ERROR_STOP="1" -c "drop schema backup if exists cascade;"
+
 time /usr/local/bin/imposm3 \
   import \
   -write --connection "postgis://$user@$host/$database" \
@@ -20,6 +23,7 @@ time /usr/local/bin/imposm3 \
   -diff \
   -mapping ${MAIN_DIR}/imposm3_mapping.yml \
   -deployproduction -overwritecache \
+  -optimize \
   -diffdir ${MAIN_DIR}/imposm/diff -cachedir ${MAIN_DIR}/imposm/cache
 
 # load several psql functions
