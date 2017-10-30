@@ -1,11 +1,19 @@
 {
   "version": 8,
-  "name": "Klokantech 3D",
+  "name": "Qwant Style Basic",
   "metadata": {
     "mapbox:autocomposite": false,
+    "mapbox:type": "template",
     "maputnik:renderer": "mbgljs",
     "openmaptiles:version": "3.x"
   },
+  "center": [
+    2.27896,
+    48.87001
+  ],
+  "zoom": 12.241790506353492,
+  "bearing": 0,
+  "pitch": 0,
   "sources": {
     "openmaptiles": {
       "url": "tileschema.json",
@@ -295,6 +303,65 @@
       }
     },
     {
+      "id": "building-not-3d",
+      "maxzoom": 18,
+      "type": "fill",
+      "source": "openmaptiles",
+      "source-layer": "building",
+      "paint": {
+        "fill-color": "rgba(222, 211, 190, 1)",
+        "fill-outline-color": {
+          "stops": [
+            [
+              15,
+              "rgba(212, 177, 146, 0)"
+            ],
+            [
+              16,
+              "rgba(212, 177, 146, 0.5)"
+            ]
+          ]
+        },
+        "fill-opacity": {
+          "base": 1,
+          "stops": [
+            [
+              13,
+              0
+            ],
+            [
+              15,
+              1
+            ]
+          ]
+        },
+        "fill-antialias": true
+      }
+    },
+    {
+      "id": "housenumber",
+      "type": "symbol",
+      "source": "openmaptiles",
+      "source-layer": "housenumber",
+      "minzoom": 17,
+      "filter": [
+        "==",
+        "$type",
+        "Point"
+      ],
+      "layout": {
+        "text-field": "{housenumber}",
+        "text-size": 10,
+        "text-font": [
+          "Klokantech Noto Sans Regular",
+          "Klokantech Noto Sans CJK Regular"
+        ]
+      },
+      "paint": {
+        "text-color": "rgba(212, 177, 146, 1)"
+      }
+    },
+    {
       "id": "road_path",
       "type": "line",
       "source": "openmaptiles",
@@ -388,16 +455,14 @@
           "LineString"
         ],
         [
-          "all", [
-            "==",
-            "brunnel",
-            "tunnel"
-          ],
-          [
-            "==",
-            "class",
-            "minor_road"
-          ]
+          "==",
+          "brunnel",
+          "tunnel"
+        ],
+        [
+          "==",
+          "class",
+          "minor_road"
         ]
       ],
       "layout": {
@@ -437,19 +502,17 @@
           "LineString"
         ],
         [
-          "all", [
-            "==",
-            "brunnel",
-            "tunnel"
-          ],
-          [
-            "in",
-            "class",
-            "primary",
-            "secondary",
-            "tertiary",
-            "trunk"
-          ]
+          "==",
+          "brunnel",
+          "tunnel"
+        ],
+        [
+          "in",
+          "class",
+          "primary",
+          "secondary",
+          "tertiary",
+          "trunk"
         ]
       ],
       "layout": {
@@ -475,6 +538,136 @@
           0.28,
           0.14
         ]
+      }
+    },
+    {
+      "id": "aeroway-area",
+      "type": "fill",
+      "metadata": {
+        "mapbox:group": "1444849345966.4436"
+      },
+      "source": "openmaptiles",
+      "source-layer": "aeroway",
+      "minzoom": 4,
+      "filter": [
+        "all", [
+          "==",
+          "$type",
+          "Polygon"
+        ],
+        [
+          "in",
+          "class",
+          "runway",
+          "taxiway"
+        ]
+      ],
+      "layout": {
+        "visibility": "visible"
+      },
+      "paint": {
+        "fill-opacity": {
+          "base": 1,
+          "stops": [
+            [
+              13,
+              0
+            ],
+            [
+              14,
+              1
+            ]
+          ]
+        },
+        "fill-color": "rgba(255, 255, 255, 1)"
+      }
+    },
+    {
+      "id": "aeroway-taxiway",
+      "type": "line",
+      "metadata": {
+        "mapbox:group": "1444849345966.4436"
+      },
+      "source": "openmaptiles",
+      "source-layer": "aeroway",
+      "minzoom": 12,
+      "filter": [
+        "all", [
+          "in",
+          "class",
+          "taxiway"
+        ],
+        [
+          "==",
+          "$type",
+          "LineString"
+        ]
+      ],
+      "layout": {
+        "line-cap": "round",
+        "line-join": "round",
+        "visibility": "visible"
+      },
+      "paint": {
+        "line-color": "rgba(255, 255, 255, 1)",
+        "line-width": {
+          "base": 1.5,
+          "stops": [
+            [
+              12,
+              1
+            ],
+            [
+              17,
+              10
+            ]
+          ]
+        },
+        "line-opacity": 1
+      }
+    },
+    {
+      "id": "aeroway-runway",
+      "type": "line",
+      "metadata": {
+        "mapbox:group": "1444849345966.4436"
+      },
+      "source": "openmaptiles",
+      "source-layer": "aeroway",
+      "minzoom": 4,
+      "filter": [
+        "all", [
+          "in",
+          "class",
+          "runway"
+        ],
+        [
+          "==",
+          "$type",
+          "LineString"
+        ]
+      ],
+      "layout": {
+        "line-cap": "round",
+        "line-join": "round",
+        "visibility": "visible"
+      },
+      "paint": {
+        "line-color": "rgba(255, 255, 255, 1)",
+        "line-width": {
+          "base": 1.5,
+          "stops": [
+            [
+              11,
+              4
+            ],
+            [
+              17,
+              50
+            ]
+          ]
+        },
+        "line-opacity": 1
       }
     },
     {
@@ -595,7 +788,7 @@
       }
     },
     {
-      "id": "railway_transit",
+      "id": "railway-transit",
       "type": "line",
       "source": "openmaptiles",
       "source-layer": "transportation",
@@ -673,16 +866,14 @@
           "LineString"
         ],
         [
-          "all", [
-            "==",
-            "brunnel",
-            "bridge"
-          ],
-          [
-            "==",
-            "class",
-            "minor_road"
-          ]
+          "==",
+          "brunnel",
+          "bridge"
+        ],
+        [
+          "==",
+          "class",
+          "minor_road"
         ]
       ],
       "layout": {
@@ -731,19 +922,17 @@
           "LineString"
         ],
         [
-          "all", [
-            "==",
-            "brunnel",
-            "bridge"
-          ],
-          [
-            "in",
-            "class",
-            "primary",
-            "secondary",
-            "tertiary",
-            "trunk"
-          ]
+          "==",
+          "brunnel",
+          "bridge"
+        ],
+        [
+          "in",
+          "class",
+          "primary",
+          "secondary",
+          "tertiary",
+          "trunk"
         ]
       ],
       "layout": {
@@ -792,16 +981,14 @@
           "LineString"
         ],
         [
-          "all", [
-            "==",
-            "brunnel",
-            "bridge"
-          ],
-          [
-            "==",
-            "class",
-            "minor_road"
-          ]
+          "==",
+          "brunnel",
+          "bridge"
+        ],
+        [
+          "==",
+          "class",
+          "minor_road"
         ]
       ],
       "layout": {
@@ -837,19 +1024,17 @@
           "LineString"
         ],
         [
-          "all", [
-            "==",
-            "brunnel",
-            "bridge"
-          ],
-          [
-            "in",
-            "class",
-            "primary",
-            "secondary",
-            "tertiary",
-            "trunk"
-          ]
+          "==",
+          "brunnel",
+          "bridge"
+        ],
+        [
+          "in",
+          "class",
+          "primary",
+          "secondary",
+          "tertiary",
+          "trunk"
         ]
       ],
       "layout": {
@@ -932,192 +1117,6 @@
             ]
           ]
         }
-      }
-    },
-    {
-      "id": "road_major_label",
-      "type": "symbol",
-      "source": "openmaptiles",
-      "source-layer": "transportation_name",
-      "filter": [
-        "==",
-        "$type",
-        "LineString"
-      ],
-      "layout": {
-        "symbol-placement": "line",
-        "text-field": "{name}",
-        "text-font": [
-          "Klokantech Noto Sans Regular"
-        ],
-
-        "text-letter-spacing": 0.1,
-        "text-size": {
-          "base": 1.4,
-          "stops": [
-            [
-              10,
-              8
-            ],
-            [
-              20,
-              14
-            ]
-          ]
-        },
-        "text-rotation-alignment": "map"
-      },
-      "paint": {
-        "text-color": "#000",
-        "text-halo-color": "hsl(0, 0%, 100%)",
-        "text-halo-width": 2
-      }
-    },
-    {
-      "id": "building-not-3d",
-      "type": "fill",
-      "maxzoom": 18,
-      "source": "openmaptiles",
-      "source-layer": "building",
-      "paint": {
-        "fill-color": "rgba(222, 211, 190, 1)",
-        "fill-outline-color": {
-          "stops": [
-            [
-              15,
-              "rgba(212, 177, 146, 0)"
-            ],
-            [
-              16,
-              "rgba(212, 177, 146, 0.5)"
-            ]
-          ]
-        },
-        "fill-opacity": {
-          "base": 1,
-          "stops": [
-            [
-              13,
-              0
-            ],
-            [
-              15,
-              1
-            ]
-          ]
-        },
-        "fill-antialias": true
-      }
-    },
-    {
-      "id": "building-3d",
-      "type": "fill-extrusion",
-      "source": "openmaptiles",
-      "minzoom": 18,
-      "source-layer": "building",
-      "paint": {
-        "fill-extrusion-color": "hsl(39, 41%, 86%)",
-        "fill-extrusion-height": {
-          "property": "render_height",
-          "type": "identity"
-        },
-        "fill-extrusion-base": {
-          "property": "render_min_height",
-          "type": "identity"
-        },
-        "fill-extrusion-opacity": 0.6
-      }
-    },
-    {
-      "id": "place_label_other",
-      "type": "symbol",
-      "source": "openmaptiles",
-      "source-layer": "place",
-      "minzoom": 8,
-      "filter": [
-        "all", [
-          "==",
-          "$type",
-          "Point"
-        ],
-        [
-          "all", [
-            "!=",
-            "class",
-            "city"
-          ]
-        ]
-      ],
-      "layout": {
-        "text-field": "{name_en}",
-        "text-font": [
-          "Klokantech Noto Sans Regular"
-        ],
-        "text-max-width": 6,
-        "text-size": {
-          "stops": [
-            [
-              6,
-              10
-            ],
-            [
-              12,
-              14
-            ]
-          ]
-        },
-        "visibility": "visible",
-        "text-anchor": "center"
-      },
-      "paint": {
-        "text-color": "hsl(0, 10%, 25%)",
-        "text-halo-color": "hsl(0, 0%, 100%)",
-        "text-halo-blur": 0,
-        "text-halo-width": 2
-      }
-    },
-    {
-      "id": "place_label_city",
-      "type": "symbol",
-      "source": "openmaptiles",
-      "source-layer": "place",
-      "maxzoom": 16,
-      "filter": [
-        "all", [
-          "==",
-          "$type",
-          "Point"
-        ],
-        [
-          "==",
-          "class",
-          "city"
-        ]
-      ],
-      "layout": {
-        "text-field": "{name_en}",
-        "text-font": [
-          "Klokantech Noto Sans Regular"
-        ],
-        "text-max-width": 10,
-        "text-size": {
-          "stops": [
-            [
-              3,
-              12
-            ],
-            [
-              8,
-              16
-            ]
-          ]
-        }
-      },
-      "paint": {
-        "text-color": "hsl(0, 0%, 0%)",
-        "text-halo-color": "hsla(0, 0%, 100%, 0.75)",
-        "text-halo-blur": 0,
-        "text-halo-width": 2
       }
     },
     {
@@ -1259,19 +1258,10 @@
       "metadata": {},
       "source": "openmaptiles",
       "source-layer": "poi",
-      "filter": [
-        "all", [
-          "in",
-          "class",
-          "bus",
-          "rail",
-          "airport"
-        ]
-      ],
       "layout": {
         "icon-image": "{class}_11",
         "text-anchor": "left",
-        "text-field": "{name_en}",
+        "text-field": "{name}",
         "text-font": [
           "Klokantech Noto Sans Italic"
         ],
@@ -1281,7 +1271,7 @@
           0
         ],
         "text-padding": 2,
-        "text-size": 10,
+        "text-size": 12,
         "visibility": "visible"
       },
       "paint": {
@@ -1289,9 +1279,208 @@
         "text-halo-blur": 0.5,
         "text-halo-color": "#ffffff",
         "text-halo-width": 1
+      },
+      "filter": [
+        "all", [
+          "in",
+          "class",
+          "bus",
+          "rail",
+          "airport"
+        ]
+      ]
+    },
+    {
+      "id": "poi_label",
+      "type": "symbol",
+      "source": "openmaptiles",
+      "source-layer": "poi",
+      "minzoom": 5,
+      "filter": [
+        "all", [
+          "==",
+          "$type",
+          "Point"
+        ],
+        [
+          "==",
+          "rank",
+          1
+        ]
+      ],
+      "layout": {
+        "text-size": 11,
+        "text-font": [
+          "Klokantech Noto Sans Regular",
+          "Klokantech Noto Sans CJK Regular"
+        ],
+        "visibility": "visible",
+        "text-offset": [
+          0,
+          0.5
+        ],
+        "icon-size": 1,
+        "text-anchor": "top",
+        "text-field": "{name}",
+        "text-max-width": 8
+      },
+      "paint": {
+        "text-color": "#666",
+        "text-halo-width": 1,
+        "text-halo-color": "rgba(255,255,255,0.75)",
+        "text-halo-blur": 1
       }
     },
-
+    {
+      "id": "road_major_label",
+      "type": "symbol",
+      "source": "openmaptiles",
+      "source-layer": "transportation_name",
+      "filter": [
+        "==",
+        "$type",
+        "LineString"
+      ],
+      "layout": {
+        "symbol-placement": "line",
+        "text-field": "{name}",
+        "text-font": [
+          "Klokantech Noto Sans Regular",
+          "Klokantech Noto Sans CJK Regular"
+        ],
+        "text-letter-spacing": 0.1,
+        "text-size": {
+          "base": 1.4,
+          "stops": [
+            [
+              10,
+              8
+            ],
+            [
+              20,
+              14
+            ]
+          ]
+        },
+        "text-rotation-alignment": "map"
+      },
+      "paint": {
+        "text-color": "#000",
+        "text-halo-color": "hsl(0, 0%, 100%)",
+        "text-halo-width": 2
+      }
+    },
+    {
+      "id": "building-3d",
+      "type": "fill-extrusion",
+      "minzoom": 18,
+      "source": "openmaptiles",
+      "source-layer": "building",
+      "paint": {
+        "fill-extrusion-color": "hsl(39, 41%, 86%)",
+        "fill-extrusion-height": {
+          "property": "render_height",
+          "type": "identity"
+        },
+        "fill-extrusion-base": {
+          "property": "render_min_height",
+          "type": "identity"
+        },
+        "fill-extrusion-opacity": 0.6
+      }
+    },
+    {
+      "id": "place_label_other",
+      "type": "symbol",
+      "source": "openmaptiles",
+      "source-layer": "place",
+      "minzoom": 8,
+      "filter": [
+        "all", [
+          "==",
+          "$type",
+          "Point"
+        ],
+        [
+          "!=",
+          "class",
+          "city"
+        ]
+      ],
+      "layout": {
+        "text-field": "{name}",
+        "text-font": [
+          "Klokantech Noto Sans Regular",
+          "Klokantech Noto Sans CJK Regular"
+        ],
+        "text-max-width": 6,
+        "text-size": {
+          "stops": [
+            [
+              6,
+              10
+            ],
+            [
+              12,
+              14
+            ]
+          ]
+        },
+        "visibility": "visible",
+        "text-anchor": "center"
+      },
+      "paint": {
+        "text-color": "hsl(0, 10%, 25%)",
+        "text-halo-color": "hsl(0, 0%, 100%)",
+        "text-halo-blur": 0,
+        "text-halo-width": 2
+      }
+    },
+    {
+      "id": "place_label_city",
+      "type": "symbol",
+      "source": "openmaptiles",
+      "source-layer": "place",
+      "maxzoom": 16,
+      "filter": [
+        "all", [
+          "==",
+          "$type",
+          "Point"
+        ],
+        [
+          "==",
+          "class",
+          "city"
+        ]
+      ],
+      "layout": {
+        "text-field": "{name}",
+        "text-font": [
+          "Klokantech Noto Sans Regular",
+          "Klokantech Noto Sans CJK Regular"
+        ],
+        "text-max-width": 10,
+        "text-size": {
+          "stops": [
+            [
+              3,
+              12
+            ],
+            [
+              8,
+              16
+            ]
+          ]
+        }
+      },
+      "paint": {
+        "text-color": "hsl(0, 0%, 0%)",
+        "text-halo-color": "hsla(0, 0%, 100%, 0.75)",
+        "text-halo-blur": 0,
+        "text-halo-width": 2
+      }
+    },
     {
       "id": "country_label",
       "type": "symbol",
@@ -1313,7 +1502,8 @@
       "layout": {
         "text-field": "{name}",
         "text-font": [
-          "Klokantech Noto Sans Bold"
+          "Klokantech Noto Sans Bold",
+          "Klokantech Noto Sans CJK Bold"
         ],
         "text-max-width": 10,
         "text-size": {
@@ -1337,5 +1527,5 @@
       }
     }
   ],
-  "id": "klokantech-3d"
+  "id": "thisisourverycustomid"
 }
