@@ -12,6 +12,8 @@ services:
      - "12345:5432"
   cassandra:
     image: cassandra:latest
+    volumes:
+     - "csdata:/var/lib/cassandra"
   tilerator:
     build: ./tilerator
     environment:
@@ -25,6 +27,9 @@ services:
       - "16534:16534"
   redis:
     image: redis:latest
+    command: redis-server --appendonly yes # to enable persistence
+    volumes:
+    - "redisdata:/data"
   load_db:
     build: ./load_db
     volumes:
@@ -48,3 +53,5 @@ services:
 
 volumes:
   pgdata:
+  csdata:
+  redisdata:
