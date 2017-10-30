@@ -121,7 +121,7 @@
       //map.setView(new L.LatLng(position.coords.latitude, position.coords.longitude), 17);
       navigator.geolocation.getCurrentPosition(
         map.flyTo({
-          center: [position.coords.latitude, position.coords.longitude],
+          center: [position.coords.longitude, position.coords.latitude],
           zoom: 15
         })
       )
