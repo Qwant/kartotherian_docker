@@ -169,20 +169,54 @@
       }
     },
     {
-      "id": "landuse",
+      "id": "landuse_cemetery",
       "type": "fill",
+      "metadata": {},
       "source": "openmaptiles",
       "source-layer": "landuse",
       "filter": [
         "==",
         "class",
-        "agriculture"
+        "cemetery"
       ],
       "layout": {
         "visibility": "visible"
       },
       "paint": {
-        "fill-color": "#eae0d0"
+        "fill-color": "hsl(75, 37%, 81%)"
+      }
+    },
+    {
+      "id": "landuse_hospital",
+      "type": "fill",
+      "metadata": {},
+      "source": "openmaptiles",
+      "source-layer": "landuse",
+      "filter": [
+        "==",
+        "class",
+        "hospital"
+      ],
+      "paint": {
+        "fill-color": "#fde"
+      }
+    },
+    {
+      "id": "landuse_school",
+      "type": "fill",
+      "metadata": {},
+      "source": "openmaptiles",
+      "source-layer": "landuse",
+      "filter": [
+        "in",
+        "class",
+        "school",
+        "university",
+        "college",
+        "kindergarten"
+      ],
+      "paint": {
+        "fill-color": "rgb(236,238,204)"
       }
     },
     {
@@ -259,7 +293,6 @@
       "type": "line",
       "source": "openmaptiles",
       "source-layer": "transportation",
-      "minzoom": 0,
       "filter": [
         "all", [
           "==",
@@ -548,7 +581,6 @@
       },
       "source": "openmaptiles",
       "source-layer": "aeroway",
-      "minzoom": 4,
       "filter": [
         "all", [
           "==",
@@ -583,6 +615,34 @@
       }
     },
     {
+      "id": "aeroway-aerodrome",
+      "type": "fill",
+      "metadata": {
+        "mapbox:group": "1444849345966.4436"
+      },
+      "source": "openmaptiles",
+      "source-layer": "aeroway",
+      "filter": [
+        "all", [
+          "==",
+          "$type",
+          "Polygon"
+        ],
+        [
+          "in",
+          "class",
+          "aerodrome"
+        ]
+      ],
+      "layout": {
+        "visibility": "visible"
+      },
+      "paint": {
+        "fill-opacity": 0.5,
+        "fill-color": "rgba(255, 255, 255, 1)"
+      }
+    },
+    {
       "id": "aeroway-taxiway",
       "type": "line",
       "metadata": {
@@ -590,7 +650,6 @@
       },
       "source": "openmaptiles",
       "source-layer": "aeroway",
-      "minzoom": 12,
       "filter": [
         "all", [
           "in",
@@ -634,7 +693,6 @@
       },
       "source": "openmaptiles",
       "source-layer": "aeroway",
-      "minzoom": 4,
       "filter": [
         "all", [
           "in",
@@ -1253,6 +1311,88 @@
       }
     },
     {
+      "id": "poi_transit_tram",
+      "type": "symbol",
+      "metadata": {},
+      "source": "openmaptiles",
+      "source-layer": "poi",
+      "layout": {
+        "icon-image": "rail_light_11",
+        "text-anchor": "left",
+        "text-field": "{name}",
+        "text-font": [
+          "Klokantech Noto Sans Italic"
+        ],
+        "text-max-width": 9,
+        "text-offset": [
+          0.9,
+          0
+        ],
+        "text-padding": 2,
+        "text-size": 12,
+        "visibility": "visible"
+      },
+      "paint": {
+        "text-color": "#4898ff",
+        "text-halo-blur": 0.5,
+        "text-halo-color": "#ffffff",
+        "text-halo-width": 1
+      },
+      "filter": [
+        "all", [
+          "==",
+          "class",
+          "railway"
+        ],
+        [
+          "==",
+          "subclass",
+          "tram_stop"
+        ]
+      ]
+    },
+    {
+      "id": "poi_transit_rail",
+      "type": "symbol",
+      "metadata": {},
+      "source": "openmaptiles",
+      "source-layer": "poi",
+      "layout": {
+        "icon-image": "rail_11",
+        "text-anchor": "left",
+        "text-field": "{name}",
+        "text-font": [
+          "Klokantech Noto Sans Italic"
+        ],
+        "text-max-width": 9,
+        "text-offset": [
+          0.9,
+          0
+        ],
+        "text-padding": 2,
+        "text-size": 12,
+        "visibility": "visible"
+      },
+      "paint": {
+        "text-color": "#4898ff",
+        "text-halo-blur": 0.5,
+        "text-halo-color": "#ffffff",
+        "text-halo-width": 1
+      },
+      "filter": [
+        "all", [
+          "==",
+          "class",
+          "railway"
+        ],
+        [
+          "in",
+          "subclass",
+          "subway", "station", "halt"
+        ]
+      ]
+    },
+    {
       "id": "poi_transit",
       "type": "symbol",
       "metadata": {},
@@ -1285,7 +1425,6 @@
           "in",
           "class",
           "bus",
-          "rail",
           "airport"
         ]
       ]
@@ -1295,7 +1434,6 @@
       "type": "symbol",
       "source": "openmaptiles",
       "source-layer": "poi",
-      "minzoom": 5,
       "filter": [
         "all", [
           "==",
