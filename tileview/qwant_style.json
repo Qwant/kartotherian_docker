@@ -169,20 +169,54 @@
       }
     },
     {
-      "id": "landuse",
+      "id": "landuse_cemetery",
       "type": "fill",
+      "metadata": {},
       "source": "openmaptiles",
       "source-layer": "landuse",
       "filter": [
         "==",
         "class",
-        "agriculture"
+        "cemetery"
       ],
       "layout": {
         "visibility": "visible"
       },
       "paint": {
-        "fill-color": "#eae0d0"
+        "fill-color": "hsl(75, 37%, 81%)"
+      }
+    },
+    {
+      "id": "landuse_hospital",
+      "type": "fill",
+      "metadata": {},
+      "source": "openmaptiles",
+      "source-layer": "landuse",
+      "filter": [
+        "==",
+        "class",
+        "hospital"
+      ],
+      "paint": {
+        "fill-color": "#fde"
+      }
+    },
+    {
+      "id": "landuse_school",
+      "type": "fill",
+      "metadata": {},
+      "source": "openmaptiles",
+      "source-layer": "landuse",
+      "filter": [
+        "in",
+        "class",
+        "school",
+        "university",
+        "college",
+        "kindergarten"
+      ],
+      "paint": {
+        "fill-color": "rgb(236,238,204)"
       }
     },
     {
@@ -259,7 +293,6 @@
       "type": "line",
       "source": "openmaptiles",
       "source-layer": "transportation",
-      "minzoom": 0,
       "filter": [
         "all", [
           "==",
@@ -548,7 +581,6 @@
       },
       "source": "openmaptiles",
       "source-layer": "aeroway",
-      "minzoom": 4,
       "filter": [
         "all", [
           "==",
@@ -583,6 +615,34 @@
       }
     },
     {
+      "id": "aeroway-aerodrome",
+      "type": "fill",
+      "metadata": {
+        "mapbox:group": "1444849345966.4436"
+      },
+      "source": "openmaptiles",
+      "source-layer": "aeroway",
+      "filter": [
+        "all", [
+          "==",
+          "$type",
+          "Polygon"
+        ],
+        [
+          "in",
+          "class",
+          "aerodrome"
+        ]
+      ],
+      "layout": {
+        "visibility": "visible"
+      },
+      "paint": {
+        "fill-opacity": 0.5,
+        "fill-color": "rgba(255, 255, 255, 1)"
+      }
+    },
+    {
       "id": "aeroway-taxiway",
       "type": "line",
       "metadata": {
@@ -590,7 +650,6 @@
       },
       "source": "openmaptiles",
       "source-layer": "aeroway",
-      "minzoom": 12,
       "filter": [
         "all", [
           "in",
@@ -634,7 +693,6 @@
       },
       "source": "openmaptiles",
       "source-layer": "aeroway",
-      "minzoom": 4,
       "filter": [
         "all", [
           "in",
@@ -1285,7 +1343,7 @@
           "in",
           "class",
           "bus",
-          "rail",
+          "railway",
           "airport"
         ]
       ]
@@ -1295,7 +1353,6 @@
       "type": "symbol",
       "source": "openmaptiles",
       "source-layer": "poi",
-      "minzoom": 5,
       "filter": [
         "all", [
           "==",
