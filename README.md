@@ -19,6 +19,8 @@ to load data in postgres you need:
 
 `docker exec -it kartotheriandocker_load_db_1 /srv/import_data/import_data.sh`
 
+Note: the first import might be quite long are some additional data will be downloaded (cf [load_db](https://github.com/QwantResearch/kartotherian_docker/blob/master/load_db/readme.md))
+
 After this you need to generate the tiles. You can do it either by generating all the tiles with:
 `docker exec -it kartotheriandocker_tilerator_1 /gen_tiles.sh`
 
