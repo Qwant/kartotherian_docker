@@ -30,6 +30,7 @@ COPY config.yaml /opt/tilerator
 COPY config.yaml /opt/tilerator
 COPY gen_tiles.sh /gen_tiles.sh
 COPY data_tm2source.xml /etc/tilerator/data_tm2source.xml
+COPY data_tm2source_lite.xml /etc/tilerator/data_tm2source_lite.xml
 
 RUN chmod +x /gen_tiles.sh \
     && chmod 600 /opt/tilerator/variables.yaml \
