@@ -1417,7 +1417,7 @@ RETURNS TABLE(geometry geometry, osm_id bigint, render_height int, render_min_he
         WHERE zoom_level = 13 AND geometry && bbox
         UNION ALL
         -- etldoc: osm_building_polygon -> layer_building:z14_
-        SELECT DISTINCT ON (osm_id) 
+        SELECT DISTINCT ON (osm_id)
            osm_id, geometry,
            ceil( COALESCE(height, levels*3.66,5))::int AS render_height,
            floor(COALESCE(min_height, min_level*3.66,0))::int AS render_min_height FROM
@@ -2565,7 +2565,7 @@ CREATE OR REPLACE FUNCTION housenumber.flag() RETURNS trigger AS $$
 BEGIN
     INSERT INTO housenumber.updates(t) VALUES ('y')  ON CONFLICT(t) DO NOTHING;
     RETURN null;
-END;    
+END;
 $$ language plpgsql;
 
 CREATE OR REPLACE FUNCTION housenumber.refresh() RETURNS trigger AS
@@ -2590,7 +2590,7 @@ CREATE CONSTRAINT TRIGGER trigger_refresh
     FOR EACH ROW
     EXECUTE PROCEDURE housenumber.refresh();
 
--- etldoc: layer_housenumber[shape=record fillcolor=lightpink, style="rounded,filled",  
+-- etldoc: layer_housenumber[shape=record fillcolor=lightpink, style="rounded,filled",
 -- etldoc:     label="layer_housenumber | <z14_> z14+" ] ;
 
 CREATE OR REPLACE FUNCTION layer_housenumber(bbox geometry, zoom_level integer)
@@ -2769,7 +2769,7 @@ RETURNS TEXT AS $$
         WHEN subclass IN ('bar','nightclub') THEN 'bar'
         WHEN subclass IN ('marina','dock') THEN 'harbor'
         WHEN subclass IN ('car','car_repair','taxi') THEN 'car'
-        WHEN subclass IN ('hospital','nursing_home') THEN 'hospital'
+        WHEN subclass IN ('hospital','nursing_home', 'doctors', 'clinic') THEN 'hospital'
         WHEN subclass IN ('grave_yard','cemetery') THEN 'cemetery'
         WHEN subclass IN ('attraction','viewpoint') THEN 'attraction'
         WHEN subclass IN ('biergarten','pub') THEN 'beer'
@@ -2810,4 +2810,3 @@ RETURNS TABLE(osm_id bigint, geometry geometry, name text, name_en text, name_de
     ORDER BY "rank"
     ;
 $$ LANGUAGE SQL IMMUTABLE;
-
