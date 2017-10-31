@@ -2591,13 +2591,13 @@ CREATE CONSTRAINT TRIGGER trigger_refresh
     EXECUTE PROCEDURE housenumber.refresh();
 
 -- etldoc: layer_housenumber[shape=record fillcolor=lightpink, style="rounded,filled",
--- etldoc:     label="layer_housenumber | <z14_> z14+" ] ;
+-- etldoc:     label="layer_housenumber | <z17_> z17+" ] ;
 
 CREATE OR REPLACE FUNCTION layer_housenumber(bbox geometry, zoom_level integer)
 RETURNS TABLE(osm_id bigint, geometry geometry, housenumber text) AS $$
-   -- etldoc: osm_housenumber_point -> layer_housenumber:z14_
+   -- etldoc: osm_housenumber_point -> layer_housenumber:z17_
     SELECT osm_id, geometry, housenumber FROM osm_housenumber_point
-    WHERE zoom_level >= 14 AND geometry && bbox;
+    WHERE zoom_level >= 17 AND geometry && bbox;
 $$ LANGUAGE SQL IMMUTABLE;
 DO $$ BEGIN RAISE NOTICE 'Layer poi'; END$$;DROP TRIGGER IF EXISTS trigger_flag ON osm_poi_polygon;
 DROP TRIGGER IF EXISTS trigger_refresh ON poi_polygon.updates;
