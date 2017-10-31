@@ -14,7 +14,7 @@ echo 'importing osm data in postgres'
 mkdir -p ${MAIN_DIR}/imposm
 
 # if there is a backup schema imposm cannot delete the tables in to (with the -deployproduction, so we delete them to be able to reload the data several times
-psql -Xq -h postgres -U $user -d $database --set ON_ERROR_STOP="1" -c "drop schema backup if exists cascade;"
+psql -Xq -h postgres -U $user -d $database --set ON_ERROR_STOP="1" -c "drop schema if exists backup cascade;"
 
 time /usr/local/bin/imposm3 \
   import \

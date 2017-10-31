@@ -8,7 +8,7 @@ v2:
   formats: [pbf]
   uri: cassandra://
   params:
-    maxzoom: 16 # Exclusive: stores up to 15 only
+    maxzoom: 16 # Note: this max zoom is inclusive
     keyspace: v2
     cp: {var: cassandra-servers}
     username: {var: cassandra-user}
@@ -57,7 +57,7 @@ v2-lite:
   formats: [pbf]
   uri: cassandra://
   params:
-    maxzoom: 14 # Exclusive: stores up to 13 only
+    maxzoom: 14 # Note: this max zoom is inclusive
     keyspace: v2lite
     cp: {var: cassandra-servers}
     username: {var: cassandra-user}
