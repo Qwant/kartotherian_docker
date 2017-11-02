@@ -1417,7 +1417,7 @@ RETURNS TABLE(geometry geometry, osm_id bigint, render_height int, render_min_he
         WHERE zoom_level = 13 AND geometry && bbox
         UNION ALL
         -- etldoc: osm_building_polygon -> layer_building:z14_
-        SELECT DISTINCT ON (osm_id) 
+        SELECT DISTINCT ON (osm_id)
            osm_id, geometry,
            ceil( COALESCE(height, levels*3.66,5))::int AS render_height,
            floor(COALESCE(min_height, min_level*3.66,0))::int AS render_min_height FROM
@@ -1600,51 +1600,6 @@ CREATE CONSTRAINT TRIGGER trigger_refresh
     FOR EACH ROW
     EXECUTE PROCEDURE water_point.refresh();
 
--- etldoc: layer_water_name[shape=record fillcolor=lightpink, style="rounded,filled",
--- etldoc:     label="layer_water_name | <z0_8> z0_8 | <z9_13> z9_13 | <z14_> z14+" ] ;
-
-CREATE OR REPLACE FUNCTION layer_water_name(bbox geometry, zoom_level integer)
-RETURNS TABLE(osm_id bigint, geometry geometry, name text, name_en text, name_de text, tags hstore, class text) AS $$
-    -- etldoc: osm_water_lakeline ->  layer_water_name:z9_13
-    -- etldoc: osm_water_lakeline ->  layer_water_name:z14_
-    SELECT osm_id, geometry, name,
-    COALESCE(NULLIF(name_en, ''), name) AS name_en,
-    COALESCE(NULLIF(name_de, ''), name, name_en) AS name_de,
-    tags,
-    'lake'::text AS class
-    FROM osm_water_lakeline
-    WHERE geometry && bbox
-      AND ((zoom_level BETWEEN 9 AND 13 AND LineLabel(zoom_level, NULLIF(name, ''), geometry))
-        OR (zoom_level >= 14))
-    -- etldoc: osm_water_point ->  layer_water_name:z9_13
-    -- etldoc: osm_water_point ->  layer_water_name:z14_
-    UNION ALL
-    SELECT osm_id, geometry, name,
-    COALESCE(NULLIF(name_en, ''), name) AS name_en,
-    COALESCE(NULLIF(name_de, ''), name, name_en) AS name_de,
-    tags,
-    'lake'::text AS class
-    FROM osm_water_point
-    WHERE geometry && bbox AND (
-        (zoom_level BETWEEN 9 AND 13 AND area > 70000*2^(20-zoom_level))
-        OR (zoom_level >= 14)
-    )
-    -- etldoc: osm_marine_point ->  layer_water_name:z0_8
-    -- etldoc: osm_marine_point ->  layer_water_name:z9_13
-    -- etldoc: osm_marine_point ->  layer_water_name:z14_
-    UNION ALL
-    SELECT osm_id, geometry, name,
-    COALESCE(NULLIF(name_en, ''), name) AS name_en,
-    COALESCE(NULLIF(name_de, ''), name, name_en) AS name_de,
-    tags,
-    place::text AS class
-    FROM osm_marine_point
-    WHERE geometry && bbox AND (
-        place = 'ocean'
-        OR (zoom_level >= 1 AND zoom_level <= "rank" AND "rank" IS NOT NULL)
-        OR (zoom_level >= 8)
-    );
-$$ LANGUAGE SQL IMMUTABLE;
 DO $$ BEGIN RAISE NOTICE 'Layer transportation_name'; END$$;DROP MATERIALIZED VIEW IF EXISTS osm_transportation_name_network CASCADE;
 DROP MATERIALIZED VIEW IF EXISTS osm_transportation_name_linestring CASCADE;
 DROP MATERIALIZED VIEW IF EXISTS osm_transportation_name_linestring_gen1 CASCADE;
@@ -2565,7 +2520,7 @@ CREATE OR REPLACE FUNCTION housenumber.flag() RETURNS trigger AS $$
 BEGIN
     INSERT INTO housenumber.updates(t) VALUES ('y')  ON CONFLICT(t) DO NOTHING;
     RETURN null;
-END;    
+END;
 $$ language plpgsql;
 
 CREATE OR REPLACE FUNCTION housenumber.refresh() RETURNS trigger AS
@@ -2590,14 +2545,14 @@ CREATE CONSTRAINT TRIGGER trigger_refresh
     FOR EACH ROW
     EXECUTE PROCEDURE housenumber.refresh();
 
--- etldoc: layer_housenumber[shape=record fillcolor=lightpink, style="rounded,filled",  
--- etldoc:     label="layer_housenumber | <z14_> z14+" ] ;
+-- etldoc: layer_housenumber[shape=record fillcolor=lightpink, style="rounded,filled",
+-- etldoc:     label="layer_housenumber | <z15_> z15+" ] ;
 
 CREATE OR REPLACE FUNCTION layer_housenumber(bbox geometry, zoom_level integer)
 RETURNS TABLE(osm_id bigint, geometry geometry, housenumber text) AS $$
-   -- etldoc: osm_housenumber_point -> layer_housenumber:z14_
+   -- etldoc: osm_housenumber_point -> layer_housenumber:z15_
     SELECT osm_id, geometry, housenumber FROM osm_housenumber_point
-    WHERE zoom_level >= 14 AND geometry && bbox;
+    WHERE zoom_level >= 15 AND geometry && bbox;
 $$ LANGUAGE SQL IMMUTABLE;
 DO $$ BEGIN RAISE NOTICE 'Layer poi'; END$$;DROP TRIGGER IF EXISTS trigger_flag ON osm_poi_polygon;
 DROP TRIGGER IF EXISTS trigger_refresh ON poi_polygon.updates;
@@ -2769,7 +2724,7 @@ RETURNS TEXT AS $$
         WHEN subclass IN ('bar','nightclub') THEN 'bar'
         WHEN subclass IN ('marina','dock') THEN 'harbor'
         WHEN subclass IN ('car','car_repair','taxi') THEN 'car'
-        WHEN subclass IN ('hospital','nursing_home') THEN 'hospital'
+        WHEN subclass IN ('hospital','nursing_home', 'doctors', 'clinic') THEN 'hospital'
         WHEN subclass IN ('grave_yard','cemetery') THEN 'cemetery'
         WHEN subclass IN ('attraction','viewpoint') THEN 'attraction'
         WHEN subclass IN ('biergarten','pub') THEN 'beer'
@@ -2810,4 +2765,3 @@ RETURNS TABLE(osm_id bigint, geometry geometry, name text, name_en text, name_de
     ORDER BY "rank"
     ;
 $$ LANGUAGE SQL IMMUTABLE;
-

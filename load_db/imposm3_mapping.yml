@@ -476,7 +476,7 @@ tables:
     mapping:
       aerialway: &id006 [station]
       amenity: &id007 [arts_centre, bank, bar, bbq, bicycle_rental, biergarten, bus_station,
-        cafe, cinema, college, community_centre, courthouse, dentist, doctors, embassy,
+        cafe, cinema, clinic, college, community_centre, courthouse, dentist, doctors, embassy,
         fast_food, ferry_terminal, fire_station, food_court, fuel, grave_yard, hospital,
         ice_cream, kindergarten, library, marketplace, nightclub, nursing_home, pharmacy,
         place_of_worship, police, post_box, post_office, prison, pub, public_building,
@@ -641,4 +641,3 @@ tags:
     'name:ro', 'name:ru', 'name:sk', 'name:sl', 'name:sq', 'name:sr', 'name:sr-Latn',
     'name:sv', 'name:th', 'name:tr', 'name:uk', 'name:zh', int_name, loc_name, name]
   load_all: true
-
