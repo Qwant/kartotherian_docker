@@ -14,6 +14,16 @@ gen:
       user: {var: osmdb-user}
       password: {var: osmdb-pswd}
 
+substgen:
+  public: true
+  formats: [pbf]
+  uri: substantial://
+  params:
+    source: {ref: gen}
+    minzoom: 10
+    maxsize: 100
+    layers: [water, landuse, landcover]
+
 ozgen: # Overzoom is used as a workaround to generate empty tiles, without error
   public: true
   formats: [pbf]
