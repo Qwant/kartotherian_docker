@@ -17,11 +17,7 @@ RUN apt update && \
              redis-tools \
     && curl -sL https://deb.nodesource.com/setup_6.x | bash - \
     && apt-get install -y nodejs \
-    && git clone https://bitbucket.org/qmap/demultiplexer.git /opt/demultiplexer \
-    && git clone https://bitbucket.org/qmap/osm-bright.tm2source.git /opt/osm-bright.tm2source \
-    && git clone https://bitbucket.org/qmap/tilerator.git  /opt/tilerator \
-    && cd /opt/tilerator \
-    && git checkout 18c39cc \
+    && git clone https://github.com/QwantResearch/tilerator.git /opt/tilerator \
     && cd /opt/tilerator && npm install --production && npm dedupe
 
 COPY variables.yaml /opt/tilerator
