@@ -173,19 +173,19 @@ RETURNS TABLE(geometry geometry, class text) AS $$
 $$ LANGUAGE SQL IMMUTABLE;
 DO $$ BEGIN RAISE NOTICE 'Layer waterway'; END$$;DO $$
 BEGIN
-  update osm_waterway_linestring SET tags = slice_language_tags(tags) || get_basic_names(tags, geometry);
-  update osm_waterway_linestring_gen1 SET tags = slice_language_tags(tags) || get_basic_names(tags, geometry);
-  update osm_waterway_linestring_gen2 SET tags = slice_language_tags(tags) || get_basic_names(tags, geometry);
-  update osm_waterway_linestring_gen3 SET tags = slice_language_tags(tags) || get_basic_names(tags, geometry);
+  update osm_waterway_linestring SET tags = tags || get_basic_names(tags, geometry);
+  update osm_waterway_linestring_gen1 SET tags = tags || get_basic_names(tags, geometry);
+  update osm_waterway_linestring_gen2 SET tags = tags || get_basic_names(tags, geometry);
+  update osm_waterway_linestring_gen3 SET tags = tags || get_basic_names(tags, geometry);
 END $$;
 DROP TRIGGER IF EXISTS trigger_refresh ON osm_waterway_linestring;
 
 DO $$
 BEGIN
-  update osm_waterway_linestring SET tags = slice_language_tags(tags) || get_basic_names(tags, geometry);
-  update osm_waterway_linestring_gen1 SET tags = slice_language_tags(tags) || get_basic_names(tags, geometry);
-  update osm_waterway_linestring_gen2 SET tags = slice_language_tags(tags) || get_basic_names(tags, geometry);
-  update osm_waterway_linestring_gen3 SET tags = slice_language_tags(tags) || get_basic_names(tags, geometry);
+  update osm_waterway_linestring SET tags = tags || get_basic_names(tags, geometry);
+  update osm_waterway_linestring_gen1 SET tags = tags || get_basic_names(tags, geometry);
+  update osm_waterway_linestring_gen2 SET tags = tags || get_basic_names(tags, geometry);
+  update osm_waterway_linestring_gen3 SET tags = tags || get_basic_names(tags, geometry);
 END $$;
 
 
@@ -196,7 +196,7 @@ CREATE OR REPLACE FUNCTION waterway_linestring.refresh() RETURNS trigger AS
   $BODY$
   BEGIN
     RAISE NOTICE 'Refresh waterway_linestring %', NEW.osm_id;
-    NEW.tags = slice_language_tags(NEW.tags) || get_basic_names(NEW.tags, NEW.geometry);
+    NEW.tags = NEW.tags || get_basic_names(NEW.tags, NEW.geometry);
     RETURN NEW;
   END;
   $BODY$
@@ -646,7 +646,7 @@ DROP TRIGGER IF EXISTS trigger_refresh ON mountain_peak_point.updates;
 CREATE OR REPLACE FUNCTION update_osm_peak_point() RETURNS VOID AS $$
 BEGIN
   UPDATE osm_peak_point
-  SET tags = slice_language_tags(tags) || get_basic_names(tags, geometry)
+  SET tags = tags || get_basic_names(tags, geometry)
   WHERE COALESCE(tags->'name:latin', tags->'name:nonlatin', tags->'name_int') IS NULL;
 
 END;
@@ -1453,7 +1453,7 @@ BEGIN
   WHERE osm.osm_id = ne.osm_id;
 
   UPDATE osm_marine_point
-  SET tags = slice_language_tags(tags) || get_basic_names(tags, geometry)
+  SET tags = tags || get_basic_names(tags, geometry)
   WHERE COALESCE(tags->'name:latin', tags->'name:nonlatin', tags->'name_int') IS NULL;
 
 END;
@@ -1506,7 +1506,7 @@ CREATE MATERIALIZED VIEW osm_water_lakeline AS (
 	SELECT wp.osm_id,
 		ll.wkb_geometry AS geometry,
 		name, name_en, name_de,
-		slice_language_tags(tags) || get_basic_names(tags, ll.wkb_geometry) AS tags,
+		tags || get_basic_names(tags, ll.wkb_geometry) AS tags,
 		ST_Area(wp.geometry) AS area
     FROM osm_water_polygon AS wp
     INNER JOIN lake_centerline ll ON wp.osm_id = ll.osm_id
@@ -1558,7 +1558,7 @@ CREATE MATERIALIZED VIEW osm_water_point AS (
     SELECT
         wp.osm_id, ST_PointOnSurface(wp.geometry) AS geometry,
         wp.name, wp.name_en, wp.name_de,
-        slice_language_tags(wp.tags) || get_basic_names(wp.tags, ST_PointOnSurface(wp.geometry)) AS tags,
+        wp.tags || get_basic_names(wp.tags, ST_PointOnSurface(wp.geometry)) AS tags,
         ST_Area(wp.geometry) AS area
     FROM osm_water_polygon AS wp
     LEFT JOIN lake_centerline ll ON wp.osm_id = ll.osm_id
@@ -2016,7 +2016,7 @@ DROP TRIGGER IF EXISTS trigger_refresh ON place_continent_point.updates;
 CREATE OR REPLACE FUNCTION update_osm_continent_point() RETURNS VOID AS $$
 BEGIN
   UPDATE osm_continent_point
-  SET tags = slice_language_tags(tags) || get_basic_names(tags, geometry)
+  SET tags = tags || get_basic_names(tags, geometry)
   WHERE COALESCE(tags->'name:latin', tags->'name:nonlatin', tags->'name_int') IS NULL;
 
 END;
@@ -2096,7 +2096,7 @@ BEGIN
   WHERE "rank" = 0;
 
   UPDATE osm_country_point
-  SET tags = slice_language_tags(tags) || get_basic_names(tags, geometry)
+  SET tags = tags || get_basic_names(tags, geometry)
   WHERE COALESCE(tags->'name:latin', tags->'name:nonlatin', tags->'name_int') IS NULL;
 
 END;
@@ -2149,7 +2149,7 @@ BEGIN
   UPDATE osm_island_polygon  SET geometry=ST_PointOnSurface(geometry) WHERE ST_GeometryType(geometry) <> 'ST_Point';
 
   UPDATE osm_island_polygon
-  SET tags = slice_language_tags(tags) || get_basic_names(tags, geometry)
+  SET tags = tags || get_basic_names(tags, geometry)
   WHERE COALESCE(tags->'name:latin', tags->'name:nonlatin', tags->'name_int') IS NULL;
 
   ANALYZE osm_island_polygon;
@@ -2198,7 +2198,7 @@ DROP TRIGGER IF EXISTS trigger_refresh ON place_island_point.updates;
 CREATE OR REPLACE FUNCTION update_osm_island_point() RETURNS VOID AS $$
 BEGIN
   UPDATE osm_island_point
-  SET tags = slice_language_tags(tags) || get_basic_names(tags, geometry)
+  SET tags = tags || get_basic_names(tags, geometry)
   WHERE COALESCE(tags->'name:latin', tags->'name:nonlatin', tags->'name_int') IS NULL;
 
 END;
@@ -2274,7 +2274,7 @@ BEGIN
   DELETE FROM osm_state_point WHERE "rank" IS NULL;
 
   UPDATE osm_state_point
-  SET tags = slice_language_tags(tags) || get_basic_names(tags, geometry)
+  SET tags = tags || get_basic_names(tags, geometry)
   WHERE COALESCE(tags->'name:latin', tags->'name:nonlatin', tags->'name_int') IS NULL;
 
 END;
@@ -2361,7 +2361,7 @@ BEGIN
   WHERE osm.osm_id = ne.osm_id;
 
   UPDATE osm_city_point
-  SET tags = slice_language_tags(tags) || get_basic_names(tags, geometry)
+  SET tags = tags || get_basic_names(tags, geometry)
   WHERE COALESCE(tags->'name:latin', tags->'name:nonlatin', tags->'name_int') IS NULL;
 
 END;
@@ -2574,7 +2574,7 @@ BEGIN
   WHERE station = 'subway' and subclass='station';
 
   UPDATE osm_poi_polygon
-  SET tags = slice_language_tags(tags) || get_basic_names(tags, geometry)
+  SET tags = tags || get_basic_names(tags, geometry)
   WHERE COALESCE(tags->'name:latin', tags->'name:nonlatin', tags->'name_int') IS NULL;
 
   ANALYZE osm_poi_polygon;
@@ -2627,7 +2627,7 @@ BEGIN
     WHERE station = 'subway' and subclass='station';
 
   UPDATE osm_poi_point
-  SET tags = slice_language_tags(tags) || get_basic_names(tags, geometry)
+  SET tags = tags || get_basic_names(tags, geometry)
   WHERE COALESCE(tags->'name:latin', tags->'name:nonlatin', tags->'name_int') IS NULL;
 
 END;
