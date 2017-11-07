@@ -26,12 +26,12 @@ COPY variables.yaml /opt/tilerator
 COPY config.yaml /opt/tilerator
 COPY gen_tiles.sh /gen_tiles.sh
 
-RUN ln -sf /opt/kartotherian_config/tilerator/data_tm2source.xml /etc/tilerator/data_tm2source.xml
-RUN ln -sf /opt/kartotherian_config/tilerator/data_tm2source_lite.xml /etc/tilerator/data_tm2source_lite.xml
+RUN mkdir -p /etc/tilerator
+RUN ln -sf /opt/kartotherian_config/tilerator/data_tm2source.xml /etc/tilerator
+RUN ln -sf /opt/kartotherian_config/tilerator/data_tm2source_lite.xml /etc/tilerator
 
 RUN chmod +x /gen_tiles.sh \
     && chmod 600 /opt/tilerator/variables.yaml \
-    && mkdir -p /etc/tilerator \
     && ln -sf /opt/tilerator/config.yaml /etc/tilerator \
     && ln -sf /opt/tilerator/variables.yaml /etc/tilerator \
     && ln -sf /opt/kartotherian_config/tilerator/sources.yaml /etc/tilerator \
