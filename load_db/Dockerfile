@@ -46,9 +46,9 @@ RUN apt update && \
 COPY import_data.sh ${MAIN_DIR}/import_data.sh
 RUN chmod +x ${MAIN_DIR}/import_data.sh
 
-COPY imposm3_mapping.yml ${MAIN_DIR}/imposm3_mapping.yml
-
-COPY generated_sql.sql ${SQL_DIR}/generated_sql.sql
+RUN git clone https://github.com/QwantResearch/kartotherian_config.git ${MAIN_DIR}/config
+RUN ln -s ${MAIN_DIR}/config/imposm/imposm3_mapping.yml ${MAIN_DIR}/imposm3_mapping.yml
+RUN ln -s ${MAIN_DIR}/config/imposm/generated_sql.sql ${SQL_DIR}/generated_sql.sql
 
 # needed for sql script, else the BOM in the file makes the query impossible
 RUN locale-gen en_US.UTF-8  

@@ -12,4 +12,4 @@ node /opt/tilerator/scripts/tileshell.js \
 	-j.zoom 0 -j.fromZoom 0 -j.beforeZoom 11 \
 	-j.generatorId substgen -j.storageId v2 \
 	-j.parts 8 -j.deleteEmpty -j.keepJob \
-        -j.checkZoom "-1"
+	-j.checkZoom "-1"
