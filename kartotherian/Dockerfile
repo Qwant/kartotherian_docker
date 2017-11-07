@@ -20,17 +20,9 @@ RUN apt update && \
     apt-get install -y nodejs
 
 
-RUN git clone https://bitbucket.org/qmap/demultiplexer.git /opt/demultiplexer
-
-# RUN git clone https://bitbucket.org/qmap/osm-bright.tm2source.git /opt/osm-bright.tm2source 
-
-RUN git clone https://bitbucket.org/qmap/snapshot.git /opt/snapshot
-RUN git clone https://bitbucket.org/qmap/kartotherian.git /opt/kartotherian
+RUN git clone https://github.com/QwantResearch/kartotherian.git /opt/kartotherian
 
 RUN cd /opt/kartotherian && npm install --production && npm dedupe
-
-RUN cd /opt/kartotherian && \
-    npm install git+https://github.com/openmaptiles/mapbox-studio-osm-bright.tm2.git
 
 # .xml style is overridden to use system fonts (DejaVu instead of Arial)
 COPY omt_osm_bright.xml /opt/kartotherian/node_modules/\@mapbox/mapbox-studio-osm-bright/project.xml
