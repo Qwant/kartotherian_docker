@@ -37,7 +37,7 @@ RUN chmod 600 /opt/kartotherian/variables.yaml
 RUN mkdir -p /etc/kartotherian
 RUN ln -sf /opt/kartotherian/config.yaml /etc/kartotherian
 RUN ln -sf /opt/kartotherian/variables.yaml /etc/kartotherian
-RUN ln -sf /opt/kartotherian_config/karrtotherian/sources.yaml /etc/kartotherian
+RUN ln -sf /opt/kartotherian_config/kartotherian/sources.yaml /etc/kartotherian
 
 COPY cassandra.wait .
 RUN chmod +x cassandra.wait
