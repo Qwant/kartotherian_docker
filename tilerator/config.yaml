@@ -75,6 +75,7 @@ services:
       # This could be good for queue management
       uiOnly: false
 
+
       redis: {
         'host': 'redis',
         'port': 6379
