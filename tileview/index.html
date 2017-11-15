@@ -3,7 +3,7 @@
 
 <head>
   <meta charset='utf-8' />
-  <title>Qwant Maps - la démo</title>
+  <title>POC mapbox-gl</title>
   <meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
   <script src='https://api.tiles.mapbox.com/mapbox-gl-js/v0.41.0/mapbox-gl.js'></script>
   <link href='https://api.tiles.mapbox.com/mapbox-gl-js/v0.41.0/mapbox-gl.css' rel='stylesheet' />
@@ -39,175 +39,82 @@
     }
 
     #control_nav {
-      font: 12px/20px 'Helvetica', Arial, Helvetica, sans-serif;
+      font: 12px/20px 'Helvetica Neue', Arial, Helvetica, sans-serif;
       background-color: #fff;
-      font-weight: "300";
-      color: rgba(0,0,0,0.3);
-      box-shadow: 0px 1px 2px rgba(0, 0, 0, 0.2);
-      border-radius: 2px;
-      top: 36px;
-      left: 36px;
+      box-shadow: 3px 3px 3px rgba(0, 0, 0, 0.1);
+      border-radius: 4px;
+      top: 10px;
+      left: 10px;
       position: absolute;
       display: flex;
       padding: 0;
-      min-width: 25em;
-      width: 45em;
-      height: 50px;
     }
 
     #control_nav input {
       border: none;
-      width: 23em;
-      
+      width: 22em;
       height: 28px;
-      padding: 10px 10px 10px 60px;
+      padding: 10px 10px 10px 37px;
       border-radius: inherit;
-      font-size: 16px;
-      font-weight: 300;
-
-      
     }
 
     #control_nav button {
       border: none;
-      background: no-repeat center;
-      cursor: pointer;
-      background-image: url(img/here.png);
-      background-size: 20px 20px;
       display: block;
       color: white;
       background-color: #78E;
-      position: absolute;
-/*      float: right;*/
-      right: 0;
-      top: 0;
-      z-index: 1;
       width: 50px;
-      height: 50px;
       font-size: 15px;
       font-weight: bold;
-      border-radius: 0px 2px 2px 0px;
-      box-shadow: 0px 1px 2px rgba(0, 0, 0, 0.2);
-      
+      border-radius: 0px 4px 4px 0px;
+      text-shadow: #363e6e 1px 1px 1px;
     }
 
     #control_nav input:focus {
       outline: none;
     }
 
-    #search::placeholder {
-      
-      left: 150px;
-      position: absolute;
-      font-size: 16px;
-      font-weight: 300;
-      color: rgba(0,0,0,0.3);
-     
+    .ui-menu .ui-menu-item-wrapper:before {
+      content: "📌";
+      display: inline-block;
+      width: 25px;
+      font-size: 13px;
+      color: #78E;
+      padding-left: 5px;
+      padding-right: 2px;
     }
-  
-    .ui-menu-item-wrapper {
 
-
-    }
-    
-    .ui-menu .ui-menu-item-wrapper.ui-state-active:before {
+    .ui-menu .ui-menu-item-wrapper.ui-state-active:before{
       color: #eee;
-
-    }
-
-    .ui-state-active {
-
-      margin-left: 55px;
-      left: 55px;
-      height: 30px;
-      vertical-align: middle;
-      position: absolute;
-      font-weight: bold;
-      cursor: pointer;
-
     }
 
     .ui-menu .ui-menu-item {
       color: #555;
       font-size: 14px;
-      font-family:'Helvetica', Arial, Helvetica, sans-serif; 
-      font-weight: 300;
-      width: 400px !important;
-      padding-top: 5px;
-      padding-bottom: 5px;
-      
-    }
-
-    
-
-
-    .ui-menu-item-wrapper {
-
-      margin-left: 55px;
-      height: 30px;
-      vertical-align: middle;
-
-
-    }
-
-
-      .ui-menu-item-wrapper:before {
-      content: "";
-      background-image: url(img/town.svg);
-      background-size: 20px 20px;
-      width: 20px;
-      height: 20px;
-      position: absolute;
-      left: -35px;
-      top: 4px;
-      font-size: 14px;
-      color: #888;
-    }
-
-    .ui-menu.ui-autocomplete {
       border: none;
-      box-shadow: 0px 1px 2px rgba(0, 0, 0, 0.2);
-
     }
 
-    .ui-menu.ui-autocomplete .ui-menu-item-wrapper {
+    .ui-menu.ui-autocomplete{
+      border: none;
+      box-shadow: 3px 3px 3px rgba(0, 0, 0, 0.1);
+      min-width: 25em;
+    }
+
+    .ui-menu.ui-autocomplete .ui-menu-item-wrapper{
       padding-bottom: 7px;
       padding-top: 7px;
     }
 
-    .ui-menu.ui-autocomplete .ui-menu-item-wrapper.ui-state-active {
+    .ui-menu.ui-autocomplete .ui-menu-item-wrapper.ui-state-active{
       border: none;
       margin: 0;
-
     }
 
-    .form-input:before {
-      content: "";
-      background-image: url(img/qwant-logo.png);
-      background-size: 20px 20px;
-      width: 20px;
-      height: 20px;
+    div#control_nav:before {
+      content: "🔍";
       position: absolute;
-      left: 20px;
-      top: 13px;
-      font-size: 14px;
-      color: #888;
-    }
-
-    .form-input {
-
-      position: relative;
-    }
-
-     .form-input:after {
-      content: "";
-      background-image: url(img/not-active.svg);
-      background-size: 20px 20px;
-      width: 20px;
-      height: 20px;
-      position: absolute;
-      right: -30px;
-      top: 15px;
+      left: 10px;
+      top: 14px;
       font-size: 14px;
       color: #888;
     }
@@ -230,20 +137,17 @@
 
   <div id='map'></div>
   <div id='control_nav'>
-    <div class="form-input">
-      <input type="text" id="search" placeholder="Où voulez-vous aller ?">
-    </div>
-    <button onclick="navigator.geolocation.getCurrentPosition(set_user_pos_from_geoloc)"></button>
+    <input type="text" id="search" placeholder="Où allez vous ?"><button onclick="navigator.geolocation.getCurrentPosition(set_user_pos_from_geoloc)">ICI</button>
   </div>
   <div id='info'>
   </div>
 
-  <div id='layers'>
-    <input id='basic' type='radio' name='rtoggle' value='qwant_style.json' checked='checked'>
-    <label for='basic'>basic</label>
-    <input id='lite' type='radio' name='rtoggle' value='qwant_style_lite.json'>
-    <label for='lite'>lite</label>
-  </div>
+<div id='layers'>
+  <input id='basic' type='radio' name='rtoggle' value='qwant_style.json' checked='checked'>
+  <label for='basic'>basic</label>
+  <input id='lite' type='radio' name='rtoggle' value='qwant_style_lite.json'>
+  <label for='lite'>lite</label>
+</div>
 
   <script>
     var map = new mapboxgl.Map({
@@ -261,8 +165,8 @@
     var inputs = document.getElementById('layers').getElementsByTagName('input');
 
     function switchLayer(layer) {
-      var layerId = layer.target.id;
-      map.setStyle(layer.target.value);
+        var layerId = layer.target.id;
+        map.setStyle(layer.target.value);
     }
 
     for (var i = 0; i < inputs.length; i++) {
@@ -273,59 +177,18 @@
     $("#search").autocomplete({
       source: function(request, response) {
         $.ajax({
-          url: "https://search.mapzen.com/v1/search",
+          url: "https://photon.komoot.de/api/",
           dataType: "json",
           data: {
-            text: request.term,
-            api_key: 'search-nHajqWA'
+            q: request.term
           },
           success: function(data) {
+            console.log(data)
             ListData = [];
             for (var i = 0; i < data['features'].length; i++) {
-              var emoji_picto = "";
-              var zoom_level = 0;
-
-              var result_type = data['features'][i]['properties']['layer'];
-              switch (result_type) {
-                case "venue":
-                  emoji_picto = ""
-                  zoom_level = 16;
-                  break;
-                case "street":
-                  emoji_picto = ""
-                  zoom_level = 15;
-                  break;
-                case "locality":
-                  emoji_picto = ""
-                  zoom_level = 12;
-                  break;
-                case "address":
-                  emoji_picto = ""
-                  zoom_level = 16;
-                  break;
-                case "localadmin":
-                case "neighbourhood":
-                case "macrocounty":
-                case "region":
-                case "macroregion":
-                case "country":
-                  emoji_picto = ""
-                  zoom_level = 12;
-                  break;
-                case "country":
-                  emoji_picto = ""
-                  zoom_level = 6;
-                  break;
-                default:
-                  emoji_picto = ""
-                  zoom_level = 15;
-              }
-
               ListData.push({
                 "id": data['features'][i]['properties']['osm_id'],
-                "value": emoji_picto + "  " + data['features'][i]['properties']['label'],
-                "poi_type": result_type,
-                "zoom_level": zoom_level,
+                "value": data['features'][i]['properties']['name'] + " (" + data['features'][i]['properties']['osm_value'] + ", " + data['features'][i]['properties']['country'] + ")",
                 "lat": data['features'][i]['geometry']['coordinates'][0],
                 "lon": data['features'][i]['geometry']['coordinates'][1]
               })
@@ -338,15 +201,17 @@
       select: function(event, ui) {
         map.flyTo({
           center: [ui.item.lat, ui.item.lon],
-          zoom: ui.item.zoom_level
+          zoom: 15
         })
       }
     });
+    //  });
 
 
 
 
     function set_user_pos_from_geoloc(position) {
+      //map.setView(new L.LatLng(position.coords.latitude, position.coords.longitude), 17);
       navigator.geolocation.getCurrentPosition(
         map.flyTo({
           center: [position.coords.longitude, position.coords.latitude],
@@ -365,14 +230,10 @@
       map.on('mouseleave', 'poi_z16', function() {
         map.getCanvas().style.cursor = '';
       });
-
-      function display_name_and_other_things(e) {
+      map.on('click', 'poi_z16', function(e) {
         // Single out the first found feature.
         var feature = e.features[0];
-        document.getElementById('info').innerHTML = feature.properties.name || "pas de nom :(";
-        map.flyTo({
-          center: feature.geometry.coordinates
-        });
+        var popup_content = feature.properties.name || "pas de nom :("
 
         if (feature.properties.class == "fuel") {
           var oedb_url = "https://api.openeventdatabase.org/event?what=fuel.price&when=last5minutes&near=" + e.lngLat.lng + "," + e.lngLat.lat + ",200"
@@ -398,16 +259,17 @@
             });
           });
         }
-      }
-      map.on('click', 'poi_z14', function(e) {
-        display_name_and_other_things(e)
+
+
+        // Display a popup
+        var popup = new mapboxgl.Popup({
+            closeButton: false
+          }).setLngLat(e.lngLat)
+          .setText(popup_content)
+          .addTo(map);
       });
-      map.on('click', 'poi_z15', function(e) {
-        display_name_and_other_things(e)
-      });
-      map.on('click', 'poi_z16', function(e) {
-        display_name_and_other_things(e)
-      });
+
+
     });
   </script>
 
