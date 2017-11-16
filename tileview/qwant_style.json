@@ -16,7 +16,11 @@
   "pitch": 0,
   "sources": {
     "openmaptiles": {
-      "url": "tileschema.json",
+      "url": "tileschema_basemap.json",
+      "type": "vector"
+    },
+    "poi": {
+      "url": "tileschema_poi.json",
       "type": "vector"
     }
   },

@@ -27,7 +27,8 @@ COPY config.yaml /opt/tilerator
 COPY gen_tiles.sh /gen_tiles.sh
 
 RUN mkdir -p /etc/tilerator
-RUN ln -sf /opt/kartotherian_config/tilerator/data_tm2source.xml /etc/tilerator
+RUN ln -sf /opt/kartotherian_config/tilerator/data_tm2source_basemap.xml /etc/tilerator
+RUN ln -sf /opt/kartotherian_config/tilerator/data_tm2source_poi.xml /etc/tilerator
 RUN ln -sf /opt/kartotherian_config/tilerator/data_tm2source_lite.xml /etc/tilerator
 
 RUN chmod +x /gen_tiles.sh \
