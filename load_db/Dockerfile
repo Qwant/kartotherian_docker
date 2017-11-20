@@ -46,7 +46,10 @@ RUN apt update && \
 COPY import_data.sh ${MAIN_DIR}/import_data.sh
 RUN chmod +x ${MAIN_DIR}/import_data.sh
 
-RUN git clone https://github.com/QwantResearch/kartotherian_config.git ${MAIN_DIR}/config
+# Prevent Caching
+# According to: https://stackoverflow.com/questions/36996046/how-to-prevent-dockerfile-caching-git-clone
+ADD https://api.github.com/repos/QwantResearch/kartotherian_config/git/refs/heads/master version.json
+RUN git clone -b master https://github.com/QwantResearch/kartotherian_config.git ${MAIN_DIR}/config
 RUN ln -s ${MAIN_DIR}/config/imposm/imposm3_mapping.yml ${MAIN_DIR}/imposm3_mapping.yml
 RUN ln -s ${MAIN_DIR}/config/imposm/generated_sql.sql ${SQL_DIR}/generated_sql.sql
 

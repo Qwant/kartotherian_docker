@@ -20,7 +20,10 @@ RUN apt update && \
     && git clone https://github.com/QwantResearch/tilerator.git /opt/tilerator \
     && cd /opt/tilerator && npm install --production && npm dedupe
 
-RUN git clone https://github.com/QwantResearch/kartotherian_config.git /opt/kartotherian_config
+# Prevent Caching
+# According to: https://stackoverflow.com/questions/36996046/how-to-prevent-dockerfile-caching-git-clone
+ADD https://api.github.com/repos/QwantResearch/kartotherian_config/git/refs/heads/master version.json
+RUN git clone -b master https://github.com/QwantResearch/kartotherian_config.git /opt/kartotherian_config
 
 COPY variables.yaml /opt/tilerator
 COPY config.yaml /opt/tilerator

@@ -19,8 +19,11 @@ RUN apt update && \
     curl -sL https://deb.nodesource.com/setup_6.x | bash - && \
     apt-get install -y nodejs
 
-
+# Prevent Caching
+# According to: https://stackoverflow.com/questions/36996046/how-to-prevent-dockerfile-caching-git-clone
+ADD https://api.github.com/repos/QwantResearch/kartotherian/git/refs/heads/master version.json
 RUN git clone https://github.com/QwantResearch/kartotherian.git /opt/kartotherian
+ADD https://api.github.com/repos/QwantResearch/kartotherian_config/git/refs/heads/master version.json
 RUN git clone https://github.com/QwantResearch/kartotherian_config.git /opt/kartotherian_config
 
 
