@@ -87,7 +87,8 @@ PGCLIENTENCODING=UTF8 ogr2ogr \
 
 # borders
 if [ ! -f "${DATA_DIR}/osmborder_lines.csv" ]; then
-    wget -P ${DATA_DIR} https://github.com/openmaptiles/import-osmborder/releases/download/v0.1/osmborder_lines.csv
+    wget -P ${DATA_DIR} https://github.com/openmaptiles/import-osmborder/releases/download/v0.4/osmborder_lines.csv.gz \
+    && gzip -d ${DATA_DIR}/osmborder_lines.csv.gz
 fi
 echo 'importing the borders'
 POSTGRES_PASSWORD= POSTGRES_PORT=5432 IMPORT_DIR=${DATA_DIR} POSTGRES_HOST=postgres POSTGRES_DB=gis POSTGRES_USER=gis ${MAIN_DIR}/import_osmborder_lines.sh

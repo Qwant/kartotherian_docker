@@ -30,7 +30,7 @@ RUN apt update && \
     && wget -O /usr/local/bin/pgfutter https://github.com/lukasmartinelli/pgfutter/releases/download/v1.1/pgfutter_linux_amd64 \
     && chmod +x /usr/local/bin/pgfutter \
     # a script to import the osm borders
-    && wget -P ${MAIN_DIR} https://raw.githubusercontent.com/openmaptiles/import-osmborder/master/import/import_osmborder_lines.sh \
+    && wget -P ${MAIN_DIR} https://raw.githubusercontent.com/openmaptiles/import-osmborder/v0.4/import/import_osmborder_lines.sh \
     && chmod +x ${MAIN_DIR}/import_osmborder_lines.sh \
     # a script to import the water polygons
     && wget -P ${MAIN_DIR} https://raw.githubusercontent.com/openmaptiles/import-water/master/import-water.sh \
@@ -46,10 +46,12 @@ RUN apt update && \
 COPY import_data.sh ${MAIN_DIR}/import_data.sh
 RUN chmod +x ${MAIN_DIR}/import_data.sh
 
+
 # Prevent Caching
 # According to: https://stackoverflow.com/questions/36996046/how-to-prevent-dockerfile-caching-git-clone
 ADD https://api.github.com/repos/QwantResearch/kartotherian_config/git/refs/heads/master version.json
 RUN git clone -b master https://github.com/QwantResearch/kartotherian_config.git ${MAIN_DIR}/config
+
 RUN ln -s ${MAIN_DIR}/config/imposm/imposm3_mapping.yml ${MAIN_DIR}/imposm3_mapping.yml
 RUN ln -s ${MAIN_DIR}/config/imposm/generated_sql.sql ${SQL_DIR}/generated_sql.sql
 
