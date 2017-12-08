@@ -27,7 +27,7 @@ After this you need to generate the tiles. You can do it either by generating al
 or only a subset using the api.
 For example to generate the tiles from 7 to 16 zoom level only on Köln:
 
-`curl -XPOST "http://localhost:16534/add?generatorId=gen&storageId=v2&zoom=7&x=66&y=42&fromZoom=7&beforeZoom=16&keepJob=true&parts=8&deleteEmpty=true"`
+`curl -XPOST "http://localhost:16534/add?generatorId=substbasemap&storageId=basemap&zoom=7&x=66&y=42&fromZoom=7&beforeZoom=16&keepJob=true&parts=8&deleteEmpty=true"`
 
 You can check the tilegeneration at `http://localhost:16534/jobs` and check a vector tile based map on `http://localhost:8585/index.html`
 
