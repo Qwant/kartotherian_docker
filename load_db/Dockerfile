@@ -30,7 +30,7 @@ RUN apt update && \
     && wget -O /usr/local/bin/pgfutter https://github.com/lukasmartinelli/pgfutter/releases/download/v1.1/pgfutter_linux_amd64 \
     && chmod +x /usr/local/bin/pgfutter \
     # a script to import the osm borders
-    && wget -P ${MAIN_DIR} https://raw.githubusercontent.com/openmaptiles/import-osmborder/master/import/import_osmborder_lines.sh \
+    && wget -P ${MAIN_DIR} https://raw.githubusercontent.com/openmaptiles/import-osmborder/v0.4/import/import_osmborder_lines.sh \
     && chmod +x ${MAIN_DIR}/import_osmborder_lines.sh \
     # a script to import the water polygons
     && wget -P ${MAIN_DIR} https://raw.githubusercontent.com/openmaptiles/import-water/master/import-water.sh \
