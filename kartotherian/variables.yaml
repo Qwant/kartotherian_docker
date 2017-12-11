@@ -1,3 +1,4 @@
+osmdb-host: postgres
 osmdb-user: gis
 osmdb-pswd: <xxx> # TBD
 cassandra-servers: cassandra # Docker container

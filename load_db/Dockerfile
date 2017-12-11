@@ -37,7 +37,7 @@ RUN apt update && \
     && chmod +x ${MAIN_DIR}/import-water.sh \
     # fetch lots of sql script
     && mkdir -p ${SQL_DIR} \
-    && wget -P ${SQL_DIR}/ https://raw.githubusercontent.com/openmaptiles/import-sql/master/language.sql \
+    && wget -P ${SQL_DIR}/ https://raw.githubusercontent.com/openmaptiles/import-sql/v0.7/language.sql \
     && wget -P ${SQL_DIR}/ https://raw.githubusercontent.com/mapbox/postgis-vt-util/v1.0.0/postgis-vt-util.sql \
     && git clone --depth=1 https://github.com/openmaptiles/mapnik-german-l10n.git \
     && mv mapnik-german-l10n/plpgsql/* ${SQL_DIR}/ \
@@ -50,8 +50,10 @@ RUN chmod +x ${MAIN_DIR}/import_data.sh
 # According to: https://stackoverflow.com/questions/36996046/how-to-prevent-dockerfile-caching-git-clone
 ADD https://api.github.com/repos/QwantResearch/kartotherian_config/git/refs/heads/master version.json
 RUN git clone -b master https://github.com/QwantResearch/kartotherian_config.git ${MAIN_DIR}/config
-RUN ln -s ${MAIN_DIR}/config/imposm/imposm3_mapping.yml ${MAIN_DIR}/imposm3_mapping.yml
-RUN ln -s ${MAIN_DIR}/config/imposm/generated_sql.sql ${SQL_DIR}/generated_sql.sql
+RUN ln -s ${MAIN_DIR}/config/imposm/generated_mapping_base.yaml ${MAIN_DIR}/generated_mapping_base.yaml
+RUN ln -s ${MAIN_DIR}/config/imposm/generated_mapping_poi.yaml ${MAIN_DIR}/generated_mapping_poi.yaml
+RUN ln -s ${MAIN_DIR}/config/imposm/generated_base.sql ${SQL_DIR}/generated_base.sql
+RUN ln -s ${MAIN_DIR}/config/imposm/generated_poi.sql ${SQL_DIR}/generated_poi.sql
 
 # needed for sql script, else the BOM in the file makes the query impossible
 RUN locale-gen en_US.UTF-8  
