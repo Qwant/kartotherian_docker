@@ -1185,7 +1185,7 @@
       "id": "poi_z16",
       "type": "symbol",
       "metadata": {},
-      "source": "openmaptiles",
+      "source": "poi",
       "source-layer": "poi",
       "minzoom": 16,
       "filter": [
@@ -1226,7 +1226,7 @@
       "id": "poi_z15",
       "type": "symbol",
       "metadata": {},
-      "source": "openmaptiles",
+      "source": "poi",
       "source-layer": "poi",
       "minzoom": 15,
       "filter": [
@@ -1272,7 +1272,7 @@
       "id": "poi_z14",
       "type": "symbol",
       "metadata": {},
-      "source": "openmaptiles",
+      "source": "poi",
       "source-layer": "poi",
       "minzoom": 14,
       "filter": [
@@ -1318,7 +1318,7 @@
       "id": "poi_transit_tram",
       "type": "symbol",
       "metadata": {},
-      "source": "openmaptiles",
+      "source": "poi",
       "source-layer": "poi",
       "layout": {
         "icon-image": "rail_light_11",
@@ -1359,7 +1359,7 @@
       "id": "poi_transit_rail",
       "type": "symbol",
       "metadata": {},
-      "source": "openmaptiles",
+      "source": "poi",
       "source-layer": "poi",
       "layout": {
         "icon-image": "rail_11",
@@ -1400,7 +1400,7 @@
       "id": "poi_transit",
       "type": "symbol",
       "metadata": {},
-      "source": "openmaptiles",
+      "source": "poi",
       "source-layer": "poi",
       "layout": {
         "icon-image": "{class}_11",
@@ -1436,7 +1436,7 @@
     {
       "id": "poi_label",
       "type": "symbol",
-      "source": "openmaptiles",
+      "source": "poi",
       "source-layer": "poi",
       "filter": [
         "all", [
