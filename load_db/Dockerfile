@@ -41,16 +41,16 @@ RUN chmod +x ${MAIN_DIR}/import_data.sh
 # According to: https://stackoverflow.com/questions/36996046/how-to-prevent-dockerfile-caching-git-clone
 ADD https://api.github.com/repos/QwantResearch/kartotherian_config/git/refs/heads/master version.json
 RUN git clone -b master https://github.com/QwantResearch/kartotherian_config.git ${MAIN_DIR}/config
+RUN cd ${MAIN_DIR}/config && git submodule update --init
 RUN ln -s ${MAIN_DIR}/config/imposm/generated_mapping_base.yaml ${MAIN_DIR}/generated_mapping_base.yaml
 RUN ln -s ${MAIN_DIR}/config/imposm/generated_mapping_poi.yaml ${MAIN_DIR}/generated_mapping_poi.yaml
 RUN ln -s ${MAIN_DIR}/config/imposm/generated_base.sql ${SQL_DIR}/generated_base.sql
 RUN ln -s ${MAIN_DIR}/config/imposm/generated_poi.sql ${SQL_DIR}/generated_poi.sql
 
-RUN ln -s ${MAIN_DIR}/add_external_dependencies/import-osmborder/import/import_osmborder_lines.sh ${MAIN_DIR}/
-RUN ln -s ${MAIN_DIR}/add_external_dependencies/import-water/import-water.sh ${MAIN_DIR}/
-RUN ln -s ${MAIN_DIR}/add_external_dependencies/import-sql/language.sql ${SQL_DIR}/
-RUN ln -s ${MAIN_DIR}/add_external_dependencies/postgis-vt-util/postgis-vt-util.sql ${SQL_DIR}/
-
+RUN ln -s ${MAIN_DIR}/config/external_dependencies/import-osmborder/import/import_osmborder_lines.sh ${MAIN_DIR}/
+RUN ln -s ${MAIN_DIR}/config/external_dependencies/import-water/import-water.sh ${MAIN_DIR}/
+RUN ln -s ${MAIN_DIR}/config/external_dependencies/import-sql/language.sql ${SQL_DIR}/
+RUN ln -s ${MAIN_DIR}/config/external_dependencies/postgis-vt-util/postgis-vt-util.sql ${SQL_DIR}/
 
 RUN cd ${MAIN_DIR}/config/import_data \
     && pipenv install
