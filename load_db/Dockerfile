@@ -1,4 +1,4 @@
-FROM python:3.6-jessie
+FROM python:3.6-stretch
 
 ENV MAIN_DIR=/srv/import_data \
     SQL_DIR=/srv/import_data/sql \
