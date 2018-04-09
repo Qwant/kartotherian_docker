@@ -12,7 +12,7 @@ Use these commmands to download, import data and create tiles jobs for Luxembour
 ```bash
 docker-compose down -v
 ```
-
+Download, import and start the tiles generation:
 ```bash
 wget https://download.geofabrik.de/europe/luxembourg-latest.osm.pbf -P data/
 docker-compose up --build -d
