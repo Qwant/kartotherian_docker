@@ -1,0 +1,10 @@
+{
+  "tileserver_base": [
+    "http://localhost:6533/ozbasemap/{z}/{x}/{y}.pbf"
+  ],
+  "tileserver_poi": [
+    "http://localhost:6533/ozpoi/{z}/{x}/{y}.pbf"
+  ],
+  "spriteserver": "https://qwantresearch.github.io/qwant-basic-gl-style/",
+  "fontserver": "https://qwantresearch.github.io/fonts/"
+}
