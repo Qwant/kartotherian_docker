@@ -60,12 +60,11 @@ You can check the tile generation at `http://localhost:16534/jobs` and check a v
 
 ## configuration files
 
-The `load_db/generated_sql.sql` and `load_db/imposm3_mapping.yml` and `tilerator/data_tm2source.xml` files have been generated using [openmaptiles-tools](https://github.com/openmaptiles/openmaptiles-tools).
+Most configuration files are imported from [kartotherian_config](https://github.com/QwantResearch/kartotherian_config) repository.
+Among them, `generated_*.sql`, imposm `generated_mapping_*.yml` and `data_tm2source_*.xml` files have been generated using [openmaptiles-tools](https://github.com/openmaptiles/openmaptiles-tools).
 
 The SQL and imposm mapping generation is quite straigthforward (cf. `generate-sql` and `generate-imposm3` in the [documentation](https://github.com/openmaptiles/openmaptiles-tools/blob/master/README.md)).
 
-The `data_tm2source.xml` generation is a bit more complex.
+The `data_tm2source_*.xml` generation is a bit more complex. We use `generate-tm2source` to generate a `Carto` project `.yml` file. This file is transformed to a Mapnik `.xml` project using [kosmtik](https://github.com/kosmtik/kosmtik).
 
-we use `generate-tm2source` to generate a `Carto` project `.yml` file.
-This file is transformed manually to a Mapnik `.xml` project using [kosmtik](https://github.com/kosmtik/kosmtik).
-
+See more details on https://github.com/QwantResearch/openmaptiles
