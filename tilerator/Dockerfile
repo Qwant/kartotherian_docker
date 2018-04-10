@@ -16,13 +16,13 @@ RUN apt update && \
              postgis \
              redis-tools \
     && curl -sL https://deb.nodesource.com/setup_6.x | bash - \
-    && apt-get install -y nodejs \
-    && git clone https://github.com/QwantResearch/tilerator.git /opt/tilerator \
+    && apt-get install -y nodejs
+
+ADD https://api.github.com/repos/QwantResearch/tilerator/git/refs/heads/master tilerator_version.json
+RUN git clone -b master https://github.com/QwantResearch/tilerator.git /opt/tilerator \
     && cd /opt/tilerator && npm install --production && npm dedupe
 
-# Prevent Caching
-# According to: https://stackoverflow.com/questions/36996046/how-to-prevent-dockerfile-caching-git-clone
-ADD https://api.github.com/repos/QwantResearch/kartotherian_config/git/refs/heads/master version.json
+ADD https://api.github.com/repos/QwantResearch/kartotherian_config/git/refs/heads/master config_version.json
 RUN git clone -b master https://github.com/QwantResearch/kartotherian_config.git /opt/kartotherian_config
 
 COPY variables.yaml /opt/tilerator
