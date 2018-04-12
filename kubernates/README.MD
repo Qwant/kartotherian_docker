@@ -1,7 +1,20 @@
-#commands
->kubectl exec -it pbfs --container=populate-postgres sh
+## Kubernates
 
+### How to start (with minikube)
 
+```
+$ minicube start --vm-driver=none
+$ kubectl create -f ./kubernates/
+```
+
+### Side notes
+
+>How to exec  popuate-posgres shell inside pbfs pod
+```
+kubectl exec -it pbfs --container=populate-postgres sh
+```
+
+### Configurations files
 load_db.pod 
  - pbfpod (download pbf)
  - populate-postgres (start load_db script)
@@ -15,6 +28,6 @@ load_db.pod
   - serve postgres as a service
   
   
-## TODO
+### TODO
  - start load db ""job""
  

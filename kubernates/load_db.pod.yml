@@ -9,7 +9,7 @@ spec:
     command:
       - "bin/sh"
       - "-c"
-      - "wget http://download.geofabrik.de/europe/france/auvergne-latest.osm.pbf -P /tmp/pbfs; echo \"download complete\";sleep 20000"
+      - "wget http://download.geofabrik.de/europe/france/auvergne-latest.osm.pbf -P /tmp/pbfs; echo \"download complete\";"
     volumeMounts:
       - name: pbfs
         mountPath: "/tmp/pbfs"

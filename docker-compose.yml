@@ -36,7 +36,7 @@ services:
   load_db:
     build: ./load_db
     volumes:
-    - ./data:/data
+    - ./data:/tmp/pbfs
     depends_on:
       - postgres
       - redis  # used to tell tilerator the db is loaded
