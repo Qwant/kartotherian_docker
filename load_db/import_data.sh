@@ -2,7 +2,7 @@
 set -e
 set -x
 
-osm_file='/data/*.pbf'
+osm_file='${DATA_DIR}/*.pbf'
 
 user='gis'
 database='gis'
@@ -17,6 +17,8 @@ psql -Xq -h postgres -U $user -d $database --set ON_ERROR_STOP="1" -c "CREATE TA
 
 cd $MAIN_DIR/config/import_data
 # run the python script that loads all the data
+
+
 INVOKE_OSM_FILE=$osm_file pipenv run invoke 
 
 # we tell redis that the import is finished so tilerator can start
