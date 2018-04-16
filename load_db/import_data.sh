@@ -19,7 +19,7 @@ cd $MAIN_DIR/config/import_data
 # run the python script that loads all the data
 
 
-INVOKE_OSM_FILE=$osm_file pipenv run invoke 
+INVOKE_DATA_DIR=$DATA_DIR INVOKE_OSM_FILE=$osm_file pipenv run invoke
 
 # we tell redis that the import is finished so tilerator can start
 redis-cli -h redis set 'data_imported' 'true'
