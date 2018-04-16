@@ -4,7 +4,7 @@
 
 ```
 $ minicube start --vm-driver=none
-$ kubectl create -f ./kubernates/
+$ kubectl create -f ./kubernetes/
 ```
 
 ### Side notes
