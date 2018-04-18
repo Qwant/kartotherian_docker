@@ -1,0 +1,24 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: pbfs
+spec:
+  containers:
+  - name: pbfpod
+    image: tchaardge/pbf_loader:latest
+    command:
+      - "bin/sh"
+      - "-c"
+      - "wget http://download.geofabrik.de/europe/france/auvergne-latest.osm.pbf -P /tmp/pbfs; echo \"download complete\";"
+    volumeMounts:
+      - name: pbfs
+        mountPath: "/tmp/pbfs"
+  - name: populate-postgres
+    image: tchaardge/db_loader:latest #tchaardge/db_loader:latest
+    volumeMounts:
+      - name: pbfs
+        mountPath: "/tmp/pbfs"
+
+  volumes:
+  - name: pbfs
+    emptyDir: {}

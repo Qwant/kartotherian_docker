@@ -2,7 +2,7 @@ FROM python:3.6-stretch
 
 ENV MAIN_DIR=/srv/import_data \
     SQL_DIR=/srv/import_data/sql \
-    DATA_DIR=/data
+    DATA_DIR=/tmp/pbfs
 
 RUN apt update && \
     apt install -y \

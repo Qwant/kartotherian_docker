@@ -10,6 +10,7 @@ services:
      - POSTGRES_USER=gis
     ports:
      - "12345:5432"
+
   cassandra:
     image: cassandra:latest
     volumes:
@@ -25,15 +26,17 @@ services:
       - redis
     ports:
       - "16534:16534"
+
   redis:
     image: redis:latest
     command: redis-server --appendonly yes # to enable persistence
     volumes:
     - "redisdata:/data"
+
   load_db:
     build: ./load_db
     volumes:
-    - ./data:/data
+    - ./data:/tmp/pbfs
     depends_on:
       - postgres
       - redis  # used to tell tilerator the db is loaded
