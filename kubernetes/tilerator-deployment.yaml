@@ -1,0 +1,27 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  labels:
+    app: tilerator
+  name: tilerator
+spec:
+  replicas: 1
+  strategy: {}
+  template:
+    metadata:
+      labels:
+        app: tilerator
+    spec:
+      containers:
+      - env:
+        - name: NODE_PATH
+          value: '''/opt/tilerator/node_modules'''
+        - name: TILERATOR_PORT
+          value: "16354"
+        image: tilerator
+        name: tilerator
+        ports:
+        - containerPort: 16534
+        resources: {}
+      restartPolicy: Always
+status: {}

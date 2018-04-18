@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    vlm: tilerator
+  name: tilerator
+spec:
+  ports:
+  - name: "16534"
+    port: 16534
+    targetPort: 16534
+  selector:
+    vlm: tilerator
+status:
+  loadBalancer: {}
