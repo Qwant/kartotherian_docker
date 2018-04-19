@@ -6,6 +6,9 @@ spec:
   template:
     spec:
       nodeSelector:
+        # This job needs to run on a specific node that
+        # will persist imposm 'cache' and 'diff' folders,
+        # and on which osm_update is defined as a cron job.
         maps-pg-importer: "true"
       restartPolicy: Never
       initContainers:

@@ -22,7 +22,7 @@ $ kubectl label nodes minikube maps-pg-importer=true
 
 **4.** Apply kubernetes configuration files
 ```
-$ kubectl create -f ./kubernetes/
+$ kubectl apply -f ./kubernetes/
 ```
 
 
@@ -31,11 +31,11 @@ $ kubectl create -f ./kubernetes/
 configmap.yml
  - a default configuration for jobs and services
 
-load_db.jod.yml
+load_db.job.yml
  - downloads a pbf (url set in configmap.yml)
  - runs the import to postgres
  
 postgres.yml
  - defines postgres replication controller
- - serve postgres as a service
+ - serves postgres as a service
   
