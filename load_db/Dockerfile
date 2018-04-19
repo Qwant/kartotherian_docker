@@ -2,7 +2,8 @@ FROM python:3.6-stretch
 
 ENV MAIN_DIR=/srv/import_data \
     SQL_DIR=/srv/import_data/sql \
-    DATA_DIR=/tmp/pbfs
+    DATA_DIR=/tmp/pbfs \
+    REDIS_SET_KEY=data_imported # Default value (overriden in k8s configmap)
 
 RUN apt update && \
     apt install -y \

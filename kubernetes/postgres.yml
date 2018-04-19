@@ -21,3 +21,14 @@ spec:
         image: openmaptiles/postgis
         ports:
         - containerPort: 5432
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgres
+spec:
+  ports:
+    - port: 5432
+      targetPort: 5432
+  selector:
+    app: postgres

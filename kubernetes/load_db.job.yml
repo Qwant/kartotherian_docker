@@ -1,0 +1,59 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: initial-import
+spec:
+  template:
+    spec:
+      nodeSelector:
+        maps-pg-importer: "true"
+      restartPolicy: Never
+      initContainers:
+      - name: import-pbf-download
+        image: alpine
+        env:
+        - name: PBF_URL
+          valueFrom:
+            configMapKeyRef:
+              name: default-config
+              key: pbf_url
+        command:
+          - "bin/sh"
+          - "-c"
+        args:
+          - >
+            if [ -n "$PBF_URL" ]; then
+              echo "Downloading .pbf..."
+              wget $PBF_URL -P /tmp/pbfs
+            else
+              echo "No .pbf to download"
+            fi
+        volumeMounts:
+          - name: data
+            mountPath: /tmp/pbfs
+      containers:
+      - name: import-load-db-container
+        image: amatissart/kartotherian_load_db:0.0.2
+        env:
+        - name: REDIS_SET_KEY
+          valueFrom:
+            configMapKeyRef:
+              name: default-config
+              key: redis_set_key
+        command:
+          - "bin/sh"
+          - "-c"
+        args: 
+          - /srv/import_data/import_data.sh
+        volumeMounts:
+          - name: data
+            mountPath: /tmp/pbfs
+          - name: imposm-dir
+            mountPath: /srv/import_data/imposm
+      volumes:
+      - name: data
+        hostPath:
+          path: /data
+      - name: imposm-dir
+        hostPath:
+          path: /srv/import_data/imposm

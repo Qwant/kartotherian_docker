@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: default-config
+  namespace: default
+data:
+  pbf_url: "https://download.geofabrik.de/europe/luxembourg-latest.osm.pbf"
+  redis_set_key: "" # If not empty, this key will be set to 'true' after import to postgres
