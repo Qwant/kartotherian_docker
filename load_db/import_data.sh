@@ -17,11 +17,9 @@ psql -Xq -h $host -U $user -d $database --set ON_ERROR_STOP="1" -c "CREATE TABLE
 
 cd $MAIN_DIR/config/import_data
 # run the python script that loads all the data
-
-
 INVOKE_DATA_DIR=$DATA_DIR INVOKE_OSM_FILE=$osm_file pipenv run invoke
 
 # we tell redis that the import is finished so tilerator can start
-if [ -n "$REDIS_SET_KEY" ]; then
-	redis-cli -h redis set "$REDIS_SET_KEY" 'true'
+if [ "$REDIS_SET_KEY" = "true" ]; then
+	redis-cli -h redis set 'data_imported' 'true'
 fi

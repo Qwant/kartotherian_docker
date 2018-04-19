@@ -24,16 +24,16 @@ spec:
           - >
             if [ -n "$PBF_URL" ]; then
               echo "Downloading .pbf..."
-              wget $PBF_URL -P /tmp/pbfs
+              wget $PBF_URL -P /data
             else
               echo "No .pbf to download"
             fi
         volumeMounts:
           - name: data
-            mountPath: /tmp/pbfs
+            mountPath: /data
       containers:
       - name: import-load-db-container
-        image: amatissart/kartotherian_load_db:0.0.2
+        image: amatissart/kartotherian_load_db:0.0.3
         env:
         - name: REDIS_SET_KEY
           valueFrom:
@@ -47,7 +47,7 @@ spec:
           - /srv/import_data/import_data.sh
         volumeMounts:
           - name: data
-            mountPath: /tmp/pbfs
+            mountPath: /data
           - name: imposm-dir
             mountPath: /srv/import_data/imposm
       volumes:
