@@ -1,33 +1,41 @@
-## Kubernates
+## Kubernetes
 
 ### How to start (with minikube)
 
+**1.** Install minikube, kubectl and vm driver (https://github.com/kubernetes/minikube#installation)
+
+**2.** Start minikube
+
 ```
-$ minicube start --vm-driver=none
-$ kubectl create -f ./kubernetes/
+$ minikube start --vm-driver=kvm2 --disk-size=30g
+```
+> Or using data from a local directory:  
+```
+$ minikube start --vm-driver=kvm2 --disk-size=30g --mount --mount-string "./data:/data"
 ```
 
-### Side notes
+**3.** Label the minikube node to host the maps data importer
 
->How to exec  popuate-posgres shell inside pbfs pod
 ```
-kubectl exec -it pbfs --container=populate-postgres sh
+$ kubectl label nodes minikube maps-pg-importer=true
 ```
+
+**4.** Apply kubernetes configuration files
+```
+$ kubectl apply -f ./kubernetes/
+```
+
 
 ### Configurations files
-load_db.pod 
- - pbfpod (download pbf)
- - populate-postgres (start load_db script)
+
+configmap.yml
+ - a default configuration for jobs and services
+
+load_db.job.yml
+ - downloads a pbf (url set in configmap.yml)
+ - runs the import to postgres
  
- these two containers shares pbfs volume located (/tmp/pbfs)
- 
- postgres.rc
-  - replicate {one} postgres pod (should be a static set or whatever)
- 
- postgres.service
-  - serve postgres as a service
+postgres.yml
+ - defines postgres replication controller
+ - serves postgres as a service
   
-  
-### TODO
- - start load db ""job""
- 
