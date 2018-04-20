@@ -19,6 +19,8 @@ spec:
         volumeMounts:
         - mountPath: "/data"
           name: redisdata
+        ports:
+        - containerPort: 6379
       volumes:
         - name: redisdata
 ---
@@ -28,7 +30,7 @@ metadata:
   name: redis
 spec:
   ports:
-    - port: 7654
-      targetPort: 7654
+    - port: 6379
+      targetPort: 6379
   selector:
     app: redis

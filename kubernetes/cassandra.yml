@@ -18,7 +18,7 @@ spec:
         - mountPath: "/var/lib/cassandra"
           name: csdata
         ports:
-        - containerPort: 6543
+        - containerPort: 9042
       volumes:
         - name: csdata
 ---
@@ -28,7 +28,7 @@ metadata:
   name: cassandra
 spec:
   ports:
-    - port: 6543
-      targetPort: 6543
+    - port: 9042
+      targetPort: 9042
   selector:
     app: cassandra

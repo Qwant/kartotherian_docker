@@ -9,7 +9,7 @@
 ```
 $ minikube start --vm-driver=kvm2 --disk-size=30g
 ```
-> Or using data from a local directory:  
+> Or using data from a local directory:
 ```
 $ minikube start --vm-driver=kvm2 --disk-size=30g --mount --mount-string "./data:/data"
 ```
@@ -34,8 +34,13 @@ configmap.yml
 load_db.job.yml
  - downloads a pbf (url set in configmap.yml)
  - runs the import to postgres
- 
+
 postgres.yml
  - defines postgres replication controller
  - serves postgres as a service
-  
+
+cassandra.yml
+
+redis.yml
+
+tilerator.yml

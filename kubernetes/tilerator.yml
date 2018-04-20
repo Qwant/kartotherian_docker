@@ -13,7 +13,7 @@ spec:
     spec:
       containers:
       - name: tilerator
-        image: jbunss/tilerator:k8s
+        image: jbunss/tilerator:nowait
         env:
           - name: NODE_PATH
             value: "/opt/tilerator/node_modules"
