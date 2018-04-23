@@ -11,6 +11,13 @@ spec:
       labels:
         app: tilerator
     spec:
+      initContainers:
+      - name: cassandra-ready
+        image: cassandra:latest
+        ports:
+        - containerPort: 9042
+        command: ["/bin/sh"]
+        args: ["-c","while ! cqlsh -e 'describe cluster' cassandra 9042; do echo 'cassandra not ready yet, sleeping' sleep 1; done"]
       containers:
       - name: tilerator
         image: jbunss/tilerator:nowait
