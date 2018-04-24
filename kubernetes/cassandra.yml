@@ -5,11 +5,11 @@ metadata:
 spec:
   replicas: 1
   selector:
-    app: tilerator
+    app: cassandra
   template:
     metadata:
       labels:
-        app: tilerator
+        app: cassandra
     spec:
       containers:
       - name: cassandra
@@ -32,4 +32,4 @@ spec:
     - port: 9042
       targetPort: 9042
   selector:
-    app: tilerator
+    app: cassandra

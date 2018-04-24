@@ -36,7 +36,7 @@ spec:
             mountPath: /data
       containers:
       - name: import-load-db-container
-        image: amatissart/kartotherian_load_db:0.0.3
+        image: amatissart/kartotherian_load_db:0.0.4
         env:
         - name: REDIS_SET_KEY
           valueFrom:

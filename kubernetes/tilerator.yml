@@ -17,7 +17,7 @@ spec:
         ports:
         - containerPort: 9042
         command: ["/bin/sh"]
-        args: ["-c","while ! cqlsh -e 'describe cluster' cassandra 9042; do echo 'cassandra not ready yet, sleeping' sleep 1; done"]
+        args: ["-c","while ! cqlsh -e 'describe cluster' cassandra 9042; do echo '$(date) - cassandra not ready yet, sleeping' sleep 1; done"]
       containers:
       - name: tilerator
         image: jbunss/tilerator:nowait
