@@ -2,7 +2,7 @@
 set -e
 
 # wait for cassandra to be up
-/usr/local/bin/cassandra.wait
+#/usr/local/bin/cassandra.wait
 
 # wait for the database to be loaded
 while true; do

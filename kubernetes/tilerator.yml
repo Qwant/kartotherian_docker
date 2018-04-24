@@ -1,0 +1,41 @@
+apiVersion: v1
+kind: ReplicationController
+metadata:
+  name: tilerator
+spec:
+  replicas: 1
+  selector:
+    app: tilerator
+  template:
+    metadata:
+      labels:
+        app: tilerator
+    spec:
+      initContainers:
+      - name: cassandra-ready
+        image: cassandra:latest
+        ports:
+        - containerPort: 9042
+        command: ["/bin/sh"]
+        args: ["-c","while ! cqlsh -e 'describe cluster' cassandra 9042; do echo '$(date) - cassandra not ready yet, sleeping' sleep 1; done"]
+      containers:
+      - name: tilerator
+        image: jbunss/tilerator:nowait
+        env:
+          - name: NODE_PATH
+            value: "/opt/tilerator/node_modules"
+          - name: TILERATOR_PORT
+            value: "16354"
+        ports:
+        - containerPort: 16534
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: tilerator
+spec:
+  ports:
+    - port: 16534
+      targetPort: 16534
+  selector:
+      app: tilerator
