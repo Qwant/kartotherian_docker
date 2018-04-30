@@ -56,7 +56,7 @@ RUN ln -s ${MAIN_DIR}/config/external_dependencies/import-sql/language.sql ${SQL
 RUN ln -s ${MAIN_DIR}/config/external_dependencies/postgis-vt-util/postgis-vt-util.sql ${SQL_DIR}/
 
 RUN cd ${MAIN_DIR}/config/import_data \
-    && pipenv install
+    && pipenv install --system --deploy
 
 # needed for sql script, else the BOM in the file makes the query impossible
 RUN locale-gen en_US.UTF-8  
