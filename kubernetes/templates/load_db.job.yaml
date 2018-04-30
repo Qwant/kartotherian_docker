@@ -1,0 +1,76 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  # Note: the job has no helm hook so it's not part of the release (but it's run at each install/upgrade)
+  name: initial-import-{{ .Release.Name }}
+spec:
+  template:
+    spec:
+      nodeSelector:
+        # This job needs to run on a specific node that
+        # will persist imposm 'cache' and 'diff' folders,
+        # and on which osm_update is defined as a cron job.
+        maps-pg-importer: "true"
+      restartPolicy: Never
+      initContainers:
+      - name: import-pbf-download
+        image: alpine
+        command:
+          - "bin/sh"
+          - "-xc"
+        args:
+          - >
+            osm_file=/data/osm.pbf;
+            pbf_url="{{ .Values.load_db.pbf_url }}";
+
+            if [ ! -z "$pbf_url" ]; then
+              echo "Downloading .pbf $pbf_url";
+              if [ "{{ .Values.load_db.override_pbf }}" = true ] ; then
+                echo 'removing all pbf in directory';
+                rm -f $osm_file;
+              fi
+              wget $pbf_url -O /data/osm.pbf;
+            else
+              echo "No .pbf to download";
+            fi
+        volumeMounts:
+          - name: data
+            mountPath: /data
+      containers:
+      - name: import-load-db-container
+        image: amatissart/kartotherian_load_db:0.0.4
+        command:
+          - "bin/sh"
+          - "-xc"
+        env:
+        - name: INVOKE_PG_HOST
+          value: '{{ template "postgresql.fullname" . }}'
+        - name: INVOKE_PG_PASSWORD
+          value: '{{ .Values.postgresql.postgresPassword }}' # TODO use secrets
+        - name: INVOKE_PG_USER
+          value: '{{ .Values.postgresql.postgresUser }}'
+        - name: INVOKE_PG_DATABASE
+          value: '{{ .Values.postgresql.postgresDatabase }}'
+        - name: PGPASSWORD
+          value: '{{ .Values.postgresql.postgresPassword }}'
+        - name: INVOKE_DATA_DIR
+          value: '/data'
+        - name: INVOKE_OSM_FILE
+          value: '/data/osm.pbf'
+        args: # we manually create a wikidata table because for the moment we do not import the wikidata db and we need it
+          - > 
+            cd /srv/import_data/config/import_data &&
+            psql -Xq -h $INVOKE_PG_HOST -U $INVOKE_PG_USER -d $INVOKE_PG_DATABASE --set ON_ERROR_STOP='1' -c "CREATE TABLE IF NOT EXISTS wd_names (id varchar(20) UNIQUE, page varchar(200) UNIQUE, labels hstore);" &&
+            pipenv run invoke
+        volumeMounts:
+          - name: data
+            mountPath: /data
+          - name: imposm-dir
+            mountPath: /srv/import_data/imposm
+      volumes:
+      - name: data
+        hostPath:
+          path: /data
+      - name: imposm-dir
+        hostPath:
+          path: /srv/import_data/imposm
