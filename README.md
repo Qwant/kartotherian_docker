@@ -6,7 +6,7 @@ They use a mixed architecture of Kartotherian and [openmaptiles](https://github.
 
 ## "Quick" Start
 
-Use these commmands to download, import data and create tiles jobs for Luxembourg:
+Use these commmands to download, import data and create tiles jobs for Luxembourg (pbf and area defined in `load_db/import_data.sh`):
 
 (Optional) First, delete all related containers and volumes (from an older import):
 ```bash
@@ -14,11 +14,8 @@ docker-compose down -v
 ```
 Download, import and start the tiles generation:
 ```bash
-wget https://download.geofabrik.de/europe/luxembourg-latest.osm.pbf -P data/
 docker-compose up --build -d
 docker-compose exec load_db /srv/import_data/import_data.sh
-curl -XPOST "http://localhost:16534/add?generatorId=substbasemap&storageId=basemap&zoom=7&x=66&y=43&fromZoom=0&beforeZoom=15&keepJob=true&parts=8&deleteEmpty=true"
-curl -XPOST "http://localhost:16534/add?generatorId=gen_poi&storageId=poi&zoom=7&x=66&y=43&fromZoom=14&beforeZoom=15&keepJob=true&parts=8&deleteEmpty=true"
 ```
 
 Once all tiles are generated, the map is visible on http://localhost:8585 !
