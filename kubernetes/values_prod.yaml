@@ -2,5 +2,7 @@
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
+namespace: qmap
+
 load_db:
   pbf_url: http://download.geofabrik.de/europe/monaco-latest.osm.pbf

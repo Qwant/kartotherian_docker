@@ -28,7 +28,13 @@ All is described in the [documentation](https://docs.helm.sh/using_helm/#install
 
 ```bash
 curl https://raw.githubusercontent.com/kubernetes/helm/master/scripts/get | bash
-& helm init
+helm init
+```
+
+Since we'll need some incubator charts, we need to add the repository:
+
+```bash
+helm repo add incubator https://kubernetes-charts-incubator.storage.googleapis.com/
 ```
 
 **5.**

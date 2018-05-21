@@ -2,5 +2,11 @@ dependencies:
 - name: postgresql
   repository: https://kubernetes-charts.storage.googleapis.com/
   version: 0.10.0
-digest: sha256:ceaf17cc64648f1c3a9c29f0542b15d2b409182887c555f83b81ae9e14a2bf9c
-generated: 2018-04-20T16:21:58.286153566+02:00
+- name: cassandra
+  repository: https://kubernetes-charts-incubator.storage.googleapis.com/
+  version: 0.2.6
+- name: redis
+  repository: https://kubernetes-charts.storage.googleapis.com/
+  version: 3.0.2
+digest: sha256:b439c758134ea1fc80da5072145e2b7d0728510f369a715045ab578744d3be95
+generated: 2018-04-24T17:43:59.321342988+02:00

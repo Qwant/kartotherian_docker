@@ -6,7 +6,7 @@ osm_file='${DATA_DIR}/*.pbf'
 
 user='gis'
 database='gis'
-host='postgres'
+host='${PG_HOST:-postgres}'
 
 echo 'importing osm data in postgres'
 mkdir -p ${MAIN_DIR}/imposm
@@ -17,7 +17,7 @@ psql -Xq -h $host -U $user -d $database --set ON_ERROR_STOP="1" -c "CREATE TABLE
 
 cd $MAIN_DIR/config/import_data
 # run the python script that loads all the data
-INVOKE_DATA_DIR=$DATA_DIR INVOKE_OSM_FILE=$osm_file pipenv run invoke
+INVOKE_PG_HOST=$host INVOKE_DATA_DIR=$DATA_DIR INVOKE_OSM_FILE=$osm_file pipenv run invoke
 
 # we tell redis that the import is finished so tilerator can start
 if [ "$REDIS_SET_KEY" = "true" ]; then
