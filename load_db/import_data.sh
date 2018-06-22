@@ -13,7 +13,6 @@ mkdir -p ${MAIN_DIR}/imposm
 
 # if there is a backup schema imposm cannot delete the tables in to (with the -deployproduction, so we delete them to be able to reload the data several times
 psql -Xq -h $host -U $user -d $database --set ON_ERROR_STOP="1" -c "drop schema if exists backup cascade;"
-psql -Xq -h $host -U $user -d $database --set ON_ERROR_STOP="1" -c "CREATE TABLE IF NOT EXISTS wd_names (id          varchar(20) UNIQUE, page          varchar(200) UNIQUE,    labels      hstore);"
 
 cd $MAIN_DIR/config/import_data
 # run the python script that loads all the data
