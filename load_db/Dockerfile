@@ -32,9 +32,6 @@ RUN apt update && \
     && wget -O /usr/local/bin/pgfutter https://github.com/lukasmartinelli/pgfutter/releases/download/v1.1/pgfutter_linux_amd64 \
     && chmod +x /usr/local/bin/pgfutter \
     && mkdir -p ${SQL_DIR} \
-    && git clone --depth=1 https://github.com/openmaptiles/mapnik-german-l10n.git \
-    && mv mapnik-german-l10n/plpgsql/* ${SQL_DIR}/ \
-    && rm -rf mapnik-german-l10n \
     && pip install pipenv
 
 COPY import_data.sh ${MAIN_DIR}/import_data.sh
