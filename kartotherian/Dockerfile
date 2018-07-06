@@ -12,7 +12,7 @@ RUN apt update && \
              liblua5.2-dev \
              libgeos++-dev \
              osmctools \
-             nmap \
+             netcat \
              net-tools \
              libcairo2-dev libjpeg8-dev libpango1.0-dev libgif-dev build-essential g++ \
              postgis && \
