@@ -4,9 +4,11 @@ CASSANDRA_SERVER=cassandra
 CASSANDRA_PORT=9042
 
 for i in `seq 1 100`; do
-    if [[ "$(nmap -p $CASSANDRA_PORT $CASSANDRA_SERVER | grep tcp | cut -d' ' -f 2)" == "open" ]]; then
+    nc -vz $CASSANDRA_SERVER $CASSANDRA_PORT
+    if [[ "$?" == "0" ]]; then
         exit 0
     fi
     sleep 1
 done
+
 exit 1
