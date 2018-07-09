@@ -13,6 +13,7 @@ RUN apt update && \
              libgeos++-dev \
              osmctools \
              nmap \
+             netcat \
              postgis \
              redis-tools \
     && curl -sL https://deb.nodesource.com/setup_6.x | bash - \
