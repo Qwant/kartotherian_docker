@@ -1,0 +1,8 @@
+version: '3'
+
+volumes:
+  input_data:
+    driver_opts:
+      type: none
+      device: ${PWD}/data
+      o: bind
