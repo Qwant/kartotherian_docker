@@ -5,6 +5,7 @@ it is based on the [openmaptiles](https://github.com/openmaptiles) architecture 
 Those data should be loaded in a database with the extension `postgis`, `hstore`, and `osml10n`.
 
 ## data sources
+
 Many data sources are used:
 
 * a .pbf file containing osm data
@@ -13,4 +14,4 @@ Many data sources are used:
 * some [precise lake borders](https://github.com/lukasmartinelli/osm-lakelines/releases/download/v0.9/lake_centerline.geojson)
 * some borders (in .csv), either computed from the osm .pbf file, or a [precomputed file](https://github.com/openmaptiles/import-osmborder/releases/download/v0.1/osmborder_lines.csv). The generation/import of a generated file can be found [here](https://github.com/openmaptiles/import-osmborder)
 
-Because of the size of the data, they are downloaded only if not present in the shared `data/` directory.
+Because of the size of the data, they are downloaded only if not present in the directory.
