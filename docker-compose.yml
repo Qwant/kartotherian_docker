@@ -25,17 +25,29 @@ services:
     image: redis:latest
     command: redis-server --appendonly yes # to enable persistence
     volumes:
-    - "redisdata:/data"
+      - "redisdata:/data"
 
   load_db:
-    build: ./load_db
+    build:
+      context: ./load_db
+      dockerfile: Dockerfile-initial
     volumes:
-    - input_data:/data/input
-    - imposm_generated_data:/data/generated
-    - update_tiles_data:/data/update_tiles_data
+      - input_data:/data/input
+      - imposm_generated_data:/data/generated
+      - update_tiles_data:/data/update_tiles_data
     depends_on:
       - postgres
       - redis  # used to tell tilerator the db is loaded
+
+  update:
+    build:
+      context: ./load_db
+      dockerfile: Dockerfile-update
+    environment:
+      - OSMOSIS_WORKING_DIR=/data/update_tiles_data
+    volumes:
+      - imposm_generated_data:/data/imposm
+      - update_tiles_data:/data/update_tiles_data
 
   kartotherian:
     build: ./kartotherian

@@ -1,0 +1,23 @@
+FROM debian:stretch
+
+ENV MAIN_DIR=/srv/osm_update
+ENV DATA_DIR=/data
+
+ENV PG_CONNECTION_STRING="postgis://gis@postgres/gis"
+
+COPY init_imposm.sh /
+RUN chmod +x /init_imposm.sh
+RUN /init_imposm.sh
+
+RUN apt-get install -y osmosis
+
+RUN git clone https://github.com/QwantResearch/kartotherian_config.git ${MAIN_DIR}/config
+
+RUN cd ${MAIN_DIR}/config && \
+	git checkout ae4dd64 && git submodule update --init
+
+WORKDIR ${MAIN_DIR}/config/update
+
+RUN chmod +x osm_update.sh
+
+ENTRYPOINT ["./osm_update.sh"]
