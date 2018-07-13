@@ -16,7 +16,7 @@ Download, import and start the tiles generation:
 ```bash
 wget https://download.geofabrik.de/europe/luxembourg-latest.osm.pbf -P data/
 docker-compose up --build -d
-docker-compose exec load_db /srv/import_data/import_data.sh
+docker-compose run --rm load_db
 curl -XPOST "http://localhost:16534/add?generatorId=substbasemap&storageId=basemap&zoom=7&x=66&y=43&fromZoom=0&beforeZoom=15&keepJob=true&parts=8&deleteEmpty=true"
 curl -XPOST "http://localhost:16534/add?generatorId=gen_poi&storageId=poi&zoom=7&x=66&y=43&fromZoom=14&beforeZoom=15&keepJob=true&parts=8&deleteEmpty=true"
 ```
