@@ -26,9 +26,9 @@ RUN apt update && \
     && curl -sL https://deb.nodesource.com/setup_6.x | bash - \
     && apt-get install -y nodejs \
     # install imposm
-    && wget https://imposm.org/static/rel/imposm3-0.4.0dev-20170519-3f00374-linux-x86-64.tar.gz && \
-    tar xvfz imposm3-0.4.0dev-20170519-3f00374-linux-x86-64.tar.gz && \
-    ln -sf /imposm3-0.4.0dev-20170519-3f00374-linux-x86-64/imposm3 /usr/local/bin/imposm3 \
+    && wget https://github.com/omniscale/imposm3/releases/download/v0.6.0-alpha.4/imposm-0.6.0-alpha.4-linux-x86-64.tar.gz \
+    && tar xvfz imposm-0.6.0-alpha.4-linux-x86-64.tar.gz \
+    && ln -sf /imposm-0.6.0-alpha.4-linux-x86-64/imposm3 /usr/local/bin/imposm3 \
     && wget -O /usr/local/bin/pgfutter https://github.com/lukasmartinelli/pgfutter/releases/download/v1.1/pgfutter_linux_amd64 \
     && chmod +x /usr/local/bin/pgfutter \
     && mkdir -p ${SQL_DIR} \
