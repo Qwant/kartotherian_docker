@@ -2,15 +2,12 @@ version: '3'
 
 services:
   postgres:
-    # build: ./postgis
     image: openmaptiles/postgis
     volumes:
       - "pgdata:/var/lib/postgresql/data"
     environment:
      - POSTGRES_DB=gis
      - POSTGRES_USER=gis
-    ports:
-     - "12345:5432"
 
   cassandra:
     image: cassandra:latest
@@ -19,15 +16,10 @@ services:
 
   tilerator:
     build: ./tilerator
-    environment:
-      - NODE_PATH='/opt/tilerator/node_modules'
-      - TILERATOR_PORT=16354
     depends_on:
       - cassandra
       - load_db
       - redis
-    ports:
-      - "16534:16534"
 
   redis:
     image: redis:latest
@@ -47,18 +39,8 @@ services:
 
   kartotherian:
     build: ./kartotherian
-    environment:
-      - NODE_PATH='/opt/kartotherian/node_modules'
-      - KARTOTHERIAN_PORT=6533
     depends_on:
       - tilerator
-    ports:
-      - "6533:6533"
-
-  tileview:
-    build: ./tileview
-    ports:
-      - 8585:80
 
 volumes:
   pgdata:

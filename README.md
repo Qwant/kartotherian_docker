@@ -4,21 +4,21 @@ docker images for the [kartotherian project](https://github.com/kartotherian/kar
 They use a mixed architecture of Kartotherian and [openmaptiles](https://github.com/openmaptiles/openmaptiles)
 
 
-## "Quick" Start
+## "Quick" Start for local testing
 
 Use these commmands to download, import data and create tiles jobs for Luxembourg:
 
 (Optional) First, delete all related containers and volumes (from an older import):
 
 ```bash
-docker-compose down -v
+docker-compose -f docker-compose.yml -f local-compose.yml down -v
 ```
 
 Download, import and start the tiles generation:
 
 ```bash
-docker-compose up --build -d
-docker-compose run --rm -e INVOKE_OSM_URL=https://download.geofabrik.de/europe/luxembourg-latest.osm.pbf load_db
+docker-compose -f docker-compose.yml -f local-compose.yml up --build -d
+docker-compose -f docker-compose.yml -f local-compose.yml run --rm -e INVOKE_OSM_URL=https://download.geofabrik.de/europe/luxembourg-latest.osm.pbf load_db
 
 curl -XPOST "http://localhost:16534/add?generatorId=substbasemap&storageId=basemap&zoom=7&x=66&y=43&fromZoom=0&beforeZoom=15&keepJob=true&parts=8&deleteEmpty=true"
 curl -XPOST "http://localhost:16534/add?generatorId=gen_poi&storageId=poi&zoom=7&x=66&y=43&fromZoom=14&beforeZoom=15&keepJob=true&parts=8&deleteEmpty=true"
@@ -53,7 +53,9 @@ To use a locally mounted volume add the `local-compose.yml` with the `-f` docker
 
 If you want to use a specific osm file, you can set `INVOKE_OSM_FILE` instead of `INVOKE_OSM_URL`.
 
-For example if you want to use a locally `./data` mounted volume with a `luxembourg-latest.osm.pbf` in it:
+For an easier dev experience, you can use the docker-compose additional file `local-compose.yml` that forward ports, use a locally `./data` mounted volume (to avoid some unnecessary download) and run a front end to view the tiles.
+
+For example with this setup you can also provide an already downloaded pbf (it needs to be in the `./data` volume) with `INVOKE_OSM_FILE`:
 
 ```bash
 docker-compose -f docker-compose.yml -f local-compose.yml up --build -d

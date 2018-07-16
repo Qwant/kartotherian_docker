@@ -1,5 +1,8 @@
 FROM ubuntu:16.04
 
+ENV NODE_PATH='/opt/kartotherian/node_modules' \
+    KARTOTHERIAN_PORT=6533
+
 RUN apt update && \
     apt install -y \
              git \

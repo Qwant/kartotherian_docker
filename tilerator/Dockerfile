@@ -1,5 +1,8 @@
 FROM ubuntu:16.04
 
+ENV NODE_PATH='/opt/tilerator/node_modules' \
+    TILERATOR_PORT=16354
+
 RUN apt update && \
     apt install -y \
              git \

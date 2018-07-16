@@ -1,5 +1,27 @@
 version: '3'
 
+services:
+
+  tilerator:
+    ports:
+      - "16534:16534"  # for the moment we need tilerator port, but we'll be able to remove this when the tilegen will be handle by the python script
+
+  kartotherian:
+    ports:
+      - "6533:6533"
+
+  erdapfel:
+    image: qwantresearch/erdapfel
+
+    environment:
+      - TILEVIEW_PORT=3000
+      - TILEVIEW_system_baseUrl=/
+      - TILEVIEW_store_name=local_store
+      - TILEVIEW_mapStyle_baseMapUrl=["http://localhost:6533/ozbasemap/{z}/{x}/{y}.pbf"]
+      - TILEVIEW_mapStyle_poiMapUrl=["http://localhost:6533/ozpoi/{z}/{x}/{y}.pbf"]
+    ports:
+      - "8585:3000"
+
 volumes:
   input_data:
     driver_opts:

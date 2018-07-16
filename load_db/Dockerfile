@@ -52,6 +52,7 @@ RUN ln -s ${MAIN_DIR}/config/external_dependencies/postgis-vt-util/postgis-vt-ut
 WORKDIR ${MAIN_DIR}/config/import_data
 
 COPY import_data.sh ./import_data.sh
+COPY config.yml ./config.yml
 RUN chmod +x ./import_data.sh
 
 RUN pipenv install --system --deploy
