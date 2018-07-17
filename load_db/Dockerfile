@@ -34,10 +34,9 @@ RUN apt update && \
     && mkdir -p ${SQL_DIR} \
     && pip install pipenv
 
-# Prevent Caching
-# According to: https://stackoverflow.com/questions/36996046/how-to-prevent-dockerfile-caching-git-clone
-ADD https://api.github.com/repos/QwantResearch/kartotherian_config/git/refs/heads/master version.json
-RUN git clone -b master https://github.com/QwantResearch/kartotherian_config.git ${MAIN_DIR}/config
+RUN git clone https://github.com/QwantResearch/kartotherian_config.git ${MAIN_DIR}/config \
+    && cd ${MAIN_DIR}/config \
+    && git checkout 8bc03376c2
 RUN cd ${MAIN_DIR}/config && git submodule update --init
 RUN ln -s ${MAIN_DIR}/config/imposm/generated_mapping_base.yaml ${MAIN_DIR}/generated_mapping_base.yaml
 RUN ln -s ${MAIN_DIR}/config/imposm/generated_mapping_poi.yaml ${MAIN_DIR}/generated_mapping_poi.yaml

@@ -22,12 +22,15 @@ RUN apt update && \
     && curl -sL https://deb.nodesource.com/setup_6.x | bash - \
     && apt-get install -y nodejs
 
+# Prevent Caching
+# According to: https://stackoverflow.com/questions/36996046/how-to-prevent-dockerfile-caching-git-clone
 ADD https://api.github.com/repos/QwantResearch/tilerator/git/refs/heads/master tilerator_version.json
 RUN git clone -b master https://github.com/QwantResearch/tilerator.git /opt/tilerator \
     && cd /opt/tilerator && npm install --production && npm dedupe
 
-ADD https://api.github.com/repos/QwantResearch/kartotherian_config/git/refs/heads/master config_version.json
-RUN git clone -b master https://github.com/QwantResearch/kartotherian_config.git /opt/kartotherian_config
+RUN git clone https://github.com/QwantResearch/kartotherian_config.git /opt/kartotherian_config \
+    && cd /opt/kartotherian_config \
+    && git checkout 8bc03376c2
 
 COPY variables.yaml /opt/tilerator
 COPY config.yaml /opt/tilerator

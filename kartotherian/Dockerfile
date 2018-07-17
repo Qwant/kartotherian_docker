@@ -25,12 +25,11 @@ RUN apt update && \
 # Prevent Caching
 # According to: https://stackoverflow.com/questions/36996046/how-to-prevent-dockerfile-caching-git-clone
 ADD https://api.github.com/repos/QwantResearch/kartotherian/git/refs/heads/master version.json
-RUN git clone https://github.com/QwantResearch/kartotherian.git /opt/kartotherian
-ADD https://api.github.com/repos/QwantResearch/kartotherian_config/git/refs/heads/master version.json
-RUN git clone https://github.com/QwantResearch/kartotherian_config.git /opt/kartotherian_config
-
-
-RUN cd /opt/kartotherian && npm install --production && npm dedupe
+RUN git clone https://github.com/QwantResearch/kartotherian.git /opt/kartotherian \
+    && git clone https://github.com/QwantResearch/kartotherian_config.git /opt/kartotherian_config \
+    && cd /opt/kartotherian_config \
+    && git checkout 8bc03376c2 \
+    && cd /opt/kartotherian && npm install --production && npm dedupe
 
 # .xml style is overridden to use system fonts (DejaVu instead of Arial)
 COPY omt_osm_bright.xml /opt/kartotherian/node_modules/\@mapbox/mapbox-studio-osm-bright/project.xml
@@ -40,10 +39,10 @@ COPY config.yaml /opt/kartotherian
 
 RUN chmod 600 /opt/kartotherian/variables.yaml
 
-RUN mkdir -p /etc/kartotherian
-RUN ln -sf /opt/kartotherian/config.yaml /etc/kartotherian
-RUN ln -sf /opt/kartotherian/variables.yaml /etc/kartotherian
-RUN ln -sf /opt/kartotherian_config/kartotherian/sources.yaml /etc/kartotherian
+RUN mkdir -p /etc/kartotherian\
+    && ln -sf /opt/kartotherian/config.yaml /etc/kartotherian\
+    && ln -sf /opt/kartotherian/variables.yaml /etc/kartotherian\
+    && ln -sf /opt/kartotherian_config/kartotherian/sources.yaml /etc/kartotherian
 
 COPY cassandra.wait .
 RUN chmod +x cassandra.wait
