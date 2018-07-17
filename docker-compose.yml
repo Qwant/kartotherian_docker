@@ -32,7 +32,7 @@ services:
     volumes:
     - input_data:/data/input
     - imposm_generated_data:/data/generated
-    - expired_tiles:/data/expired_tiles
+    - update_tiles_data:/data/update_tiles_data
     depends_on:
       - postgres
       - redis  # used to tell tilerator the db is loaded
@@ -48,5 +48,5 @@ volumes:
   redisdata:
   input_data:
   imposm_generated_data:
-  expired_tiles:
+  update_tiles_data:
 

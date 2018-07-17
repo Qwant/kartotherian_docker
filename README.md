@@ -62,7 +62,7 @@ docker-compose -f docker-compose.yml -f local-compose.yml up --build -d
 docker-compose -f docker-compose.yml -f local-compose.yml run --rm -e INVOKE_OSM_FILE=/data/input/luxembourg-latest.osm.pbf load_db
 ```
 
-Note: even if the local directoy in `./data` the osm file path is "/data/**input**/ because it's the directory path inside the container.
+Note: even if the local directoy in `./data` the osm file path is "/data/**input**/" because it's the directory path inside the container.
 
 ### Tiles generation
 

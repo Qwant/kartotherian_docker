@@ -2,7 +2,7 @@
 set -e
 set -x
 
-optional_invoke_args=$1
+optional_invoke_args=$@
 
 # run the python script that loads all the data
 invoke -f config.yml $optional_invoke_args
