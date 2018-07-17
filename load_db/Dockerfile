@@ -34,13 +34,9 @@ RUN apt update && \
     && mkdir -p ${SQL_DIR} \
     && pip install pipenv
 
-COPY import_data.sh ${MAIN_DIR}/import_data.sh
-RUN chmod +x ${MAIN_DIR}/import_data.sh
-
-# Prevent Caching
-# According to: https://stackoverflow.com/questions/36996046/how-to-prevent-dockerfile-caching-git-clone
-ADD https://api.github.com/repos/QwantResearch/kartotherian_config/git/refs/heads/master version.json
-RUN git clone -b master https://github.com/QwantResearch/kartotherian_config.git ${MAIN_DIR}/config
+RUN git clone https://github.com/QwantResearch/kartotherian_config.git ${MAIN_DIR}/config \
+    && cd ${MAIN_DIR}/config \
+    && git checkout 8bc03376c2
 RUN cd ${MAIN_DIR}/config && git submodule update --init
 RUN ln -s ${MAIN_DIR}/config/imposm/generated_mapping_base.yaml ${MAIN_DIR}/generated_mapping_base.yaml
 RUN ln -s ${MAIN_DIR}/config/imposm/generated_mapping_poi.yaml ${MAIN_DIR}/generated_mapping_poi.yaml
@@ -54,7 +50,11 @@ RUN ln -s ${MAIN_DIR}/config/external_dependencies/postgis-vt-util/postgis-vt-ut
 
 WORKDIR ${MAIN_DIR}/config/import_data
 
-RUN pipenv install
+COPY import_data.sh ./import_data.sh
+COPY config.yml ./config.yml
+RUN chmod +x ./import_data.sh
+
+RUN pipenv install --system --deploy
 
 # needed for sql script, else the BOM in the file makes the query impossible
 RUN locale-gen en_US.UTF-8  
@@ -62,4 +62,4 @@ ENV LANG C.UTF-8
 ENV LANGUAGE en_US:en  
 ENV LC_ALL C.UTF-8
 
-CMD ["sleep", "infinity"]
+ENTRYPOINT ["./import_data.sh"]

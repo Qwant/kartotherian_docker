@@ -1,31 +1,25 @@
 version: '3'
+
 services:
   postgres:
-    # build: ./postgis
     image: openmaptiles/postgis
     volumes:
       - "pgdata:/var/lib/postgresql/data"
     environment:
      - POSTGRES_DB=gis
      - POSTGRES_USER=gis
-    ports:
-     - "12345:5432"
 
   cassandra:
     image: cassandra:latest
     volumes:
-     - "csdata:/var/lib/cassandra"
+     - "cassandra_data:/var/lib/cassandra"
+
   tilerator:
     build: ./tilerator
-    environment:
-      - NODE_PATH='/opt/tilerator/node_modules'
-      - TILERATOR_PORT=16354
     depends_on:
       - cassandra
       - load_db
       - redis
-    ports:
-      - "16534:16534"
 
   redis:
     image: redis:latest
@@ -36,25 +30,23 @@ services:
   load_db:
     build: ./load_db
     volumes:
-    - ./data:/data
+    - input_data:/data/input
+    - imposm_generated_data:/data/generated
+    - update_tiles_data:/data/update_tiles_data
     depends_on:
       - postgres
       - redis  # used to tell tilerator the db is loaded
+
   kartotherian:
     build: ./kartotherian
-    environment:
-      - NODE_PATH='/opt/kartotherian/node_modules'
-      - KARTOTHERIAN_PORT=6533
     depends_on:
       - tilerator
-    ports:
-      - "6533:6533"
-  tileview:
-    build: ./tileview
-    ports:
-      - 8585:80
 
 volumes:
   pgdata:
-  csdata:
+  cassandra_data:
   redisdata:
+  input_data:
+  imposm_generated_data:
+  update_tiles_data:
+
