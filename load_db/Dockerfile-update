@@ -9,7 +9,7 @@ COPY init_imposm.sh /
 RUN chmod +x /init_imposm.sh
 RUN /init_imposm.sh
 
-RUN apt-get install -y osmosis
+RUN apt-get install -y osmosis jq
 
 RUN git clone https://github.com/QwantResearch/kartotherian_config.git ${MAIN_DIR}/config
 
@@ -17,6 +17,8 @@ RUN cd ${MAIN_DIR}/config && \
 	git checkout ae4dd64 && git submodule update --init
 
 WORKDIR ${MAIN_DIR}/config/update
+
+RUN ln -s ${MAIN_DIR}/config/imposm /etc/imposm
 
 RUN chmod +x osm_update.sh
 
