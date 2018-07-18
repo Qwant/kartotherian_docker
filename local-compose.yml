@@ -4,7 +4,7 @@ services:
 
   tilerator:
     ports:
-      - "16534:16534"  # for the moment we need tilerator port, but we'll be able to remove this when the tilegen will be handle by the python script
+      - "16534:80"
 
   kartotherian:
     ports:
