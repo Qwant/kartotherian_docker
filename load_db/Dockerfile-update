@@ -11,10 +11,11 @@ RUN /init_imposm.sh
 
 RUN apt-get install -y osmosis jq
 
-RUN git clone https://github.com/QwantResearch/kartotherian_config.git ${MAIN_DIR}/config
 
-RUN cd ${MAIN_DIR}/config && \
-	git checkout ae4dd64 && git submodule update --init
+RUN git clone https://github.com/QwantResearch/kartotherian_config.git ${MAIN_DIR}/config \
+	&& cd ${MAIN_DIR}/config \
+	&& git checkout ae4dd64 \
+	&& git submodule update --init
 
 WORKDIR ${MAIN_DIR}/config/update
 

@@ -70,6 +70,20 @@ The different ways to configure the tiles generation can be seen [in the default
 
 If you have forwarded the port, you can check the tile generation at `http://localhost:16534/jobs` and check a vector tile based map on `http://localhost:8585`
 
+
+### Updating tiles
+
+During the initial creation of the PG database, state and configuration files is initialized in the `update_tiles_data` volume from the .pbf metadata.
+To launch the tiles update, run the `update` container (defined in "update-compose.yml"):
+
+`docker-compose -f docker-compose.yml -f update-compose.yml run --rm update`
+
+With this script:
+ * osmosis will fetch latest changes from openstreetmap.org
+ * imposm will apply these changes in the pg databse, and write a file with expired tiles
+ * tilerator jobs will be created to generate new tiles
+
+
 ## archi
 
 The tile server architecture can be seen at [QwantMaps](https://github.com/QwantResearch/qwantmaps#global-picture)
