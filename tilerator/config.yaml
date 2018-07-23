@@ -32,7 +32,7 @@ services:
     # version: ^0.4.0
     # per-service config
     conf:
-      port: 16534
+      port: 80
 
       # restrict to localhost access only
       # interface: '*'

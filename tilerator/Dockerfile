@@ -1,7 +1,7 @@
 FROM ubuntu:16.04
 
 ENV NODE_PATH='/opt/tilerator/node_modules' \
-    TILERATOR_PORT=16354
+    TILERATOR_PORT=80
 
 RUN apt update && \
     apt install -y \
@@ -30,7 +30,7 @@ RUN git clone -b master https://github.com/QwantResearch/tilerator.git /opt/tile
 
 RUN git clone https://github.com/QwantResearch/kartotherian_config.git /opt/kartotherian_config \
     && cd /opt/kartotherian_config \
-    && git checkout 8bc03376c2
+    && git checkout 30bf6e8ce894
 
 COPY variables.yaml /opt/tilerator
 COPY config.yaml /opt/tilerator
