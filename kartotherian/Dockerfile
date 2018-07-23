@@ -28,7 +28,7 @@ ADD https://api.github.com/repos/QwantResearch/kartotherian/git/refs/heads/maste
 RUN git clone https://github.com/QwantResearch/kartotherian.git /opt/kartotherian \
     && git clone https://github.com/QwantResearch/kartotherian_config.git /opt/kartotherian_config \
     && cd /opt/kartotherian_config \
-    && git checkout 8bc03376c2 \
+    && git checkout 30bf6e8ce894 \
     && cd /opt/kartotherian && npm install --production && npm dedupe
 
 # .xml style is overridden to use system fonts (DejaVu instead of Arial)
