@@ -1,2 +1,3 @@
 generated_files_dir: /data/generated
 data_dir: /data/input
+update_tiles_dir: /data/update_tiles_data

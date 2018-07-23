@@ -30,9 +30,9 @@ services:
       - "redisdata:/data"
 
   load_db:
-    build:
-      context: ./load_db
-      dockerfile: Dockerfile-load-db
+    build: ./load_db
+    environment:
+      - INVOKE_CONFIG_FILE=config.yml
     volumes:
       - input_data:/data/input
       - imposm_generated_data:/data/generated

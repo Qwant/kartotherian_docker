@@ -15,7 +15,10 @@ apt-get update && apt-get install -y \
     nmap \
     sqlite3 \
     gdal-bin \
-    postgis
+    postgis \
+    osmosis \
+    jq \
+    redis-tools
 
 # install imposm
 wget https://github.com/omniscale/imposm3/releases/download/v0.6.0-alpha.4/imposm-0.6.0-alpha.4-linux-x86-64.tar.gz \

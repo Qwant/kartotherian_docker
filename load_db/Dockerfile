@@ -11,8 +11,6 @@ COPY init_imposm.sh /
 RUN chmod +x /init_imposm.sh
 RUN /init_imposm.sh
 
-RUN apt-get install -y redis-tools
-
 RUN mkdir -p ${SQL_DIR} \
     && pip install pipenv
 
@@ -36,6 +34,7 @@ WORKDIR ${MAIN_DIR}/config/import_data
 COPY import_data.sh ./import_data.sh
 COPY config.yml ./config.yml
 RUN chmod +x ./import_data.sh
+RUN chmod +x ./osm_update.sh
 
 RUN pipenv install --system --deploy
 
