@@ -74,11 +74,11 @@ If you have forwarded the port, you can check the tile generation at `http://loc
 ### Updating tiles
 
 During the initial creation of the PG database, state and configuration files is initialized in the `update_tiles_data` volume from the .pbf metadata.
-To launch the tiles update, run the `update` container (defined in "update-compose.yml"):
+To launch the tiles update, run the `run_osm_update` task (defined in load_db tasks):
 
-`docker-compose -f docker-compose.yml -f update-compose.yml run --rm update`
+`docker-compose -f docker-compose.yml -f update-compose.yml run --rm load_db run-osm-update`
 
-With this script:
+During this task:
  * osmosis will fetch latest changes from openstreetmap.org
  * imposm will apply these changes in the pg databse, and write a file with expired tiles
  * tilerator jobs will be created to generate new tiles

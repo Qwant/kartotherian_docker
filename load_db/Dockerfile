@@ -9,9 +9,9 @@ ENV MAIN_DIR=/srv/import_data \
 
 COPY init_imposm.sh /
 RUN chmod +x /init_imposm.sh
-RUN /init_imposm.sh
 
-RUN mkdir -p ${SQL_DIR} \
+RUN /init_imposm.sh \
+    && mkdir -p ${SQL_DIR} \
     && pip install pipenv
 
 RUN git clone https://github.com/QwantResearch/kartotherian_config.git ${MAIN_DIR}/config \
