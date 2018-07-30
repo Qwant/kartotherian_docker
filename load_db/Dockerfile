@@ -7,16 +7,37 @@ ENV MAIN_DIR=/srv/import_data \
     REDIS_SET_KEY=true
 # nb: REDIS_SET_KEY is overriden in k8s configmap
 
-COPY init_imposm.sh /
-RUN chmod +x /init_imposm.sh
 
-RUN /init_imposm.sh \
+RUN apt-get update && \
+    apt-get install -y \
+        git \
+        unzip \
+        screen \
+        curl \
+        libpq-dev \
+        libproj-dev \
+        liblua5.2-dev \
+        libgeos++-dev \
+        osmctools \
+        nmap \
+        sqlite3 \
+        gdal-bin \
+        postgis \
+        osmosis \
+        jq \
+        redis-tools \
+# install imposm
+    && wget https://github.com/omniscale/imposm3/releases/download/v0.6.0-alpha.4/imposm-0.6.0-alpha.4-linux-x86-64.tar.gz \
+    && tar xvfz imposm-0.6.0-alpha.4-linux-x86-64.tar.gz \
+    && ln -sf /imposm-0.6.0-alpha.4-linux-x86-64/imposm3 /usr/local/bin/imposm3 \
+    && wget -O /usr/local/bin/pgfutter https://github.com/lukasmartinelli/pgfutter/releases/download/v1.1/pgfutter_linux_amd64 \
+    && chmod +x /usr/local/bin/pgfutter \
     && mkdir -p ${SQL_DIR} \
     && pip install pipenv
 
 RUN git clone https://github.com/QwantResearch/kartotherian_config.git ${MAIN_DIR}/config \
     && cd ${MAIN_DIR}/config \
-    && git checkout 30bf6e8ce894
+    && git checkout d0e82741a5
 
 RUN cd ${MAIN_DIR}/config && git submodule update --init
 RUN ln -s ${MAIN_DIR}/config/imposm/generated_mapping_base.yaml ${MAIN_DIR}/generated_mapping_base.yaml
