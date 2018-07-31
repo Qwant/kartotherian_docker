@@ -5,7 +5,8 @@ set -e
 CASSANDRA_SERVER=cassandra
 CASSANDRA_PORT=9042
 
-function wait_for_cassandra() {
+function wait_for_cassandra() {(
+    set +e
     for i in `seq 1 100`; do
         nc -vz $CASSANDRA_SERVER $CASSANDRA_PORT
         if [[ "$?" == "0" ]]; then
@@ -15,7 +16,7 @@ function wait_for_cassandra() {
     done
     # cassandra unreachable, exiting
     exit 1
-}
+)}
 
 wait_for_cassandra
 
