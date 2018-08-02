@@ -68,6 +68,12 @@ services:
       sources: /etc/tilerator/sources.yaml
       variables: /etc/tilerator/variables.yaml
 
+      modules:
+      - "@kartotherian/cassandra"
+      - "@kartotherian/overzoom"
+      - "@kartotherian/substantial"
+      - "@kartotherian/tilelive-tmsource"
+
       # If true, do not enable admin interface
       daemonOnly: false
 
