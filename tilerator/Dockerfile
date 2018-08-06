@@ -24,7 +24,7 @@ RUN apt update && \
 
 RUN git clone https://github.com/QwantResearch/tilerator.git /opt/tilerator \
     && cd /opt/tilerator \
-    && git checkout 0061c45d21 \
+    && git checkout 8778f755afda1ef08 \
     && npm install --production && npm dedupe
 
 RUN git clone https://github.com/QwantResearch/kartotherian_config.git /opt/kartotherian_config \
