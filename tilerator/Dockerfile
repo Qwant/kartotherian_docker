@@ -24,21 +24,21 @@ RUN apt update && \
 
 RUN git clone https://github.com/QwantResearch/tilerator.git /opt/tilerator \
     && cd /opt/tilerator \
-    && git checkout 0061c45d21 \
+    && git checkout 8778f755afda1ef08 \
     && npm install --production && npm dedupe
 
 RUN git clone https://github.com/QwantResearch/kartotherian_config.git /opt/kartotherian_config \
     && cd /opt/kartotherian_config \
-    && git checkout d0e82741a5
+    && git checkout 7d0fdd4
 
 COPY variables.yaml /opt/tilerator
 COPY config.yaml /opt/tilerator
 COPY gen_tiles.sh /gen_tiles.sh
 
 RUN mkdir -p /etc/tilerator
-RUN ln -sf /opt/kartotherian_config/tilerator/data_tm2source_base.xml /etc/tilerator
-RUN ln -sf /opt/kartotherian_config/tilerator/data_tm2source_poi.xml /etc/tilerator
-RUN ln -sf /opt/kartotherian_config/tilerator/data_tm2source_lite.xml /etc/tilerator
+RUN ln -sf /opt/kartotherian_config/tilerator/data_tm2source_base.yml /etc/tilerator
+RUN ln -sf /opt/kartotherian_config/tilerator/data_tm2source_poi.yml /etc/tilerator
+RUN ln -sf /opt/kartotherian_config/tilerator/data_tm2source_lite.yml /etc/tilerator
 
 RUN chmod +x /gen_tiles.sh \
     && chmod 600 /opt/tilerator/variables.yaml \

@@ -6,8 +6,3 @@ optional_invoke_args=$@
 
 # run the python script that loads all the data
 invoke -f $INVOKE_CONFIG_FILE $optional_invoke_args
-
-# we tell redis that the import is finished so tilerator can start
-if [ "$REDIS_SET_KEY" = "true" ]; then
-	redis-cli -h redis set 'data_imported' 'true'
-fi

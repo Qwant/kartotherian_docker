@@ -18,7 +18,7 @@ services:
     build: ./tilerator
     depends_on:
       - cassandra
-      - load_db
+      - postgres
       - redis
     volumes:
       - update_tiles_data:/data/update_tiles_data
@@ -39,12 +39,9 @@ services:
       - update_tiles_data:/data/update_tiles_data
     depends_on:
       - postgres
-      - redis  # used to tell tilerator the db is loaded
 
   kartotherian:
     build: ./kartotherian
-    depends_on:
-      - tilerator
 
 volumes:
   pgdata:
