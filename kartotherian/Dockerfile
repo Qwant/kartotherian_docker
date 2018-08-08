@@ -24,11 +24,11 @@ RUN apt update && \
 
 RUN git clone https://github.com/QwantResearch/kartotherian.git /opt/kartotherian \
     && cd /opt/kartotherian \
-    && git checkout 2f06667e59 \
+    && git checkout c4fc56843f \
     && npm install --production && npm dedupe \
     && git clone https://github.com/QwantResearch/kartotherian_config.git /opt/kartotherian_config \
     && cd /opt/kartotherian_config \
-    && git checkout d0e82741a5
+    && git checkout 7d58cabb76
 
 # .xml style is overridden to use system fonts (DejaVu instead of Arial)
 COPY omt_osm_bright.xml /opt/kartotherian/node_modules/\@mapbox/mapbox-studio-osm-bright/project.xml
@@ -43,7 +43,4 @@ RUN mkdir -p /etc/kartotherian\
     && ln -sf /opt/kartotherian/variables.yaml /etc/kartotherian\
     && ln -sf /opt/kartotherian_config/kartotherian/sources.yaml /etc/kartotherian
 
-COPY cassandra.wait .
-RUN chmod +x cassandra.wait
-
-CMD ./cassandra.wait && /usr/bin/nodejs /opt/kartotherian/server.js -c /etc/kartotherian/config.yaml
+CMD /usr/bin/nodejs /opt/kartotherian/server.js -c /etc/kartotherian/config.yaml
