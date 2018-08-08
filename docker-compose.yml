@@ -50,4 +50,3 @@ volumes:
   input_data:
   imposm_generated_data:
   update_tiles_data:
-

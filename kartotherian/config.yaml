@@ -15,11 +15,23 @@ services:
   - name: kartotherian
     module: ./app.js
 
-
     conf:
       port: 6533
+
       # Comment this out to allow connections from everywhere
       # interface: localhost
 
+      # Show the the X-Powered-By header (default: true)
+      expose_version: false
+
       variables: /etc/kartotherian/variables.yaml
       sources: /etc/kartotherian/sources.yaml
+      modules:
+        - "@kartotherian/cassandra"
+        - "@kartotherian/overzoom"
+
+      # Secondary request handlers
+      requestHandlers: []
+
+      # Allow to reload sources when calling a disabled source
+      reloadSourcesOnGetTile: true
