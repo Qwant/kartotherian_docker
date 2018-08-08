@@ -24,11 +24,11 @@ RUN apt update && \
 
 RUN git clone https://github.com/QwantResearch/kartotherian.git /opt/kartotherian \
     && cd /opt/kartotherian \
-    && git checkout noTile404 \
+    && git checkout c4fc56843f \
     && npm install --production && npm dedupe \
     && git clone https://github.com/QwantResearch/kartotherian_config.git /opt/kartotherian_config \
     && cd /opt/kartotherian_config \
-    && git checkout kartotherianReadOnly
+    && git checkout 7d58cabb76
 
 # .xml style is overridden to use system fonts (DejaVu instead of Arial)
 COPY omt_osm_bright.xml /opt/kartotherian/node_modules/\@mapbox/mapbox-studio-osm-bright/project.xml

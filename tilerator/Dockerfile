@@ -29,7 +29,7 @@ RUN git clone https://github.com/QwantResearch/tilerator.git /opt/tilerator \
 
 RUN git clone https://github.com/QwantResearch/kartotherian_config.git /opt/kartotherian_config \
     && cd /opt/kartotherian_config \
-    && git checkout 7d0fdd4
+    && git checkout 7d58cabb76
 
 COPY variables.yaml /opt/tilerator
 COPY config.yaml /opt/tilerator
