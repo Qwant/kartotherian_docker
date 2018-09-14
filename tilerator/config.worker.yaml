@@ -75,7 +75,7 @@ services:
       - "@kartotherian/tilelive-tmsource"
 
       # If true, do not enable admin interface
-      daemonOnly: false
+      daemonOnly: true
 
       # If true, runs this instance without processing tiles
       # This could be good for queue management
