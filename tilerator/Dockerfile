@@ -31,8 +31,8 @@ RUN git clone https://github.com/QwantResearch/kartotherian_config.git /opt/kart
     && cd /opt/kartotherian_config \
     && git checkout 738abe8c1060ef104be379087612b3a5b6348cfe
 
-COPY variables.yaml /opt/tilerator
-COPY config.yaml /opt/tilerator
+COPY variables.yaml /opt/tilerator/
+COPY config*.yaml /opt/tilerator/
 COPY gen_tiles.sh /gen_tiles.sh
 
 RUN mkdir -p /etc/tilerator
@@ -42,7 +42,7 @@ RUN ln -sf /opt/kartotherian_config/tilerator/data_tm2source_lite.yml /etc/tiler
 
 RUN chmod +x /gen_tiles.sh \
     && chmod 600 /opt/tilerator/variables.yaml \
-    && ln -sf /opt/tilerator/config.yaml /etc/tilerator \
+    && ln -sf /opt/tilerator/config*.yaml /etc/tilerator \
     && ln -sf /opt/tilerator/variables.yaml /etc/tilerator \
     && ln -sf /opt/kartotherian_config/tilerator/sources.yaml /etc/tilerator \
     && ln -sf /opt/tilerator/dist/init-scripts/cassandra.wait /usr/local/bin

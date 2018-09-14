@@ -20,8 +20,17 @@ services:
       - cassandra
       - postgres
       - redis
+    environment:
+      - TILERATOR_MODE=api # This service will not process tiles
     volumes:
       - update_tiles_data:/data/update_tiles_data
+
+  tilerator-worker:
+    build: ./tilerator
+    depends_on:
+      - cassandra
+      - postgres
+      - redis
 
   redis:
     image: redis:latest

@@ -5,6 +5,14 @@ set -e
 CASSANDRA_SERVER=cassandra
 CASSANDRA_PORT=9042
 
+TILERATOR_MODE="${TILERATOR_MODE:-default}"
+
+if [[ "$TILERATOR_MODE" == "api" ]]; then
+    TILERATOR_CONFIG_FILE=config.api.yaml
+else
+    TILERATOR_CONFIG_FILE=config.yaml
+fi
+
 function wait_for_cassandra() {(
     set +e
     for i in `seq 1 100`; do
@@ -20,6 +28,6 @@ function wait_for_cassandra() {(
 
 wait_for_cassandra
 
-/usr/bin/nodejs /opt/tilerator/server.js -c /etc/tilerator/config.yaml
+/usr/bin/nodejs /opt/tilerator/server.js -c /etc/tilerator/$TILERATOR_CONFIG_FILE
 
 sleep infinity
