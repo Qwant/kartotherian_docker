@@ -28,7 +28,7 @@ RUN git clone https://github.com/QwantResearch/kartotherian.git /opt/kartotheria
     && npm install --production && npm dedupe \
     && git clone https://github.com/QwantResearch/kartotherian_config.git /opt/kartotherian_config \
     && cd /opt/kartotherian_config \
-    && git checkout 738abe8c1060ef104be379087612b3a5b6348cfe
+    && git checkout 66f314aa89bcbf524071895bc1c021dcd6aac4d3
 
 # .xml style is overridden to use system fonts (DejaVu instead of Arial)
 COPY omt_osm_bright.xml /opt/kartotherian/node_modules/\@mapbox/mapbox-studio-osm-bright/project.xml
