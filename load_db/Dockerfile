@@ -37,7 +37,7 @@ RUN apt-get update && \
 
 RUN git clone https://github.com/QwantResearch/kartotherian_config.git ${MAIN_DIR}/config \
     && cd ${MAIN_DIR}/config \
-    && git checkout 66f314aa89bcbf524071895bc1c021dcd6aac4d3
+    && git checkout 6b5f4c1881da1c553157cc3fbaf4916b3ba58dcb
 
 RUN cd ${MAIN_DIR}/config && git submodule update --init
 RUN ln -s ${MAIN_DIR}/config/imposm/generated_mapping_base.yaml ${MAIN_DIR}/generated_mapping_base.yaml
