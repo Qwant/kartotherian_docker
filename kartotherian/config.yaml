@@ -35,3 +35,6 @@ services:
 
       # Allow to reload sources when calling a disabled source
       reloadSourcesOnGetTile: true
+
+      # Expose leaflet UI and statics (default: true)
+      exposeMapUi: false
