@@ -1,4 +1,4 @@
-FROM ubuntu:16.04
+FROM ubuntu:16.04@sha256:45ddfa61744947b0b8f7f20b8de70cbcdd441a6a0532f791fd4c09f5e491a8eb
 
 ENV NODE_PATH='/opt/tilerator/node_modules' \
     TILERATOR_PORT=80

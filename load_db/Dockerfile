@@ -1,4 +1,4 @@
-FROM python:3.6-stretch
+FROM python:3.6-stretch@sha256:bccbebc715c9b0c0bf247ba3781248c1b0d075d5ef462ee86a396a394a19f6b0
 
 
 ENV MAIN_DIR=/srv/import_data \

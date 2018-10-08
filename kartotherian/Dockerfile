@@ -1,4 +1,4 @@
-FROM node:6-stretch
+FROM node:6-stretch@sha256:9b5d8caed98111c7bcacd8c46bce19635670b04d59dba20f765b096d6ef98dea
 
 ENV NODE_ENV=production
 
