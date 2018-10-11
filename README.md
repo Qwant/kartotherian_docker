@@ -3,6 +3,7 @@
 docker images for the [kartotherian project](https://github.com/kartotherian/kartotherian)
 
 They use a mixed architecture of Kartotherian and [openmaptiles](https://github.com/openmaptiles/openmaptiles)
+You need a docker version > 18.06
 
 ## "Quick" Start for local testing
 
@@ -64,7 +65,7 @@ Note: even if the local directoy in `./data` the osm file path is "/data/**input
 
 The tiles generation is also handle by the `load_db` container.
 
-To only generate 1 tile, you can set `INVOKE_TILES_X`, `INVOKE_TILES_Y`, `INVOKE_TILES_Z`. x, y, and z are based on the [Slippy Map Tile name](https://wiki.openstreetmap.org/wiki/Slippy_map_tilenames) system and you can use [Geofabrik's tool](http://download.geofabrik.de/europe/luxembourg.html) to generate these for a specific location.
+To only generate 1 tile, you can set `INVOKE_TILES_X`, `INVOKE_TILES_Y`, `INVOKE_TILES_Z`. x, y, and z are based on the [Slippy Map Tile name](https://wiki.openstreetmap.org/wiki/Slippy_map_tilenames) system and you can use [Geofabrik's tool](https://tools.geofabrik.de/calc/#6/51.25727/10.45457&type=Mapnik&grid=1) to generate these for a specific location.
 
 The different ways to configure the tiles generation can be seen [in the default configuration file](https://github.com/QwantResearch/kartotherian_config/blob/master/import_data/invoke.yaml).
 
