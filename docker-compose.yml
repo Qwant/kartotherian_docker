@@ -27,6 +27,8 @@ services:
 
   tilerator-worker:
     build: ./tilerator
+    environment:
+      - TILERATOR_NUM_WORKERS=ncpu # Number of workers (or ncpu by default)
     depends_on:
       - cassandra
       - postgres
