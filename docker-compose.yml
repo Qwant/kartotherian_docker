@@ -54,6 +54,17 @@ services:
   kartotherian:
     build: ./kartotherian
 
+  statsd-exporter:
+    image: prom/statsd-exporter
+    ports:
+      - 9102:9102
+      - 9125/udp
+    
+  prometheus:
+    image: prom/prometheus
+    ports:
+      - 9090:9090
+
 volumes:
   pgdata:
   cassandra_data:

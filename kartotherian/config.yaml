@@ -11,6 +11,13 @@ worker_heap_limit_mb: 250
 logging:
   level: info
 
+
+# Statsd metrics reporter
+metrics:
+  type: debug
+  host: statsd-exporter
+  port: 9125
+
 services:
   - name: kartotherian
     module: ./app.js
