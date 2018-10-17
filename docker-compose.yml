@@ -54,11 +54,8 @@ services:
   kartotherian:
     build: ./kartotherian
 
-  statsd-exporter:
-    image: prom/statsd-exporter
-    ports:
-      - 9102:9102
-      - 9125/udp
+  telegraf:
+    build: ./telegraf
     
   prometheus:
     image: prom/prometheus

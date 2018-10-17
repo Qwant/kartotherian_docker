@@ -15,8 +15,8 @@ logging:
 # Statsd metrics reporter
 metrics:
   type: debug
-  host: statsd-exporter
-  port: 9125
+  host: telegraf
+  port: 8125
 
 services:
   - name: kartotherian
