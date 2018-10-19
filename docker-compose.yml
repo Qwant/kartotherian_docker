@@ -56,11 +56,6 @@ services:
 
   telegraf:
     build: ./telegraf
-    
-  prometheus:
-    image: prom/prometheus
-    ports:
-      - 9090:9090
 
 volumes:
   pgdata:

@@ -22,6 +22,11 @@ services:
     ports:
       - "8585:3000"
 
+  prometheus:
+    image: prom/prometheus
+    ports:
+      - 9090:9090
+
 volumes:
   input_data:
     driver_opts:
