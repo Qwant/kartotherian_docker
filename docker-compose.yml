@@ -54,6 +54,9 @@ services:
   kartotherian:
     build: ./kartotherian
 
+  telegraf:
+    build: ./telegraf
+
 volumes:
   pgdata:
   cassandra_data:

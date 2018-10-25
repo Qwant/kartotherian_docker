@@ -11,6 +11,13 @@ worker_heap_limit_mb: 250
 logging:
   level: info
 
+
+# Statsd metrics reporter
+metrics:
+  type: debug
+  host: telegraf
+  port: 8125
+
 services:
   - name: kartotherian
     module: ./app.js
