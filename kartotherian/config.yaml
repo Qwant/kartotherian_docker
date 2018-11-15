@@ -42,6 +42,12 @@ services:
 
       # Allow to reload sources when calling a disabled source
       reloadSourcesOnGetTile: true
+      # Source will be disabled on unavailability
+      # (eg: Cassandra error) to close obsolete connections
+      disableSourceOnError: true
 
       # Expose leaflet UI and statics (default: true)
       exposeMapUi: false
+
+      # Expose source 'info.json' (default: true)
+      exposeSourceInfo: false
