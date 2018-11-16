@@ -12,7 +12,7 @@ USER node
 
 RUN git clone https://github.com/QwantResearch/kartotherian.git /opt/kartotherian \
     && cd /opt/kartotherian \
-    && git checkout b021dde5ac37 \
+    && git checkout 0851c0b80995f07c9b46aa8308f2a3c2b8d734b8 \
     && npm install --production \
     && git clone https://github.com/QwantResearch/kartotherian_config.git /opt/kartotherian_config \
     && cd /opt/kartotherian_config \
