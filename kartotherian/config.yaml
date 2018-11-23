@@ -51,3 +51,6 @@ services:
 
       # Expose source 'info.json' (default: true)
       exposeSourceInfo: false
+
+      # Catch and log statsd errors (default: false)
+      catchMetricsErrors: true

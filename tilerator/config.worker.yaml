@@ -7,6 +7,8 @@ num_workers: '{env(TILERATOR_NUM_WORKERS,ncpu)}'
 # uses more heap (note: not RSS) than this many mb.
 worker_heap_limit_mb: 250
 
+worker_heartbeat_timeout: '{env(TILERATOR_WORKER_HEARTBEAT_TIMEOUT,30000)}'
+
 # Logger info
 logging:
   level: info
