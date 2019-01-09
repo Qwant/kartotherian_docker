@@ -25,10 +25,10 @@ RUN apt-get update && \
     && chmod +x /usr/local/bin/pgfutter \
     && pip install pipenv==2018.11.26
 
-RUN git clone https://github.com/amatissart/kartotherian_config.git ${MAIN_DIR}/config \
+RUN git clone https://github.com/QwantResearch/kartotherian_config.git ${MAIN_DIR}/config \
     && cd ${MAIN_DIR}/config \
-    && git checkout   import_clean_up \
-    && git submodule update --init
+	&& git checkout b58ff10a41ad9b0e179e2753e0a52d296897f439 \
+	&& git submodule update --init
 
 WORKDIR ${MAIN_DIR}/config/import_data
 
