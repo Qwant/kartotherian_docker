@@ -28,6 +28,4 @@ function wait_for_cassandra() {(
 
 wait_for_cassandra
 
-/usr/bin/nodejs /opt/tilerator/server.js -c /etc/tilerator/$TILERATOR_CONFIG_FILE
-
-sleep infinity
+node /opt/tilerator/server.js -c /etc/tilerator/$TILERATOR_CONFIG_FILE

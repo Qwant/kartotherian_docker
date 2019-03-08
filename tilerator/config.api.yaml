@@ -1,7 +1,7 @@
 # Number of worker processes to spawn.
 # Set to 0 to run everything in a single process without clustering.
 # Use 'ncpu' to run as many workers as there are CPU units
-num_workers: '{env(TILERATOR_NUM_WORKERS,ncpu)}'
+num_workers: '{env(TILERATOR_NUM_WORKERS,4)}'
 
 # Log error messages and gracefully restart a worker if v8 reports that it
 # uses more heap (note: not RSS) than this many mb.
@@ -68,7 +68,6 @@ services:
       #   - x-request-id
 
       sources: /etc/tilerator/sources.yaml
-      variables: /etc/tilerator/variables.yaml
 
       modules:
       - "@kartotherian/cassandra"

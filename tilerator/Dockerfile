@@ -1,37 +1,30 @@
-FROM ubuntu:16.04@sha256:45ddfa61744947b0b8f7f20b8de70cbcdd441a6a0532f791fd4c09f5e491a8eb
+FROM node:8-stretch@sha256:fec2d6c325686988c4e0bf1b17cd32954422333d24ed6a97c28c8570054a6e1d
 
-ENV NODE_PATH='/opt/tilerator/node_modules' \
-    TILERATOR_PORT=80
+ENV NODE_ENV=production
 
-RUN apt update && \
-    apt install -y \
-             git \
-             unzip \
-             python-pip \
-             screen \
-             curl \
-             libpq-dev \
-             libproj-dev \
-             liblua5.2-dev \
-             libgeos++-dev \
-             osmctools \
-             nmap \
-             netcat \
-             postgis \
-             redis-tools \
-    && curl -sL https://deb.nodesource.com/setup_6.x | bash - \
-    && apt-get install -y nodejs
+RUN apt-get update && \
+    apt-get install -y \
+        git \
+        unzip \
+        curl \
+        libpq-dev \
+        libproj-dev \
+        liblua5.2-dev \
+        libgeos++-dev \
+        nmap \
+        netcat \
+        redis-tools \
+    && npm i npm@latest -g
 
 RUN git clone https://github.com/QwantResearch/tilerator.git /opt/tilerator \
     && cd /opt/tilerator \
-    && git checkout 8778f755afda1ef08 \
-    && npm install --production && npm dedupe
+    && git checkout 64b69c064aae15d474bd61da2c6bc35140f118f8 \
+    && npm install --production
 
 RUN git clone https://github.com/QwantResearch/kartotherian_config.git /opt/kartotherian_config \
     && cd /opt/kartotherian_config \
-    && git checkout ff64c9744b8c27e9c7aaaeed919cf0913951fd27
+    && git checkout 0af5aba6e6657c8b42842704947108c33934197a
 
-COPY variables.yaml /opt/tilerator/
 COPY config*.yaml /opt/tilerator/
 COPY gen_tiles.sh /gen_tiles.sh
 
@@ -41,13 +34,18 @@ RUN ln -sf /opt/kartotherian_config/tilerator/data_tm2source_poi.yml /etc/tilera
 RUN ln -sf /opt/kartotherian_config/tilerator/data_tm2source_lite.yml /etc/tilerator
 
 RUN chmod +x /gen_tiles.sh \
-    && chmod 600 /opt/tilerator/variables.yaml \
     && ln -sf /opt/tilerator/config*.yaml /etc/tilerator \
-    && ln -sf /opt/tilerator/variables.yaml /etc/tilerator \
     && ln -sf /opt/kartotherian_config/tilerator/sources.yaml /etc/tilerator \
     && ln -sf /opt/tilerator/dist/init-scripts/cassandra.wait /usr/local/bin
 
 COPY runserver.sh /runserver.sh
 RUN chmod +x /runserver.sh
+
+ENV TILERATOR_OSMDB_HOST=postgres
+ENV TILERATOR_OSMDB_USER=gis
+ENV TILERATOR_OSMDB_PSWD=
+ENV TILERATOR_CASSANDRA_SERVERS=cassandra
+ENV TILERATOR_CASSANDRA_USER=gis
+ENV TILERATOR_CASSANDRA_PSWD=
 
 CMD ["/runserver.sh"]
