@@ -31,7 +31,6 @@ services:
       # Show the the X-Powered-By header (default: true)
       expose_version: false
 
-      variables: /etc/kartotherian/variables.yaml
       sources: /etc/kartotherian/sources.yaml
       modules:
         - "@kartotherian/cassandra"
