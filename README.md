@@ -11,6 +11,8 @@ Use these commmands to download, import data and create tiles jobs for Luxembour
 
 (Optional) First, delete all related containers and volumes (from an older import):
 
+**If sudo required, use "-E"!!**
+
 ```bash
 docker-compose -f docker-compose.yml -f local-compose.yml down -v
 ```
