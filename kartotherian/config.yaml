@@ -24,6 +24,7 @@ services:
 
     conf:
       port: 6533
+      cors: '{env(KARTOTHERIAN_CORS_ORIGIN,*)}'
 
       # Comment this out to allow connections from everywhere
       # interface: localhost
