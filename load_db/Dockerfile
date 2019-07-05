@@ -27,7 +27,7 @@ RUN apt-get update && \
 
 RUN git clone https://github.com/QwantResearch/kartotherian_config.git ${MAIN_DIR}/config \
     && cd ${MAIN_DIR}/config \
-	&& git checkout 0af5aba6e6657c8b42842704947108c33934197a \
+	&& git checkout 78208ef48b925c1e81fdad4dd47227b3d31f7fe1 \
 	&& git submodule update --init
 
 WORKDIR ${MAIN_DIR}/config/import_data
