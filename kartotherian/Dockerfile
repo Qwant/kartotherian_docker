@@ -16,7 +16,7 @@ RUN git clone https://github.com/QwantResearch/kartotherian.git /opt/kartotheria
     && npm install --production \
     && git clone https://github.com/QwantResearch/kartotherian_config.git /opt/kartotherian_config \
     && cd /opt/kartotherian_config \
-    && git checkout 78208ef48b925c1e81fdad4dd47227b3d31f7fe1
+    && git checkout d8f6b1ae64ed3e23353c9871803c081dafb397b7
 
 COPY --chown=node config.yaml /opt/kartotherian
 
