@@ -26,6 +26,18 @@ docker-compose -f docker-compose.yml -f local-compose.yml run --rm -e INVOKE_OSM
 
 Once all tiles are generated, the map is visible on http://localhost:8585 !
 
+## Workflow
+
+If you want to update the generation process, you need to edit [QwantResearch/openmaptiles](https://github.com/QwantResearch/openmaptiles), then generate the [QwantResearch/kartoterian_config](https://github.com/QwantResearch/kartotherian_config):
+
+```bash
+$ CONFIG_DIR='<PATH of your local clone of kartotherian_config>' make qwant
+```
+
+Then commit the diff and push it to the [QwantResearch/kartoterian_config](https://github.com/QwantResearch/kartotherian_config) repository (it's important to have the commit on github, otherwise you won't be able to use it!).
+
+Update the Dockerfiles using the old [QwantResearch/kartoterian_config](https://github.com/QwantResearch/kartotherian_config)'s commit and replace it with your new one. Then generate it.
+
 ## running
 
 To launch kartotherian just do:
