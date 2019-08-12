@@ -34,11 +34,9 @@ If you want to update the generation process, you need to edit [QwantResearch/op
 $ CONFIG_DIR='<PATH of your local clone of kartotherian_config>' make qwant
 ```
 
-Then commit the diff and push it to the [QwantResearch/kartoterian_config](https://github.co\
-m/QwantResearch/kartotherian_config) repository (it's important to have the commit on github, otherwise you won't be able to use it!).
+Then commit the diff and push it to the [QwantResearch/kartoterian_config](https://github.com/QwantResearch/kartotherian_config) repository (it's important to have the commit on github, otherwise you won't be able to use it!).
 
-Update the Dockerfiles using the old [QwantResearch/kartoterian_config](https://github.co\
-m/QwantResearch/kartotherian_config)'s commit and replace it with your new one. Then generate it.
+Update the Dockerfiles using the old [QwantResearch/kartoterian_config](https://github.com/QwantResearch/kartotherian_config)'s commit and replace it with your new one. Then generate it.
 
 ## running
 
