@@ -23,7 +23,7 @@ RUN git clone https://github.com/QwantResearch/tilerator.git /opt/tilerator \
 
 RUN git clone https://github.com/QwantResearch/kartotherian_config.git /opt/kartotherian_config \
     && cd /opt/kartotherian_config \
-    && git checkout d8f6b1ae64ed3e23353c9871803c081dafb397b7
+    && git checkout 0980d27a8df715a7140aa2a912ab82dc287927f8
 
 COPY config*.yaml /opt/tilerator/
 COPY gen_tiles.sh /gen_tiles.sh
