@@ -10,6 +10,9 @@ env:
     - SERVICE=kartotherian
     - SERVICE=telegraf
 
+branches:
+  only:
+    - master
 
 before_install:
   - echo "$DOCKER_TOKEN" | docker login -u "$DOCKER_USERNAME" --password-stdin
