@@ -18,9 +18,9 @@ RUN apt-get update && \
         osmosis \
         jq \
 # install imposm
-    && wget https://github.com/omniscale/imposm3/releases/download/v0.6.0-alpha.4/imposm-0.6.0-alpha.4-linux-x86-64.tar.gz \
-    && tar xvfz imposm-0.6.0-alpha.4-linux-x86-64.tar.gz \
-    && ln -sf /imposm-0.6.0-alpha.4-linux-x86-64/imposm3 /usr/local/bin/imposm3 \
+    && wget https://github.com/amatissart/imposm3/releases/download/v0.8.1-qwant-0/imposm-0.8.1-qwant-0-linux-x86-64.tar.gz \
+    && tar xvfz imposm-0.8.1-qwant-0-linux-x86-64.tar.gz \
+    && ln -sf /imposm-0.8.1-qwant-0-linux-x86-64/imposm /usr/local/bin/imposm3 \
     && wget -O /usr/local/bin/pgfutter https://github.com/lukasmartinelli/pgfutter/releases/download/v1.1/pgfutter_linux_amd64 \
     && chmod +x /usr/local/bin/pgfutter \
     && pip install pipenv==2018.11.26
