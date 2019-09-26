@@ -25,15 +25,12 @@ RUN apt-get update && \
     && chmod +x /usr/local/bin/pgfutter \
     && pip install pipenv==2018.11.26
 
-RUN git clone https://github.com/QwantResearch/kartotherian_config.git ${MAIN_DIR}/config \
-    && cd ${MAIN_DIR}/config \
-    && git checkout c9fefaf505165c5a01bd24e3bc5295cfa9e73bde \
-    && git submodule update --init
+COPY import_data ${MAIN_DIR}/import_data
 
-WORKDIR ${MAIN_DIR}/config/import_data
+WORKDIR ${MAIN_DIR}/import_data
 
-COPY import_data.sh ./import_data.sh
-COPY config.yml ./config.yml
+COPY load_db/import_data.sh ./import_data.sh
+COPY load_db/config.yml ./config.yml
 RUN chmod +x ./import_data.sh
 RUN chmod +x ./osm_update.sh
 

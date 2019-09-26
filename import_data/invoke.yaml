@@ -1,0 +1,64 @@
+pg:
+  user: gis
+  database: gis
+  import_database: import_gis
+  backup_database: backup_gis
+  host: postgres
+  password: gis
+  port: 5432
+
+imposm_config_dir: ../imposm
+
+generated_files_dir: /data/imposm
+data_dir: /data
+update_tiles_dir: /data/update_tiles_data
+
+################################################
+# Data sources
+
+water:
+  polygons_url: https://osmdata.openstreetmap.de/download/water-polygons-split-3857.zip
+
+osm:
+  ## one of those value needs to be configured
+  ## URL where to get the osm file
+  url:
+  ## Path of the file
+  file:
+
+
+################################################
+# Tiles generation
+
+## if neither 'x'/'y' nor 'planet' is defined, no tiles are generated
+tiles:
+  ## boolean to tell that we want to generate tiles on the whole planet
+  planet: False
+  ## the 3 parameters below are used to generate only 1 tile
+  ## X and Y coordinates and the z (zoom) are based on the Slippy Map Tile Names system. 
+  ## These can be generated easily with Geofabrik's calculator.
+  x:
+  y:
+  z:
+  ## zoom range [base_from_zoom, base_before_zoom[ to generate the base tiles
+  base_from_zoom: 0
+  base_before_zoom: 15
+  ## zoom range [poi_from_zoom, poi_before_zoom[ to generate the poi tiles
+  poi_from_zoom: 14
+  poi_before_zoom: 15
+  ## number of parts to break each jobs into
+  parts: 8
+  ## url of tilerator API
+  tilerator_url: http://tilerator
+  # names of the tilerator sources
+  base_sources:
+    generator: substbasemap
+    storage: basemap
+  poi_sources:
+    generator: gen_poi
+    storage: poi
+
+osm_update:
+  replication_url: https://planet.osm.org/replication/day
+  max_interval: 0 # maximum delay to catch up (in seconds) by osmosis, 0 to fetch all changes
+  max_interations: 300 # maximum number of requests to replication server to find the correct state file

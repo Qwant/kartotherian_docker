@@ -14,6 +14,8 @@ RUN apt-get update && \
         nmap \
         netcat \
         redis-tools \
+        python3.5 \
+        python3-pip \
     && npm i npm@latest -g
 
 RUN git clone https://github.com/QwantResearch/tilerator.git /opt/tilerator \
@@ -21,24 +23,32 @@ RUN git clone https://github.com/QwantResearch/tilerator.git /opt/tilerator \
     && git checkout 64b69c064aae15d474bd61da2c6bc35140f118f8 \
     && npm install --production
 
-RUN git clone https://github.com/QwantResearch/kartotherian_config.git /opt/kartotherian_config \
-    && cd /opt/kartotherian_config \
-    && git checkout c9fefaf505165c5a01bd24e3bc5295cfa9e73bde
+# install openmaptiles-tools
+RUN python3.5 -m pip install --upgrade pip \
+    && python3.5 -m pip install openmaptiles-tools
+# install openmaptiles
+COPY openmaptiles /opt/openmaptiles
+# setup needed directories
+RUN mkdir -p /opt/config/imposm
+RUN mkdir -p /opt/config/tilerator
+# generate config files
+RUN cd /opt/openmaptiles \
+    && LANG=en_US.UTF-8 CONFIG_DIR=/opt/config make qwant
 
-COPY config*.yaml /opt/tilerator/
-COPY gen_tiles.sh /gen_tiles.sh
+COPY tilerator/config*.yaml /opt/tilerator/
+COPY tilerator/sources.yaml /opt/tilerator/
+COPY tilerator/gen_tiles.sh /gen_tiles.sh
 
 RUN mkdir -p /etc/tilerator
-RUN ln -sf /opt/kartotherian_config/tilerator/data_tm2source_base.yml /etc/tilerator
-RUN ln -sf /opt/kartotherian_config/tilerator/data_tm2source_poi.yml /etc/tilerator
-RUN ln -sf /opt/kartotherian_config/tilerator/data_tm2source_lite.yml /etc/tilerator
+RUN ln -sf /opt/config/tilerator/data_tm2source_base.yml /etc/tilerator
+RUN ln -sf /opt/config/tilerator/data_tm2source_poi.yml /etc/tilerator
+RUN ln -sf /opt/config/tilerator/data_tm2source_lite.yml /etc/tilerator
 
 RUN chmod +x /gen_tiles.sh \
     && ln -sf /opt/tilerator/config*.yaml /etc/tilerator \
-    && ln -sf /opt/kartotherian_config/tilerator/sources.yaml /etc/tilerator \
     && ln -sf /opt/tilerator/dist/init-scripts/cassandra.wait /usr/local/bin
 
-COPY runserver.sh /runserver.sh
+COPY tilerator/runserver.sh /runserver.sh
 RUN chmod +x /runserver.sh
 
 ENV TILERATOR_OSMDB_HOST=postgres

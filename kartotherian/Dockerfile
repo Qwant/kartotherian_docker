@@ -13,16 +13,13 @@ USER node
 RUN git clone https://github.com/QwantResearch/kartotherian.git /opt/kartotherian \
     && cd /opt/kartotherian \
     && git checkout 98338d934057426fb3ac938b0e00c6dee533efc3 \
-    && npm install --production \
-    && git clone https://github.com/QwantResearch/kartotherian_config.git /opt/kartotherian_config \
-    && cd /opt/kartotherian_config \
-    && git checkout c9fefaf505165c5a01bd24e3bc5295cfa9e73bde
+    && npm install --production
 
-COPY --chown=node config.yaml /opt/kartotherian
+COPY --chown=node kartotherian/config.yaml /opt/kartotherian
 
 RUN mkdir -p /etc/kartotherian\
-    && ln -sf /opt/kartotherian/config.yaml /etc/kartotherian\
-    && ln -sf /opt/kartotherian_config/kartotherian/sources.yaml /etc/kartotherian
+    && ln -sf /opt/kartotherian/config.yaml /etc/kartotherian
+COPY tilerator/sources.yaml /etc/kartotherian
 
 ENV KARTOTHERIAN_CASSANDRA_SERVERS=cassandra
 ENV KARTOTHERIAN_CASSANDRA_USER=gis
