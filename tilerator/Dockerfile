@@ -16,6 +16,7 @@ RUN apt-get update && \
         redis-tools \
         python3.5 \
         python3-pip \
+        locales \
     && npm i npm@latest -g
 
 RUN git clone https://github.com/QwantResearch/tilerator.git /opt/tilerator \
@@ -31,9 +32,14 @@ COPY openmaptiles /opt/openmaptiles
 # setup needed directories
 RUN mkdir -p /opt/config/imposm
 RUN mkdir -p /opt/config/tilerator
+# needed for sql script, else the BOM in the file makes the query impossible
+RUN locale-gen en_US.UTF-8
+ENV LANG C.UTF-8
+ENV LANGUAGE en_US:en
+ENV LC_ALL C.UTF-8
 # generate config files
 RUN cd /opt/openmaptiles \
-    && LANG=en_US.UTF-8 CONFIG_DIR=/opt/config make qwant
+    && CONFIG_DIR=/opt/config make qwant
 
 COPY tilerator/config*.yaml /opt/tilerator/
 COPY tilerator/sources.yaml /opt/tilerator/
