@@ -1,0 +1,15 @@
+[[source]]
+url = "https://pypi.python.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[dev-packages]
+
+[packages]
+invoke = "*"
+requests = ">=2.20.0"
+configparser = "*"
+pydantic = "*"
+
+[requires]
+python_version = "3.6"
