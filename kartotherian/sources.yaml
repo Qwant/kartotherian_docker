@@ -1,0 +1,68 @@
+v2-lite:
+  public: true
+  formats: [pbf]
+  uri: cassandra://
+  params:
+    maxzoom: 14 # Note: this max zoom is inclusive
+    keyspace: v2lite
+    cp: {env: KARTOTHERIAN_CASSANDRA_SERVERS}
+    username: {env: KARTOTHERIAN_CASSANDRA_USER}
+    password: {env: KARTOTHERIAN_CASSANDRA_PSWD}
+    createIfMissing: false
+    setLastModified: true
+
+oz-lite:
+  public: true
+  formats: [pbf]
+  uri: overzoom://
+  params:
+    source: {ref: v2-lite}
+  defaultHeaders:
+    Cache-Control: 'public, max-age=43200, s-maxage=43200'
+
+
+basemap:
+  public: true
+  formats: [pbf]
+  uri: cassandra://
+  params:
+    maxzoom: 14 # Note: this max zoom is inclusive
+    keyspace: basemap
+    cp: {env: KARTOTHERIAN_CASSANDRA_SERVERS}
+    username: {env: KARTOTHERIAN_CASSANDRA_USER}
+    password: {env: KARTOTHERIAN_CASSANDRA_PSWD}
+    createIfMissing: false
+    setLastModified: true
+
+ozbasemap:
+  public: true
+  formats: [pbf]
+  uri: overzoom://
+  params:
+    source: {ref: basemap}
+  defaultHeaders:
+    Cache-Control: 'public, max-age=43200, s-maxage=43200'
+
+
+poi:
+  public: true
+  formats: [pbf]
+  uri: cassandra://
+  params:
+    maxzoom: 14 # Note: this max zoom is inclusive
+    minzoom: 10 # Note: this max zoom is inclusive
+    keyspace: poi
+    cp: {env: KARTOTHERIAN_CASSANDRA_SERVERS}
+    username: {env: KARTOTHERIAN_CASSANDRA_USER}
+    password: {env: KARTOTHERIAN_CASSANDRA_PSWD}
+    createIfMissing: false
+    setLastModified: true
+
+ozpoi:
+  public: true
+  formats: [pbf]
+  uri: overzoom://
+  params:
+    source: {ref: poi}
+  defaultHeaders:
+    Cache-Control: 'public, max-age=43200, s-maxage=43200'

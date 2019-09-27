@@ -25,7 +25,28 @@ RUN apt-get update && \
     && chmod +x /usr/local/bin/pgfutter \
     && pip install pipenv==2018.11.26
 
+# install openmaptiles
+COPY openmaptiles /opt/openmaptiles
+
 COPY import_data ${MAIN_DIR}/import_data
+
+# needed for sql script, else the BOM in the file makes the query impossible
+RUN locale-gen en_US.UTF-8
+ENV LANG C.UTF-8
+ENV LANGUAGE en_US:en
+ENV LC_ALL C.UTF-8
+
+RUN cd ${MAIN_DIR}/import_data \
+    && pipenv install --system --deploy
+
+# generate imposm files
+RUN mkdir -p ${MAIN_DIR}/imposm \
+    && mkdir -p ${MAIN_DIR}/tilerator \
+    && ln -s ${MAIN_DIR}/import_data/* ${MAIN_DIR}/imposm/ \
+    && cd /opt/openmaptiles \
+    && rm -f /usr/bin/python3 \
+    && ln -s `which python3.6` /usr/bin/python3 \
+    && CONFIG_DIR=${MAIN_DIR} make qwant
 
 WORKDIR ${MAIN_DIR}/import_data
 
@@ -33,13 +54,5 @@ COPY load_db/import_data.sh ./import_data.sh
 COPY load_db/config.yml ./config.yml
 RUN chmod +x ./import_data.sh
 RUN chmod +x ./osm_update.sh
-
-RUN pipenv install --system --deploy
-
-# needed for sql script, else the BOM in the file makes the query impossible
-RUN locale-gen en_US.UTF-8
-ENV LANG C.UTF-8
-ENV LANGUAGE en_US:en
-ENV LC_ALL C.UTF-8
 
 ENTRYPOINT ["./import_data.sh"]
