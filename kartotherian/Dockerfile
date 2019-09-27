@@ -19,7 +19,7 @@ COPY --chown=node kartotherian/config.yaml /opt/kartotherian
 
 RUN mkdir -p /etc/kartotherian \
     && ln -sf /opt/kartotherian/config.yaml /etc/kartotherian
-COPY tilerator/sources.yaml /etc/kartotherian
+COPY kartotherian/sources.yaml /etc/kartotherian
 
 ENV KARTOTHERIAN_CASSANDRA_SERVERS=cassandra
 ENV KARTOTHERIAN_CASSANDRA_USER=gis
