@@ -28,15 +28,7 @@ Once all tiles are generated, the map is visible on http://localhost:8585 !
 
 ## Workflow
 
-If you want to update the generation process, you need to edit [QwantResearch/openmaptiles](https://github.com/QwantResearch/openmaptiles), then generate the [QwantResearch/kartoterian_config](https://github.com/QwantResearch/kartotherian_config):
-
-```bash
-$ CONFIG_DIR='<PATH of your local clone of kartotherian_config>' make qwant
-```
-
-Then commit the diff and push it to the [QwantResearch/kartoterian_config](https://github.com/QwantResearch/kartotherian_config) repository (it's important to have the commit on github, otherwise you won't be able to use it!).
-
-Update the Dockerfiles using the old [QwantResearch/kartoterian_config](https://github.com/QwantResearch/kartotherian_config)'s commit and replace it with your new one. Then generate it.
+If you want to update the generation process, you need to edit [QwantResearch/openmaptiles](https://github.com/QwantResearch/openmaptiles) then update the openmaptiles submodule.
 
 ## running
 
@@ -52,11 +44,11 @@ to download a pbf and load data in postgres and generate tiles you need:
 
 `docker-compose run --rm -e INVOKE_OSM_URL=https://download.geofabrik.de/europe/luxembourg-latest.osm.pbf -e INVOKE_TILES_X=66 -e INVOKE_TILES_Y=43 -e INVOKE_TILES_Z=7 load_db`
 
-The different way to configure the import can be seen in the [script repository](https://github.com/QwantResearch/kartotherian_config/blob/master/import_data)
+The different way to configure the import can be seen in [this readme](https://github.com/QwantResearch/kartotherian_docker/blob/master/import_data/readme.md).
 
 Note: the first import might be quite long are some additional data will be downloaded (cf [load_db](https://github.com/QwantResearch/kartotherian_docker/blob/master/load_db/readme.md))
 
-if you want to use already downloaded data (especially usefull for a quicker dev cycle), you can use a mounted docker volume.
+If you want to use already downloaded data (especially usefull for a quicker dev cycle), you can use a mounted docker volume.
 
 The file `local-compose.yml` gives an example of how to bind a named docker volume (the file uses a `./data` directory but you can change it if you want).
 
@@ -81,7 +73,7 @@ The tiles generation is also handle by the `load_db` container.
 
 To only generate 1 tile, you can set `INVOKE_TILES_X`, `INVOKE_TILES_Y`, `INVOKE_TILES_Z`. x, y, and z are based on the [Slippy Map Tile name](https://wiki.openstreetmap.org/wiki/Slippy_map_tilenames) system and you can use [Geofabrik's tool](https://tools.geofabrik.de/calc/#6/51.25727/10.45457&type=Mapnik&grid=1) to generate these for a specific location.
 
-The different ways to configure the tiles generation can be seen [in the default configuration file](https://github.com/QwantResearch/kartotherian_config/blob/master/import_data/invoke.yaml).
+The different ways to configure the tiles generation can be seen [in the default configuration file](https://github.com/QwantResearch/kartotherian_docker/blob/master/import_data/invoke.yaml).
 
 If you have forwarded the port, you can check the tile generation at `http://localhost:16534/jobs` and check a vector tile based map on `http://localhost:8585`
 
@@ -104,9 +96,6 @@ During this task:
 The tile server architecture can be seen at [QwantMaps](https://github.com/QwantResearch/qwantmaps#global-picture)
 
 ## configuration files
-
-Most configuration files are imported from [kartotherian_config](https://github.com/QwantResearch/kartotherian_config) repository.
-Among them, `generated_*.sql`, imposm `generated_mapping_*.yml` and `data_tm2source_*.xml` files have been generated using [openmaptiles-tools](https://github.com/openmaptiles/openmaptiles-tools).
 
 The SQL and imposm mapping generation is quite straigthforward (cf. `generate-sql` and `generate-imposm3` in the [documentation](https://github.com/openmaptiles/openmaptiles-tools/blob/master/README.md)).
 
