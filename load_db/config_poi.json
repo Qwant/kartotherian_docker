@@ -1,0 +1,5 @@
+{
+    "tiles_layer_name": "poi",
+    "mapping_filename": "generated_mapping_poi.yaml",
+    "expiretiles_zoom": 14
+}

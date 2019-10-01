@@ -27,8 +27,13 @@ RUN apt-get update && \
 
 # install openmaptiles
 COPY openmaptiles /opt/openmaptiles
-
 COPY import_data ${MAIN_DIR}/import_data
+
+RUN mkdir -p ${MAIN_DIR}/imposm \
+    && mkdir -p ${MAIN_DIR}/import_data/imposm/
+
+COPY load_db/config_base.json ${MAIN_DIR}/imposm/
+COPY load_db/config_poi.json ${MAIN_DIR}/imposm/
 
 # needed for sql script, else the BOM in the file makes the query impossible
 RUN locale-gen en_US.UTF-8
@@ -39,9 +44,8 @@ ENV LC_ALL C.UTF-8
 RUN cd ${MAIN_DIR}/import_data \
     && pipenv install --system --deploy
 
-# generate imposm files
-RUN mkdir -p ${MAIN_DIR}/imposm \
-    && mkdir -p ${MAIN_DIR}/tilerator \
+# generate imposm files \
+RUN mkdir -p ${MAIN_DIR}/tilerator \
     && ln -s ${MAIN_DIR}/import_data/* ${MAIN_DIR}/imposm/ \
     && cd /opt/openmaptiles \
     && rm -f /usr/bin/python3 \

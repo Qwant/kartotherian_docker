@@ -268,6 +268,10 @@ fi
 
 free_lock
 
+log "============"
+log "current location: $(pwd)"
+log "============"
+
 log "${CHANGE_FILE} file size is $(ls -sh ${TMP_DIR}/${CHANGE_FILE} | cut -d' ' -f 1)"
 END=$(date +%s)
 DURATION=$(($END-$START))
