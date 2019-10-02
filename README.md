@@ -14,14 +14,13 @@ Use these commmands to download, import data and create tiles jobs for Luxembour
 **If sudo required, use "-E"!!**
 
 ```bash
-docker-compose -f docker-compose.yml -f local-compose.yml down -v
+./exec.py shutdown
 ```
 
 Download, import and start the tiles generation:
 
 ```bash
-docker-compose -f docker-compose.yml -f local-compose.yml up --build -d
-docker-compose -f docker-compose.yml -f local-compose.yml run --rm -e INVOKE_OSM_URL=https://download.geofabrik.de/europe/luxembourg-latest.osm.pbf -e INVOKE_TILES_X=66 -e INVOKE_TILES_Y=43 -e INVOKE_TILES_Z=7 load_db
+./exec.py load-db # it runs the build command as a dependency on 'load-db'
 ```
 
 Once all tiles are generated, the map is visible on http://localhost:8585 !
@@ -34,7 +33,7 @@ If you want to update the generation process, you need to edit [QwantResearch/op
 
 To launch kartotherian just do:
 
-`docker-compose up --build -d`
+`./exec.py kartotherian`
 
 (you might need `sudo` permissions depending on your setup)
 
@@ -42,7 +41,9 @@ To launch kartotherian just do:
 
 to download a pbf and load data in postgres and generate tiles you need:
 
-`docker-compose run --rm -e INVOKE_OSM_URL=https://download.geofabrik.de/europe/luxembourg-latest.osm.pbf -e INVOKE_TILES_X=66 -e INVOKE_TILES_Y=43 -e INVOKE_TILES_Z=7 load_db`
+`./exec.py load-db`
+
+Note that you can specify the PBF you want to give by using the `--osm-file-url` option.
 
 The different way to configure the import can be seen in [this readme](https://github.com/QwantResearch/kartotherian_docker/blob/master/import_data/readme.md).
 
@@ -54,15 +55,12 @@ The file `local-compose.yml` gives an example of how to bind a named docker volu
 
 To use a locally mounted volume add the `local-compose.yml` with the `-f` docker-compose option.
 
-If you want to use a specific osm file, you can set `INVOKE_OSM_FILE` instead of `INVOKE_OSM_URL`.
-
 For an easier dev experience, you can use the docker-compose additional file `local-compose.yml` that forward ports, use a locally `./data` mounted volume (to avoid some unnecessary download) and run a front end to view the tiles.
 
-For example with this setup you can also provide an already downloaded pbf (it needs to be in the `./data` volume) with `INVOKE_OSM_FILE`:
+For example with this setup you can also provide an already downloaded pbf (it needs to be in the `./data` volume) with `--osm-file`:
 
 ```bash
-docker-compose -f docker-compose.yml -f local-compose.yml up --build -d
-docker-compose -f docker-compose.yml -f local-compose.yml run --rm -e INVOKE_OSM_FILE=/data/input/luxembourg-latest.osm.pbf load_db
+./exec.py --osm-file /data/input/luxembourg-latest.osm.pbf load-db
 ```
 
 Note: even if the local directoy in `./data` the osm file path is "/data/**input**/" because it's the directory path inside the container.
@@ -71,7 +69,7 @@ Note: even if the local directoy in `./data` the osm file path is "/data/**input
 
 The tiles generation is also handle by the `load_db` container.
 
-To only generate 1 tile, you can set `INVOKE_TILES_X`, `INVOKE_TILES_Y`, `INVOKE_TILES_Z`. x, y, and z are based on the [Slippy Map Tile name](https://wiki.openstreetmap.org/wiki/Slippy_map_tilenames) system and you can use [Geofabrik's tool](https://tools.geofabrik.de/calc/#6/51.25727/10.45457&type=Mapnik&grid=1) to generate these for a specific location.
+To only generate 1 tile, you can set `--tiles-x`, `--tiles-y`, `--tiles-z`. x, y, and z are based on the [Slippy Map Tile name](https://wiki.openstreetmap.org/wiki/Slippy_map_tilenames) system and you can use [Geofabrik's tool](https://tools.geofabrik.de/calc/#6/51.25727/10.45457&type=Mapnik&grid=1) to generate these for a specific location.
 
 The different ways to configure the tiles generation can be seen [in the default configuration file](https://github.com/QwantResearch/kartotherian_docker/blob/master/import_data/invoke.yaml).
 
@@ -81,9 +79,9 @@ If you have forwarded the port, you can check the tile generation at `http://loc
 ### Updating tiles
 
 During the initial creation of the PG database, state and configuration files is initialized in the `update_tiles_data` volume from the .pbf metadata.
-To launch the tiles update, run the `run_osm_update` task (defined in load_db tasks):
+To launch the tiles update, run the `update-tiles` task (defined in load_db tasks):
 
-`docker-compose -f docker-compose.yml -f update-compose.yml run --rm load_db run-osm-update`
+`./exec.py update-tiles`
 
 During this task:
  * osmosis will fetch latest changes from openstreetmap.org
