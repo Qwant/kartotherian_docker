@@ -98,6 +98,7 @@ def run_load_db(options):
 
 def run_load_db_france(options):
     options['osm-file'] = "https://download.geofabrik.de/europe/france-latest.osm.pbf"
+    # got tiles from http://tools.geofabrik.de/calc/?grid=1
     options['tiles-coords'] = '[[15, 10, 5], [16, 10, 5], [15, 11, 5], [16, 11, 5]]'
     run_load_db(options)
 
