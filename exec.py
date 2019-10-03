@@ -4,6 +4,7 @@ import subprocess
 import time
 import sys
 import os
+import json
 
 
 COMMANDS = ["build", "load-db", "load-db-france", "update-tiles", "shutdown", "logs", "kartotherian"]
@@ -186,6 +187,18 @@ def parse_args(args):
                 print('`{}` option expects an argument!'.format(args[i]))
                 sys.exit(1)
             i += 1
+            try:
+                d = json.loads(args[i])
+                if not isinstance(d, list):
+                    print(f'`{args[i - 1]}` option expects an array of [longitude, latitude, zoom]')
+                    sys.exit(1)
+                for x in d:
+                    if not isinstance(x, list) or len(x) != 3:
+                        print(f'`{args[i - 1]}` option expects an array of [longitude, latitude, zoom]')
+                        sys.exit(1)
+            except Exception as e:
+                print(f'`{args[i - 1]}` option expects an array of [longitude, latitude, zoom]')
+                sys.exit(1)
             enabled_options[args[i - 1][2:]] = args[i]
         elif args[i] == '-h' or args[i] == '--help':
             run_help()
