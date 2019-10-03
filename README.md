@@ -17,13 +17,13 @@ Use these commmands to download, import data and create tiles jobs for Luxembour
 ./exec.py shutdown
 ```
 
-Download, import and start the tiles generation:
+Download, import and start the tiles generation (of Luxembourg by default):
 
 ```bash
 ./exec.py load-db # it runs the build command as a dependency on 'load-db'
 ```
 
-Once all tiles are generated, the map is visible on http://localhost:8585 !
+Once all tiles are generated, the map is visible on `http://localhost:8585`!
 
 ## Workflow
 

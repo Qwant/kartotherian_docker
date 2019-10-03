@@ -37,9 +37,7 @@ tiles:
   ## the 3 parameters below are used to generate only 1 tile
   ## X and Y coordinates and the z (zoom) are based on the Slippy Map Tile Names system. 
   ## These can be generated easily with Geofabrik's calculator.
-  x:
-  y:
-  z:
+  coords:
   ## zoom range [base_from_zoom, base_before_zoom[ to generate the base tiles
   base_from_zoom: 0
   base_before_zoom: 15

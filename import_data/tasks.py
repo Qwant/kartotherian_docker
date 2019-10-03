@@ -1,5 +1,6 @@
 import sys
 import logging
+import json
 import os
 import os.path
 from datetime import timedelta, datetime
@@ -467,28 +468,37 @@ def generate_tiles(ctx):
             before_zoom=15,
             check_base_layer_level=13,
         )
-    elif ctx.tiles.x and ctx.tiles.y and ctx.tiles.z:
-        logging.info(
-            f"generating tiles for {ctx.tiles.x} / {ctx.tiles.y}, z = {ctx.tiles.z}"
-        )
-        create_tiles_jobs(
-            ctx,
-            tiles_layer=TilesLayer.BASEMAP,
-            x=ctx.tiles.x,
-            y=ctx.tiles.y,
-            z=ctx.tiles.z,
-            from_zoom=ctx.tiles.base_from_zoom,
-            before_zoom=ctx.tiles.base_before_zoom,
-        )
-        create_tiles_jobs(
-            ctx,
-            tiles_layer=TilesLayer.POI,
-            x=ctx.tiles.x,
-            y=ctx.tiles.y,
-            z=ctx.tiles.z,
-            from_zoom=ctx.tiles.poi_from_zoom,
-            before_zoom=ctx.tiles.poi_before_zoom,
-        )
+    elif ctx.tiles.coords:
+        try:
+            data = json.loads(ctx.tiles.coords)
+        except Exception as err:
+            logging.error(f"invalid tiles data received, expected JSON: {err}")
+            sys.exit(1)
+        for entry in data:
+            if len(entry) != 3:
+                logging.warn(f"Expected entry [longitude, latitude, zoom], got {len(entry)} elements")
+                continue
+            logging.info(
+                f"generating tiles for {entry[0]} / {entry[1]}, z = {entry[2]}"
+            )
+            create_tiles_jobs(
+                ctx,
+                tiles_layer=TilesLayer.BASEMAP,
+                x=entry[0],
+                y=entry[1],
+                z=entry[2],
+                from_zoom=ctx.tiles.base_from_zoom,
+                before_zoom=ctx.tiles.base_before_zoom,
+            )
+            create_tiles_jobs(
+                ctx,
+                tiles_layer=TilesLayer.POI,
+                x=entry[0],
+                y=entry[1],
+                z=entry[2],
+                from_zoom=ctx.tiles.poi_from_zoom,
+                before_zoom=ctx.tiles.poi_before_zoom,
+            )
     else:
         logging.info("no parameter given for tile generation, skipping it")
 
