@@ -3,9 +3,10 @@
 import subprocess
 import time
 import sys
+import os
 
 
-COMMANDS = ["build", "load-db", "update-tiles", "shutdown", "logs", "kartotherian"]
+COMMANDS = ["build", "load-db", "load-db-france", "update-tiles", "shutdown", "logs", "kartotherian"]
 
 
 def exec_command(command, options):
@@ -26,7 +27,30 @@ def exec_command(command, options):
             sys.stdout.buffer.flush()
 
 
+def get_submodules():
+    dirs = []
+    try:
+        with open('.gitmodules', 'r') as f:
+            for line in f:
+                line = line.strip()
+                if not line.startswith('path = '):
+                    continue
+                dirs.append(line.split('path = ')[1])
+    except Exception as err:
+        print(f'error happened when trying to get submodules: {err}')
+    return dirs
+
+
+def init_submodule_if_not():
+    submodules = get_submodules()
+    for sub in submodules:
+        if len(os.listdir(sub)) == 0:
+            if exec_command(['git', 'submodule', 'update', '--init', sub]) != 0:
+                print(f'Failed to update submodule "{sub}"')
+
+
 def run_kartotherian(options):
+    init_submodule_if_not()
     print('> running kartotherian command')
     return exec_command([
         'docker-compose',
@@ -37,6 +61,7 @@ def run_kartotherian(options):
 
 
 def run_build(options):
+    init_submodule_if_not()
     print('> running build command')
     return exec_command([
         'docker-compose',
@@ -68,6 +93,12 @@ def run_load_db(options):
     ]
     command.append('load_db')
     return exec_command(command, options)
+
+
+def run_load_db_france(options):
+    options['osm-file'] = "https://download.geofabrik.de/europe/france-latest.osm.pbf"
+    options['tiles-coords'] = '[[15, 10, 5], [16, 10, 5], [15, 11, 5], [16, 11, 5]]'
+    run_load_db(options)
 
 
 def run_update_tiles(options):
@@ -114,6 +145,7 @@ def run_help():
     print('  build         : build basics')
     print('  kartotherian  : launch (and build) kartotherian')
     print('  load-db       : load data from the given `--osm-file-url` (luxembourg by default)')
+    print('  load-db-france: load data (tiles too) for the french country')
     print('  update-tiles  : update the tiles data')
     print('  shutdown      : shutdown running docker instances')
     print('  logs          : show docker logs (can be filtered with `--filter` option)')
