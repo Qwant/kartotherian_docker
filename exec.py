@@ -104,9 +104,7 @@ def run_load_db_france(options):
 
 
 def run_update_tiles(options):
-    ret = run_load_db(options)
-    if ret != 0:
-        return ret
+    # needs to be run after load-db, adding a check for it would be nice.
     print('> running update-tiles command')
     return exec_command([
         'docker-compose',
