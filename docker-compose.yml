@@ -15,7 +15,9 @@ services:
      - "cassandra_data:/var/lib/cassandra"
 
   tilerator:
-    build: ./tilerator
+    build:
+      context: .
+      dockerfile: tilerator/Dockerfile
     depends_on:
       - cassandra
       - postgres
@@ -26,7 +28,9 @@ services:
       - update_tiles_data:/data/update_tiles_data
 
   tilerator-worker:
-    build: ./tilerator
+    build:
+      context: .
+      dockerfile: tilerator/Dockerfile
     environment:
       - TILERATOR_NUM_WORKERS=ncpu # Number of workers (or ncpu by default)
     depends_on:
@@ -41,7 +45,9 @@ services:
       - "redisdata:/data"
 
   load_db:
-    build: ./load_db
+    build:
+      context: .
+      dockerfile: load_db/Dockerfile
     environment:
       - INVOKE_CONFIG_FILE=config.yml
     volumes:
@@ -52,10 +58,14 @@ services:
       - postgres
 
   kartotherian:
-    build: ./kartotherian
+    build:
+      context: .
+      dockerfile: kartotherian/Dockerfile
 
   telegraf:
-    build: ./telegraf
+    build:
+      context: .
+      dockerfile: telegraf/Dockerfile
 
 volumes:
   pgdata:

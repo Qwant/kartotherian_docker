@@ -1,0 +1,120 @@
+# Generates vtiles from database
+ 
+### gen lite tiles for mobile
+gen-lite:
+  public: true
+  formats: [pbf]
+  uri: tmsource://
+  yaml: "/etc/tilerator/data_tm2source_lite.yml"
+  yamlSetDataSource:
+    if:
+      dbname: gis
+      host: 'localhost'
+      type: postgis
+    set:
+      host: {env: TILERATOR_OSMDB_HOST}
+      user: {env: TILERATOR_OSMDB_USER}
+      password: {env: TILERATOR_OSMDB_PSWD}
+
+ozgen-lite:
+  public: true
+  formats: [pbf]
+  uri: overzoom://
+  params:
+    source: {ref: gen-lite}
+
+v2-lite:
+  public: true
+  formats: [pbf]
+  uri: cassandra://
+  params:
+    maxzoom: 15
+    keyspace: v2lite
+    cp: {env: TILERATOR_CASSANDRA_SERVERS}
+    username: {env: TILERATOR_CASSANDRA_USER}
+    password: {env: TILERATOR_CASSANDRA_PSWD}
+    repfactor: 4
+    durablewrite: 0
+    createIfMissing: true
+    copyInfoFrom: {ref: gen-lite}
+
+oz-lite:
+  public: true
+  formats: [pbf]
+  uri: overzoom://
+  params:
+    source: {ref: v2-lite}
+
+
+### Basemap without POIs
+gen_basemap:
+  public: true
+  formats: [pbf]
+  uri: tmsource://
+  yaml: "/etc/tilerator/data_tm2source_base.yml"
+  yamlSetDataSource:
+    if:
+      dbname: gis
+      host: 'localhost'
+      type: postgis
+    set:
+      host: {env: TILERATOR_OSMDB_HOST}
+      user: {env: TILERATOR_OSMDB_USER}
+      password: {env: TILERATOR_OSMDB_PSWD}
+
+basemap:
+  public: true
+  formats: [pbf]
+  uri: cassandra://
+  params:
+    maxzoom: 15
+    keyspace: basemap
+    cp: {env: TILERATOR_CASSANDRA_SERVERS}
+    username: {env: TILERATOR_CASSANDRA_USER}
+    password: {env: TILERATOR_CASSANDRA_PSWD}
+    repfactor: 4
+    durablewrite: 0
+    createIfMissing: true
+    copyInfoFrom: {ref: gen_basemap}
+
+substbasemap:  # only for basemap
+  public: true
+  formats: [pbf]
+  uri: substantial://
+  params:
+    source: {ref: gen_basemap}
+    minzoom: 10
+    maxsize: 100
+    layers: [water, landuse, landcover]
+
+# Generate POIs layer
+gen_poi:
+  public: true
+  formats: [pbf]
+  uri: tmsource://
+  yaml: "/etc/tilerator/data_tm2source_poi.yml"
+  yamlSetDataSource:
+    if:
+      dbname: gis
+      host: 'localhost'
+      type: postgis
+    set:
+      host: {env: TILERATOR_OSMDB_HOST}
+      user: {env: TILERATOR_OSMDB_USER}
+      password: {env: TILERATOR_OSMDB_PSWD}
+
+poi:
+  public: true
+  formats: [pbf]
+  uri: cassandra://
+  params:
+    maxzoom: 15
+    minzoom: 10
+    keyspace: poi
+    cp: {env: TILERATOR_CASSANDRA_SERVERS}
+    username: {env: TILERATOR_CASSANDRA_USER}
+    password: {env: TILERATOR_CASSANDRA_PSWD}
+    repfactor: 4
+    durablewrite: 0
+    createIfMissing: true
+    copyInfoFrom: {ref: gen_poi}
