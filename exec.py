@@ -78,7 +78,7 @@ def run_load_db(options):
     ret = run_build(options)
     if ret != 0:
         return ret
-    time.sleep(5) # add into the script a function to check if postgresql is up
+    time.sleep(10) # add into the script a function to check if postgresql is up
     print('> running load-db command')
     if options['osm-file'].startswith('https://') or options['osm-file'].startswith('http://'):
         flag = 'INVOKE_OSM_URL={}'.format(options['osm-file'])
