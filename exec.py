@@ -7,7 +7,7 @@ import os
 import json
 
 
-COMMANDS = ["build", "load-db", "load-db-france", "update-tiles", "shutdown", "logs", "kartotherian"]
+COMMANDS = ["build", "load-db", "load-db-france", "update-tiles", "clean", "logs", "kartotherian"]
 
 
 def exec_command(command, options):
@@ -118,8 +118,8 @@ def run_update_tiles(options):
     ], options)
 
 
-def run_shutdown(options):
-    print('> running shutdown command')
+def run_clean(options):
+    print('> running clean command')
     return exec_command([
         'docker-compose',
         '-f', 'docker-compose.yml',
@@ -149,7 +149,7 @@ def run_help():
     print('  load-db       : load data from the given `--osm-file-url` (luxembourg by default)')
     print('  load-db-france: load data (tiles too) for the french country')
     print('  update-tiles  : update the tiles data')
-    print('  shutdown      : shutdown running docker instances')
+    print('  clean         : stop and remove running docker instances')
     print('  logs          : show docker logs (can be filtered with `--filter` option)')
     print('  --debug       : show more information on the run')
     print('  --filter      : container to show on `logs` command')

@@ -26,7 +26,7 @@ RUN git clone https://github.com/QwantResearch/tilerator.git /opt/tilerator \
 
 # install openmaptiles-tools
 RUN python3.5 -m pip install --upgrade pip \
-    && python3.5 -m pip install openmaptiles-tools
+    && python3.5 -m pip install openmaptiles-tools==0.9.2
 # install openmaptiles
 COPY openmaptiles /opt/openmaptiles
 # setup needed directories

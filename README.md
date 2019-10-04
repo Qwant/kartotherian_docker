@@ -14,7 +14,7 @@ Use these commmands to download, import data and create tiles jobs for Luxembour
 **If sudo required, use "-E"!!**
 
 ```bash
-./exec.py shutdown
+./exec.py clean
 ```
 
 Download, import and start the tiles generation (of Luxembourg by default):
@@ -69,7 +69,7 @@ Note: even if the local directoy in `./data` the osm file path is "/data/**input
 
 The tiles generation is also handle by the `load_db` container.
 
-To only generate 1 tile, you can set `--tiles-x`, `--tiles-y`, `--tiles-z`. x, y, and z are based on the [Slippy Map Tile name](https://wiki.openstreetmap.org/wiki/Slippy_map_tilenames) system and you can use [Geofabrik's tool](https://tools.geofabrik.de/calc/#6/51.25727/10.45457&type=Mapnik&grid=1) to generate these for a specific location.
+To only generate 1 tile, you can set `--tiles-coords [[x, y, z]]`. x, y, and z are based on the [Slippy Map Tile name](https://wiki.openstreetmap.org/wiki/Slippy_map_tilenames) system and you can use [Geofabrik's tool](https://tools.geofabrik.de/calc/#6/51.25727/10.45457&type=Mapnik&grid=1) to generate these for a specific location.
 
 The different ways to configure the tiles generation can be seen [in the default configuration file](https://github.com/QwantResearch/kartotherian_docker/blob/master/import_data/invoke.yaml).
 
