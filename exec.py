@@ -42,16 +42,16 @@ def get_submodules():
     return dirs
 
 
-def init_submodule_if_not():
+def init_submodule_if_not(options):
     submodules = get_submodules()
     for sub in submodules:
         if len(os.listdir(sub)) == 0:
-            if exec_command(['git', 'submodule', 'update', '--init', sub]) != 0:
+            if exec_command(['git', 'submodule', 'update', '--init', sub], options) != 0:
                 print(f'Failed to update submodule "{sub}"')
 
 
 def run_kartotherian(options):
-    init_submodule_if_not()
+    init_submodule_if_not(options)
     print('> running kartotherian command')
     return exec_command([
         'docker-compose',
@@ -62,7 +62,7 @@ def run_kartotherian(options):
 
 
 def run_build(options):
-    init_submodule_if_not()
+    init_submodule_if_not(options)
     print('> running build command')
     return exec_command([
         'docker-compose',

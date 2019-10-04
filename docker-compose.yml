@@ -63,7 +63,9 @@ services:
       dockerfile: kartotherian/Dockerfile
 
   telegraf:
-    build: ./telegraf
+    build:
+      context: .
+      dockerfile: telegraf/Dockerfile
 
 volumes:
   pgdata:
