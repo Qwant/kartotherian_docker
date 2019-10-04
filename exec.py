@@ -170,6 +170,8 @@ def parse_args(args):
     i = 0
     while i < len(args):
         if args[i] in available_options:
+            if args[i].startswith('--'):
+                args[i] = args[i][2:]
             enabled_options[args[i]] = True
         elif args[i] == '--filter':
             if i + 1 >= len(args):
