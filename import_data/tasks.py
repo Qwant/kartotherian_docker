@@ -468,6 +468,31 @@ def generate_tiles(ctx):
             before_zoom=15,
             check_base_layer_level=13,
         )
+    elif ctx.tiles.x and ctx.tiles.y and ctx.tiles.z:
+        logging.info(
+            f"generating tiles for {ctx.tiles.x} / {ctx.tiles.y}, z = {ctx.tiles.z}"
+        )
+        logging.warn("/!\\================================/!\\")
+        logging.warn("Please not that this way of giving position is DEPRECATED! use `coords` instead");
+        logging.warn("/!\\================================/!\\")
+        create_tiles_jobs(
+            ctx,
+            tiles_layer=TilesLayer.BASEMAP,
+            x=ctx.tiles.x,
+            y=ctx.tiles.y,
+            z=ctx.tiles.z,
+            from_zoom=ctx.tiles.base_from_zoom,
+            before_zoom=ctx.tiles.base_before_zoom,
+        )
+        create_tiles_jobs(
+            ctx,
+            tiles_layer=TilesLayer.POI,
+            x=ctx.tiles.x,
+            y=ctx.tiles.y,
+            z=ctx.tiles.z,
+            from_zoom=ctx.tiles.poi_from_zoom,
+            before_zoom=ctx.tiles.poi_before_zoom,
+        )
     elif ctx.tiles.coords:
         try:
             data = json.loads(ctx.tiles.coords)
