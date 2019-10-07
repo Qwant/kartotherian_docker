@@ -140,6 +140,10 @@ def run_logs(options):
 
 def run_help():
     print('== katotherian_docker options ==')
+    print('')
+    print('Generally, it runs in this order: build > load-db(-france) > kartotherian (> logs)')
+    print('To update, it runs in this order: build > load-db(-france) > update-tiles (> logs)')
+    print('')
     print('  build         : build basics')
     print('  kartotherian  : launch (and build) kartotherian')
     print('  load-db       : load data from the given `--osm-file-url` (luxembourg by default)')
