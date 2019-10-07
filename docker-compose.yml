@@ -67,6 +67,9 @@ services:
       context: .
       dockerfile: telegraf/Dockerfile
 
+  tileview:
+    build: tileview
+
 volumes:
   pgdata:
   cassandra_data:

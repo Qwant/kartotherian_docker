@@ -6,7 +6,16 @@ import os
 import json
 
 
-COMMANDS = ["build", "load-db", "load-db-france", "update-tiles", "clean", "logs", "kartotherian"]
+COMMANDS = [
+    "build",
+    "load-db",
+    "load-db-france",
+    "update-tiles",
+    "clean",
+    "logs",
+    "kartotherian",
+    "tileview",
+]
 
 
 def exec_command(command, options):
@@ -138,16 +147,32 @@ def run_logs(options):
     return exec_command(command, options)
 
 
+def run_tileview(options):
+    print('> running tileview command')
+    ret = run_load_db(options)
+    if ret != 0:
+        return ret
+    return exex_command([
+        'docker-compose',
+        '-f', 'docker-compose.yml',
+        '-f', 'local-compose.yml',
+        'up',
+        '-d', 'tileview',
+    ])
+
+
 def run_help():
     print('== katotherian_docker options ==')
     print('')
     print('Generally, it runs in this order: build > load-db(-france) > kartotherian (> logs)')
     print('To update, it runs in this order: build > load-db(-france) > update-tiles (> logs)')
+    print('To debug, it runs in this order:  build > load-db(-france) > tileview (> logs)')
     print('')
     print('  build         : build basics')
     print('  kartotherian  : launch (and build) kartotherian')
     print('  load-db       : load data from the given `--osm-file-url` (luxembourg by default)')
     print('  load-db-france: load data (tiles too) for the french country')
+    print('  tileview      : run a map server which allows to get detailed tiles information')
     print('  update-tiles  : update the tiles data')
     print('  clean         : stop and remove running docker instances')
     print('  logs          : show docker logs (can be filtered with `--filter` option)')
