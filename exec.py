@@ -156,6 +156,7 @@ def run_help():
     print('  --osm-file    : file or URL to be used for pbf file in `load-db`, luxembourg by default')
     print('  --tiles-coords: needs to be an array of arrays (each of len 3). Defaults to [[66, 43, 7]].')
     print('                  You can find coords by using http://tools.geofabrik.de/calc/?grid=1')
+    print('                  Used in load-db(-france) command.')
     print('  -h | --help   : show this help')
     sys.exit(0)
 
