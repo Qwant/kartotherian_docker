@@ -3,6 +3,7 @@ import logging
 import json
 import os
 import os.path
+import time
 from datetime import timedelta, datetime
 from urllib.request import getproxies
 from urllib.parse import urlparse
@@ -37,8 +38,25 @@ def _db_exists(ctx, db_name):
     return has_db.stdout == "1\n"
 
 
+def _wait_until_postgresql_is_ready(ctx):
+    logging.info(f'Trying to connect to postgres...')
+    query = f'pg_isready -h {ctx.pg.host} -p {ctx.pg.port} -U {ctx.pg.user}'
+    x = 0
+    while x < 30:
+        try:
+            ctx.run(query, env={"PGPASSWORD": ctx.pg.password})
+            logging.info(f'Success!')
+            return
+        except:
+            logging.info(f'Connection to postgres failed, remaining {30 - x} attempts...')
+        time.sleep(1)
+        x += 1
+    raise Exception("Postgreql doesn't seem to ready, aborting...")
+
+
 @task
 def prepare_db(ctx):
+    _wait_until_postgresql_is_ready(ctx)
     """
     creates the import database and remove the old backup one
     """
