@@ -25,6 +25,8 @@ Download, import and start the tiles generation (of Luxembourg by default):
 
 Once all tiles are generated, the map is visible on `http://localhost:8585`!
 
+If you want to see the list of all available commands, use `-h` or `--help` option on `exec.py`.
+
 ## Workflow
 
 If you want to update the generation process, you need to edit [QwantResearch/openmaptiles](https://github.com/QwantResearch/openmaptiles) then update the openmaptiles submodule.
@@ -92,6 +94,10 @@ During this task:
 ## archi
 
 The tile server architecture can be seen at [QwantMaps](https://github.com/QwantResearch/qwantmaps#global-picture)
+
+### sub-folders
+
+Normally you shouldn't need to change anything in the subfolders: everything is handled inside the docker files through `exec.py`. However, if you're interested in what these sub-folders are used for, go take a look to their `README.md` file.
 
 ## configuration files
 

@@ -11,8 +11,7 @@ RUN git clone https://github.com/QwantResearch/map-style-builder.git
 COPY tileview_conf.json /opt/qwant-basic-gl-style/map-style-builder
 
 RUN cd map-style-builder && npm install && \
-	npm run build_all -- --style-dir=../ --conf=./tileview_conf.json --icons=true --i18n fr
-
+    npm run build_all -- --style-dir=../ --conf=./tileview_conf.json --icons=true --i18n fr
 
 
 FROM nginx:alpine
