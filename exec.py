@@ -157,6 +157,9 @@ def run_help():
 
 
 def parse_args(args):
+    if len(args) == 0:
+        run_help()
+        sys.exit(0)
     available_options = ['--no-dependency-run', '--debug']
     available_options.extend(COMMANDS)
     enabled_options = {
@@ -202,6 +205,7 @@ def parse_args(args):
             enabled_options[args[i - 1][2:]] = args[i]
         elif args[i] == '-h' or args[i] == '--help':
             run_help()
+            sys.exit(0)
         else:
             print('Unknown option `{}`, run with with `-h` or `--help` to see the list of commands'
                 .format(args[i]))
