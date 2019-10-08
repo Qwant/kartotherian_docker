@@ -23,6 +23,7 @@ services:
       - "8585:3000"
 
   tileview:
+    build: tileview
     ports:
       - "9999:80"
 

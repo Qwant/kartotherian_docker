@@ -154,7 +154,6 @@ def run_tileview(options):
         return ret
     return exex_command([
         'docker-compose',
-        '-f', 'docker-compose.yml',
         '-f', 'local-compose.yml',
         'up',
         '-d', 'tileview',
