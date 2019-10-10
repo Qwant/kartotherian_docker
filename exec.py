@@ -152,12 +152,12 @@ def run_tileview(options):
     ret = run_load_db(options)
     if ret != 0:
         return ret
-    return exex_command([
+    return exec_command([
         'docker-compose',
         '-f', 'local-compose.yml',
         'up',
         '-d', 'tileview',
-    ])
+    ], options)
 
 
 def run_help():
