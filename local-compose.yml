@@ -22,6 +22,11 @@ services:
     ports:
       - "8585:3000"
 
+  tileview:
+    build: tileview
+    ports:
+      - "9999:80"
+
 volumes:
   input_data:
     driver_opts:

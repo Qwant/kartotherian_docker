@@ -6,7 +6,16 @@ import os
 import json
 
 
-COMMANDS = ["build", "load-db", "load-db-france", "update-tiles", "clean", "logs", "kartotherian"]
+COMMANDS = [
+    "build",
+    "load-db",
+    "load-db-france",
+    "update-tiles",
+    "clean",
+    "logs",
+    "kartotherian",
+    "tileview",
+]
 
 
 def exec_command(command, options):
@@ -138,24 +147,48 @@ def run_logs(options):
     return exec_command(command, options)
 
 
+def run_tileview(options):
+    print('> running tileview command')
+    ret = run_load_db(options)
+    if ret != 0:
+        return ret
+    return exex_command([
+        'docker-compose',
+        '-f', 'local-compose.yml',
+        'up',
+        '-d', 'tileview',
+    ])
+
+
 def run_help():
     print('== katotherian_docker options ==')
+    print('')
+    print('Generally, it runs in this order: build > load-db(-france) > kartotherian (> logs)')
+    print('To update, it runs in this order: build > load-db(-france) > update-tiles (> logs)')
+    print('To debug, it runs in this order:  build > load-db(-france) > tileview (> logs)')
+    print('')
     print('  build         : build basics')
     print('  kartotherian  : launch (and build) kartotherian')
     print('  load-db       : load data from the given `--osm-file-url` (luxembourg by default)')
     print('  load-db-france: load data (tiles too) for the french country')
+    print('  tileview      : run a map server which allows to get detailed tiles information')
     print('  update-tiles  : update the tiles data')
     print('  clean         : stop and remove running docker instances')
     print('  logs          : show docker logs (can be filtered with `--filter` option)')
     print('  --debug       : show more information on the run')
     print('  --filter      : container to show on `logs` command')
     print('  --osm-file    : file or URL to be used for pbf file in `load-db`, luxembourg by default')
-    print('  --tiles-coords: needs to be an array of arrays (each of len 3). Defaults to [[66, 43, 7]]')
+    print('  --tiles-coords: needs to be an array of arrays (each of len 3). Defaults to [[66, 43, 7]].')
+    print('                  You can find coords by using http://tools.geofabrik.de/calc/?grid=1')
+    print('                  Used in load-db(-france) command.')
     print('  -h | --help   : show this help')
     sys.exit(0)
 
 
 def parse_args(args):
+    if len(args) == 0:
+        run_help()
+        sys.exit(0)
     available_options = ['--no-dependency-run', '--debug']
     available_options.extend(COMMANDS)
     enabled_options = {
@@ -201,6 +234,7 @@ def parse_args(args):
             enabled_options[args[i - 1][2:]] = args[i]
         elif args[i] == '-h' or args[i] == '--help':
             run_help()
+            sys.exit(0)
         else:
             print('Unknown option `{}`, run with with `-h` or `--help` to see the list of commands'
                 .format(args[i]))

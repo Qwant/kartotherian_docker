@@ -23,7 +23,9 @@ Download, import and start the tiles generation (of Luxembourg by default):
 ./exec.py load-db # it runs the build command as a dependency on 'load-db'
 ```
 
-Once all tiles are generated, the map is visible on `http://localhost:8585`!
+Once all tiles are generated, the map is visible on `http://localhost:8585`! (If not, take a look at `docker ps` and see what the port of the image `qwantresearch/erdapfel` is.)
+
+If you want to see the list of all available commands, use `-h` or `--help` option on `exec.py`.
 
 ## Workflow
 
@@ -92,6 +94,10 @@ During this task:
 ## archi
 
 The tile server architecture can be seen at [QwantMaps](https://github.com/QwantResearch/qwantmaps#global-picture)
+
+### sub-folders
+
+Normally you shouldn't need to change anything in the subfolders: everything is handled inside the docker files through `exec.py`. However, if you're interested in what these sub-folders are used for, go take a look to their `README.md` file.
 
 ## configuration files
 
