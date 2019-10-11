@@ -161,7 +161,7 @@ def run_tileview(options):
 
 
 def run_help():
-    print('== katotherian_docker options ==')
+    print('== kartotherian_docker options ==')
     print('')
     print('Generally, it runs in this order: build > load-db(-france) > kartotherian (> logs)')
     print('To update, it runs in this order: build > load-db(-france) > update-tiles (> logs)')
