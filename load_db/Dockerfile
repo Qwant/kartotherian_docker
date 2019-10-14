@@ -17,7 +17,7 @@ RUN apt-get update && \
         postgis \
         osmosis \
         jq \
-# install imposm
+# install imposm 0.8.1 (custom release, waiting for https://github.com/omniscale/imposm3/pull/206 to be merged)
     && wget https://github.com/amatissart/imposm3/releases/download/v0.8.1-qwant-0/imposm-0.8.1-qwant-0-linux-x86-64.tar.gz \
     && tar xvfz imposm-0.8.1-qwant-0-linux-x86-64.tar.gz \
     && ln -sf /imposm-0.8.1-qwant-0-linux-x86-64/imposm /usr/local/bin/imposm3 \
