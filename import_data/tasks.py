@@ -58,22 +58,25 @@ def _wait_until_postgresql_is_ready(ctx):
 def prepare_db(ctx):
     _wait_until_postgresql_is_ready(ctx)
     """
-    creates the import database and remove the old backup one
+    create the import database and remove the old backup one
     """
-    _execute_sql(ctx, f"DROP DATABASE IF EXISTS {ctx.pg.backup_database};")
-    if not _db_exists(ctx, ctx.pg.import_database):
-        logging.info("creating databases")
-        _execute_sql(ctx, f"CREATE DATABASE {ctx.pg.import_database};")
-        _execute_sql(
-            ctx,
-            db=ctx.pg.import_database,
-            sql=f"""
+    _execute_sql(ctx, f"DROP DATABASE IF EXISTS {ctx.pg.import_database};")
+
+    logging.info(f"creating {ctx.pg.import_database} database")
+    _execute_sql(ctx, f"CREATE DATABASE {ctx.pg.import_database};")
+    _execute_sql(
+        ctx,
+        db=ctx.pg.import_database,
+        sql="""
 CREATE EXTENSION postgis;
 CREATE EXTENSION hstore;
 CREATE EXTENSION unaccent;
 CREATE EXTENSION fuzzystrmatch;
 CREATE EXTENSION osml10n;""",
-        )
+    )
+
+    _execute_sql(ctx, f"DROP DATABASE IF EXISTS {ctx.pg.backup_database};")
+
 
 
 def _read_md5(md5_response):
