@@ -31,5 +31,10 @@ volumes:
   input_data:
     driver_opts:
       type: none
-      device: ${PWD}/data
+      device: ${PWD}/data/input
+      o: bind
+  update_tiles_data:
+    driver_opts:
+      type: none
+      device: ${PWD}/data/update_tiles_data
       o: bind

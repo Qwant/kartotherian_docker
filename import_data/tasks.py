@@ -7,6 +7,7 @@ import time
 from datetime import timedelta, datetime
 from urllib.request import getproxies
 from urllib.parse import urlparse
+from pathlib import Path
 
 import requests
 import configparser
@@ -52,6 +53,16 @@ def _wait_until_postgresql_is_ready(ctx):
         time.sleep(1)
         x += 1
     raise Exception("Postgreql doesn't seem to ready, aborting...")
+
+@task
+def create_db(ctx, db_name):
+    _execute_sql(ctx, f"CREATE DATABASE {db_name};")
+
+@task
+def init_airflow(ctx):
+    if not _db_exists(ctx, "airflow"):
+        create_db(ctx, "airflow")
+        ctx.run("airflow initdb")
 
 
 @task

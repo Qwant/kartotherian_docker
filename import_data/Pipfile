@@ -11,6 +11,7 @@ requests = ">=2.20.0"
 configparser = "*"
 pydantic = "*"
 openmaptiles-tools = ">=0.9.2"
+apache-airflow = {extras = ["postgres"],version = "*"}
 
 [requires]
 python_version = "3.6"
