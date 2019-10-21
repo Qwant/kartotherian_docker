@@ -1,6 +1,7 @@
 #!/bin/bash
 
 set -x
+set -o pipefail
 
 description="OpenStreetMap database update script"
 version="0.2/20180716"
