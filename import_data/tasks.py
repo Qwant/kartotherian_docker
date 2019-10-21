@@ -1,6 +1,10 @@
+import csv
 import sys
 import logging
 import json
+import gzip
+import psycopg2
+import psycopg2.extras
 import os
 import os.path
 import time
@@ -10,7 +14,7 @@ from invoke import task
 from invoke.exceptions import Failure
 from utils.lock import FileLock
 
-
+psycopg2.extensions.register_adapter(dict, psycopg2.extras.Json)
 logging.basicConfig(level=logging.INFO)
 
 
@@ -18,12 +22,28 @@ class TilesLayer:
     BASEMAP = 'basemap'
     POI = 'poi'
 
+def _open_sql_connection(ctx):
+    connection = psycopg2.connect(
+        user=ctx.pg.user,
+        database=ctx.pg.database,
+        host=ctx.pg.host,
+        password=ctx.pg.password,
+        port=ctx.pg.port
+    )
+    psycopg2.extras.register_hstore(connection, globally=True)
+    return connection
 
-def _execute_sql(ctx, sql, db=None, additional_options=""):
+def _execute_sql(ctx, sql, db=None, additional_options="", istream=None):
     query = f'psql -Xq -h {ctx.pg.host} -p {ctx.pg.port} -U {ctx.pg.user} -c "{sql}" {additional_options}'
+
     if db is not None:
         query += f" -d {db}"
-    return ctx.run(query, env={"PGPASSWORD": ctx.pg.password})
+
+    return ctx.run(
+        query,
+        env={"PGPASSWORD": ctx.pg.password},
+        in_stream=istream
+    )
 
 
 def _db_exists(ctx, db_name):
@@ -181,6 +201,7 @@ def run_sql_script(ctx):
     # load several psql functions
     _run_sql_script(ctx, "import-sql/language.sql")
     _run_sql_script(ctx, "postgis-vt-util/postgis-vt-util.sql")
+    _run_sql_script(ctx, "import-wikidata/wikidata.sql")
 
 
 ### non-OSM data import
@@ -288,16 +309,94 @@ def import_border(ctx):
   {ctx.imposm_config_dir}/import-osmborder/import/import_osmborder_lines.sh"
     )
 
+### Wikimedia sites
+###################
 
 @task
-def import_wikidata(ctx):
+def import_wikimedia_stats(ctx):
+    """
+    import wikimedia stats (for POI ranking through Wikipedia page views).
+    """
+    target_file = os.path.join(ctx.data_dir, ctx.wikimedia_stats.file)
+
+    if not os.path.isfile(target_file):
+        ctx.run(
+            f'wget --progress=dot:giga -O {target_file} {ctx.wikimedia_stats.url}'
+        )
+
+    connection = _open_sql_connection(ctx)
+    cursor = connection.cursor()
+
+    with gzip.open(target_file, 'rt') as istream:
+        cursor.execute(f'TRUNCATE TABLE {ctx.wikimedia_stats.table};')
+        cursor.copy_expert(
+            f"COPY {ctx.wikimedia_stats.table} "
+            f"FROM STDIN DELIMITER ',' CSV HEADER;",
+            istream
+        )
+
+    cursor.close()
+    connection.close()
+
+@task
+def import_wikidata_sitelinks(ctx):
+    target_file = os.path.join(ctx.data_dir, ctx.wikidata.sitelinks.file)
+
+    if not os.path.isfile(target_file):
+        ctx.run(
+            f'wget --progress=dot:giga -O {target_file} '
+            f'{ctx.wikidata.sitelinks.url}'
+        )
+
+    connection = _open_sql_connection(ctx)
+    cursor = connection.cursor()
+
+    with gzip.open(target_file, 'rt') as istream:
+        cursor.execute(f'TRUNCATE TABLE {ctx.wikidata.sitelinks.table};')
+        cursor.copy_expert(
+            f"COPY {ctx.wikidata.sitelinks.table} "
+            f"FROM STDIN DELIMITER ',' CSV HEADER;",
+            istream
+        )
+
+    connection.commit()
+    connection.close()
+
+@task
+def import_wikidata_labels(ctx):
     """
     import wikidata (for some translations)
-
-    For the moment this does nothing (but we need a table for some openmaptiles function)
     """
-    create_table = "CREATE TABLE IF NOT EXISTS wd_names (id varchar(20) UNIQUE, page varchar(200) UNIQUE, labels hstore);"
-    _execute_sql(ctx, db=ctx.pg.import_database, sql=create_table)
+    target_file = os.path.join(ctx.data_dir, ctx.wikidata.labels.file)
+
+    if not os.path.isfile(target_file):
+        ctx.run(
+            f'wget --progress=dot:giga -O {target_file} '
+            f'{ctx.wikidata.labels.url}'
+        )
+
+    with gzip.open(target_file, 'rt') as istream:
+        reader = csv.DictReader(istream)
+
+        connection = _open_sql_connection(ctx)
+        cursor = connection.cursor()
+
+        from psycopg2.extras import execute_values
+        cursor.executemany(
+            f'''
+            INSERT INTO {ctx.wikidata.labels.table} (id, labels)
+            VALUES (%s, %s)
+            ON CONFLICT (id) DO
+                UPDATE SET labels = (wd_names.labels || EXCLUDED.labels)
+            ''',
+            map(
+                lambda row: (row['title'], {row['language']: row['value']}),
+                reader
+            )
+        )
+
+        connection.commit()
+        connection.close()
 
 
 ### import pipeline
