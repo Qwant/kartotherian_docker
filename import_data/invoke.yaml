@@ -30,7 +30,7 @@ wikidata:
   sitelinks:
     url: https://github.com/QwantResearch/wikimedia-dumps/releases/download/10/2019/sitelinks.csv.gz
     file: sitelinks.csv.gz
-    table: test_wikidata_sitelinks
+    table: wd_sitelinks
 
   labels:
     url: https://github.com/QwantResearch/wikimedia-dumps/releases/download/10/2019/labels.csv.gz
@@ -40,7 +40,7 @@ wikidata:
 wikimedia_stats:
   url: https://github.com/QwantResearch/wikimedia-dumps/releases/download/10/2019/stats.csv.gz
   file: stats.csv.gz
-  table: test_wikimedia_stats
+  table: wm_stats
 
 ################################################
 # Tiles generation

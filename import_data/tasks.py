@@ -335,7 +335,7 @@ def import_wikimedia_stats(ctx):
             istream
         )
 
-    cursor.close()
+    connection.commit()
     connection.close()
 
 @task
@@ -377,11 +377,9 @@ def import_wikidata_labels(ctx):
 
     with gzip.open(target_file, 'rt') as istream:
         reader = csv.DictReader(istream)
-
         connection = _open_sql_connection(ctx)
         cursor = connection.cursor()
 
-        from psycopg2.extras import execute_values
         cursor.executemany(
             f'''
             INSERT INTO {ctx.wikidata.labels.table} (id, labels)
@@ -390,8 +388,10 @@ def import_wikidata_labels(ctx):
                 UPDATE SET labels = (wd_names.labels || EXCLUDED.labels)
             ''',
             map(
-                lambda row: (row['title'], {row['language']: row['value']}),
-                reader
+                lambda row: (
+                    row['title'],
+                    {'name:' + row['language']: row['value']}
+                ), reader
             )
         )
 
