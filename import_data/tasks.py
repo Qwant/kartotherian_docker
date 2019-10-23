@@ -14,7 +14,6 @@ from invoke import task
 from invoke.exceptions import Failure
 from utils.lock import FileLock
 
-psycopg2.extensions.register_adapter(dict, psycopg2.extras.Json)
 logging.basicConfig(level=logging.INFO)
 
 
@@ -315,8 +314,12 @@ def import_border(ctx):
 @task
 def import_wikimedia_stats(ctx):
     """
-    import wikimedia stats (for POI ranking through Wikipedia page views).
+    import wikimedia stats (for POI ranking through Wikipedia page views)
     """
+    if ctx.wikimedia_stats.skip:
+        print("Skipping wikimedia stats", file=sys.stderr)
+        return
+
     target_file = os.path.join(ctx.data_dir, ctx.wikimedia_stats.file)
 
     if not os.path.isfile(target_file):
@@ -330,8 +333,8 @@ def import_wikimedia_stats(ctx):
     with gzip.open(target_file, 'rt') as istream:
         cursor.execute(f'TRUNCATE TABLE {ctx.wikimedia_stats.table};')
         cursor.copy_expert(
-            f"COPY {ctx.wikimedia_stats.table} "
-            f"FROM STDIN DELIMITER ',' CSV HEADER;",
+            f'COPY {ctx.wikimedia_stats.table} '
+            f'FROM STDIN DELIMITER \',\' CSV HEADER;',
             istream
         )
 
@@ -340,6 +343,13 @@ def import_wikimedia_stats(ctx):
 
 @task
 def import_wikidata_sitelinks(ctx):
+    """
+    import Wikipedia pages links for Wikidata items
+    """
+    if ctx.wikidata.sitelinks.skip:
+        print("Skipping wikidata sitelinks", file=sys.stderr)
+        return
+
     target_file = os.path.join(ctx.data_dir, ctx.wikidata.sitelinks.file)
 
     if not os.path.isfile(target_file):
@@ -354,8 +364,8 @@ def import_wikidata_sitelinks(ctx):
     with gzip.open(target_file, 'rt') as istream:
         cursor.execute(f'TRUNCATE TABLE {ctx.wikidata.sitelinks.table};')
         cursor.copy_expert(
-            f"COPY {ctx.wikidata.sitelinks.table} "
-            f"FROM STDIN DELIMITER ',' CSV HEADER;",
+            f'COPY {ctx.wikidata.sitelinks.table} '
+            f'FROM STDIN DELIMITER ',' CSV HEADER;',
             istream
         )
 
@@ -365,8 +375,12 @@ def import_wikidata_sitelinks(ctx):
 @task
 def import_wikidata_labels(ctx):
     """
-    import wikidata (for some translations)
+    import labels from Wikidata (for some translations)
     """
+    if ctx.wikidata.labels.skip:
+        print("Skipping wikidata labels", file=sys.stderr)
+        return
+
     target_file = os.path.join(ctx.data_dir, ctx.wikidata.labels.file)
 
     if not os.path.isfile(target_file):

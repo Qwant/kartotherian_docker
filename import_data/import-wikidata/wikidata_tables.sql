@@ -1,9 +1,9 @@
 -- View counts for Wikipedia pages.
 CREATE TABLE IF NOT EXISTS wm_stats
 (
-    lang      VARCHAR(8)      NOT NULL,
-    title     VARCHAR(1024)   NOT NULL,
-    views     INTEGER         NOT NULL,
+    lang    VARCHAR(8)      NOT NULL,
+    title   VARCHAR(1024)   NOT NULL,
+    views   INTEGER         NOT NULL,
     UNIQUE (lang, title)
 );
 

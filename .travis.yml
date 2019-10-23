@@ -1,0 +1,23 @@
+services:
+  - docker
+
+env:
+  global:
+    - DOCKER_IMAGE_PREFIX=qwantresearch/kartotherian
+  matrix:
+    - SERVICE=load_db
+    - SERVICE=tilerator
+    - SERVICE=kartotherian
+    - SERVICE=telegraf
+
+before_install:
+  - if [ "$TRAVIS_PULL_REQUEST_BRANCH" == "" ] && [ "$TRAVIS_BRANCH" == "master" ]; then
+    echo "$DOCKER_TOKEN" | docker login -u "$DOCKER_USERNAME" --password-stdin;
+    fi
+
+script:
+  - export DOCKER_IMAGE="${DOCKER_IMAGE_PREFIX}_$SERVICE"
+  - docker build --label "org.label-schema.vcs-ref=$TRAVIS_COMMIT" -t $DOCKER_IMAGE -f ./$SERVICE/Dockerfile .
+  - if [ "$TRAVIS_PULL_REQUEST_BRANCH" == "" ] && [ "$TRAVIS_BRANCH" == "master" ]; then
+    docker push $DOCKER_IMAGE;
+    fi

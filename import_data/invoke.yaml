@@ -3,7 +3,7 @@ pg:
   database: gis
   import_database: import_gis
   backup_database: backup_gis
-  host: postgres
+  host: 172.18.0.5
   password: gis
   port: 5432
 
@@ -28,16 +28,19 @@ osm:
 
 wikidata:
   sitelinks:
+    skip: true
     url: https://github.com/QwantResearch/wikimedia-dumps/releases/download/10/2019/sitelinks.csv.gz
     file: sitelinks.csv.gz
     table: wd_sitelinks
 
   labels:
+    skip: true
     url: https://github.com/QwantResearch/wikimedia-dumps/releases/download/10/2019/labels.csv.gz
     file: labels.csv.gz
     table: wd_names
 
 wikimedia_stats:
+  skip: true
   url: https://github.com/QwantResearch/wikimedia-dumps/releases/download/10/2019/stats.csv.gz
   file: stats.csv.gz
   table: wm_stats
