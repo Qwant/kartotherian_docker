@@ -32,16 +32,13 @@ def _open_sql_connection(ctx):
     psycopg2.extras.register_hstore(connection, globally=True)
     return connection
 
-def _execute_sql(ctx, sql, db=None, additional_options="", istream=None):
+def _execute_sql(ctx, sql, db=None, additional_options=""):
     query = f'psql -Xq -h {ctx.pg.host} -p {ctx.pg.port} -U {ctx.pg.user} -c "{sql}" {additional_options}'
-
     if db is not None:
         query += f" -d {db}"
-
     return ctx.run(
         query,
-        env={"PGPASSWORD": ctx.pg.password},
-        in_stream=istream
+        env={"PGPASSWORD": ctx.pg.password}
     )
 
 
