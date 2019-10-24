@@ -47,13 +47,12 @@ this data you can either change the `invoke.yaml` file or run the commands
 bellow after you imported other data:
 
 ```bash
-INVOKE_WIKIMEDIA_STATS_SKIP=0 pipenv run invoke import-wikimedia-stats
-INVOKE_WIKIDATA_LABELS_SKIP=0 pipenv run invoke import-wikidata-labels
-INVOKE_WIKIDATA_SITELINKS_SKIP=0 pipenv run invoke import-wikidata-sitelinks
+pipenv run invoke import-wikimedia-stats
+pipenv run invoke import-wikidata-sitelinks
+pipenv run invoke import-wikidata-labels
 ```
 
-or set `INVOKE_WIKIMEDIA_STATS_SKIP=0`, `INVOKE_WIKIDATA_LABELS_SKIP=0` and
-`INVOKE_WIKIDATA_SITELINKS_SKIP=0` while importing other data.
+or set `INVOKE_IMPORT_WIKIDATA=1` while importing other data.
 
 Note: be careful to replace `_` with `-` in the function name
 

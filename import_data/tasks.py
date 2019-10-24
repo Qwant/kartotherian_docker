@@ -316,10 +316,6 @@ def import_wikimedia_stats(ctx):
     """
     import wikimedia stats (for POI ranking through Wikipedia page views)
     """
-    if ctx.wikimedia_stats.skip:
-        print("Skipping wikimedia stats", file=sys.stderr)
-        return
-
     target_file = os.path.join(ctx.data_dir, ctx.wikimedia_stats.file)
 
     if not os.path.isfile(target_file):
@@ -346,10 +342,6 @@ def import_wikidata_sitelinks(ctx):
     """
     import Wikipedia pages links for Wikidata items
     """
-    if ctx.wikidata.sitelinks.skip:
-        print("Skipping wikidata sitelinks", file=sys.stderr)
-        return
-
     target_file = os.path.join(ctx.data_dir, ctx.wikidata.sitelinks.file)
 
     if not os.path.isfile(target_file):
@@ -377,10 +369,6 @@ def import_wikidata_labels(ctx):
     """
     import labels from Wikidata (for some translations)
     """
-    if ctx.wikidata.labels.skip:
-        print("Skipping wikidata labels", file=sys.stderr)
-        return
-
     target_file = os.path.join(ctx.data_dir, ctx.wikidata.labels.file)
 
     if not os.path.isfile(target_file):
@@ -442,7 +430,11 @@ def load_additional_data(ctx):
     import_water_polygon(ctx)
     import_lake(ctx)
     import_border(ctx)
-    import_wikidata(ctx)
+
+    if ctx.import_wikidata:
+        import_wikimedia_stats(ctx)
+        import_wikidata_sitelinks(ctx)
+        import_wikidata_labels(ctx)
 
 
 @task
