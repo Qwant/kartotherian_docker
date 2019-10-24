@@ -35,26 +35,27 @@ CREATE OR REPLACE FUNCTION poi_weight(
     mapping_key varchar,
     tags hstore
 )
-RETURNS integer AS $$
-    SELECT COALESCE(
-        (
-            SELECT MAX(wm_stats.views)
+RETURNS REAL AS $$
+    DECLARE
+        max_views CONSTANT REAL := 1e9;
+        min_views CONSTANT REAL := 10.;
+        views_count real;
+    BEGIN
+        SELECT INTO views_count
+            COALESCE(MAX(wm_stats.views)::real, 0)
             FROM wm_stats
             JOIN wd_sitelinks ON (wm_stats.title = wd_sitelinks.title
                               AND wm_stats.lang = wd_sitelinks.lang)
-            WHERE wd_sitelinks.id = tags->'wikidata'
-        ),
-        (
-            CASE
-                WHEN tags ? 'wikidata' THEN -500
-                WHEN name = '' THEN -1000000
-                ELSE -10 * poi_class_rank(poi_class(subclass, mapping_key))
-            END
-            + (
-                SELECT COUNT(*)::integer
-                FROM each(tags)
-                WHERE key LIKE 'name:%'
-            )
-        )
-    )
-$$ LANGUAGE SQL IMMUTABLE;
+            WHERE wd_sitelinks.id = tags->'wikidata';
+        RETURN CASE
+            WHEN views_count > min_views THEN
+                0.5 * (1 + LOG(LEAST(max_views, views_count)) / LOG(max_views))
+            WHEN name = '' THEN
+                0.0
+            ELSE
+                0.5 * (
+                    1 - poi_class_rank(poi_class(subclass, mapping_key))::real / 2000
+                )
+        END;
+    END
+$$ LANGUAGE plpgsql IMMUTABLE;
