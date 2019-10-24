@@ -37,8 +37,8 @@ CREATE OR REPLACE FUNCTION poi_weight(
 )
 RETURNS REAL AS $$
     DECLARE
-        max_views CONSTANT REAL := 1e9;
-        min_views CONSTANT REAL := 10.;
+        max_views CONSTANT REAL := 1e6;
+        min_views CONSTANT REAL := 50.;
         views_count real;
     BEGIN
         SELECT INTO views_count
