@@ -28,4 +28,4 @@ function wait_for_cassandra() {(
 
 wait_for_cassandra
 
-node /opt/tilerator/server.js -c /etc/tilerator/$TILERATOR_CONFIG_FILE
+node /opt/kartotherian/packages/tilerator/server.js -c /etc/tilerator/$TILERATOR_CONFIG_FILE

@@ -20,7 +20,7 @@ metrics:
 
 services:
   - name: kartotherian
-    module: ./app.js
+    module: kartotherian
 
     conf:
       port: 6533

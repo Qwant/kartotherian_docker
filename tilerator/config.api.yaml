@@ -29,7 +29,7 @@ metrics:
 services:
   - name: tilerator
     # a relative path or the name of an npm package, if different from name
-    module: ./app.js
+    module: tilerator
     # optionally, a version constraint of the npm package
     # version: ^0.4.0
     # per-service config
@@ -41,7 +41,7 @@ services:
 
       # more per-service config settings
       # the location of the spec, defaults to spec.yaml if not specified
-      spec: /opt/tilerator/spec.template.yaml
+      spec: /opt/kartotherian/packages/tilerator/spec.template.yaml
       # allow cross-domain requests to the API (default '*')
       cors: '*'
       # to disable use:

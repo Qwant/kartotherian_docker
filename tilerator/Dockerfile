@@ -19,9 +19,9 @@ RUN apt-get update && \
         locales \
     && npm i npm@latest -g
 
-RUN git clone https://github.com/QwantResearch/tilerator.git /opt/tilerator \
-    && cd /opt/tilerator \
-    && git checkout 64b69c064aae15d474bd61da2c6bc35140f118f8 \
+RUN git clone https://github.com/QwantResearch/kartotherian.git /opt/kartotherian \
+    && cd /opt/kartotherian \
+    && git checkout b932ee3254e72aeea6af5935fd53e4269807a86c \
     && npm install --production
 
 # install openmaptiles-tools
@@ -41,18 +41,16 @@ ENV LC_ALL C.UTF-8
 RUN cd /opt/openmaptiles \
     && CONFIG_DIR=/opt/config make qwant
 
-COPY tilerator/config*.yaml /opt/tilerator/
+RUN mkdir -p /etc/tilerator
+COPY tilerator/config*.yaml /etc/tilerator/
 COPY tilerator/gen_tiles.sh /gen_tiles.sh
 
-RUN mkdir -p /etc/tilerator
 COPY tilerator/sources.yaml /etc/tilerator/
 RUN ln -sf /opt/config/tilerator/data_tm2source_base.yml /etc/tilerator
 RUN ln -sf /opt/config/tilerator/data_tm2source_poi.yml /etc/tilerator
 RUN ln -sf /opt/config/tilerator/data_tm2source_lite.yml /etc/tilerator
 
-RUN chmod +x /gen_tiles.sh \
-    && ln -sf /opt/tilerator/config*.yaml /etc/tilerator \
-    && ln -sf /opt/tilerator/dist/init-scripts/cassandra.wait /usr/local/bin
+RUN chmod +x /gen_tiles.sh
 
 COPY tilerator/runserver.sh /runserver.sh
 RUN chmod +x /runserver.sh
