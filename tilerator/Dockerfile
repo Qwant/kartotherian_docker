@@ -41,10 +41,10 @@ ENV LC_ALL C.UTF-8
 RUN cd /opt/openmaptiles \
     && CONFIG_DIR=/opt/config make qwant
 
+RUN mkdir -p /etc/tilerator
 COPY tilerator/config*.yaml /etc/tilerator/
 COPY tilerator/gen_tiles.sh /gen_tiles.sh
 
-RUN mkdir -p /etc/tilerator
 COPY tilerator/sources.yaml /etc/tilerator/
 RUN ln -sf /opt/config/tilerator/data_tm2source_base.yml /etc/tilerator
 RUN ln -sf /opt/config/tilerator/data_tm2source_poi.yml /etc/tilerator
