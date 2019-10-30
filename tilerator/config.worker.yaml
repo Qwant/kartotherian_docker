@@ -29,7 +29,7 @@ metrics:
 services:
   - name: tilerator
     # a relative path or the name of an npm package, if different from name
-    module: ./app.js
+    module: tilerator
     # optionally, a version constraint of the npm package
     # version: ^0.4.0
     # per-service config
