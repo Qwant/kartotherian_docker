@@ -21,10 +21,10 @@ class TilesLayer:
     BASEMAP = 'basemap'
     POI = 'poi'
 
-def _open_sql_connection(ctx):
+def _open_sql_connection(ctx, db):
     connection = psycopg2.connect(
         user=ctx.pg.user,
-        database=ctx.pg.database,
+        dbname=db,
         host=ctx.pg.host,
         password=ctx.pg.password,
         port=ctx.pg.port
@@ -197,7 +197,7 @@ def run_sql_script(ctx):
     # load several psql functions
     _run_sql_script(ctx, "import-sql/language.sql")
     _run_sql_script(ctx, "postgis-vt-util/postgis-vt-util.sql")
-    _run_sql_script(ctx, "import-wikidata/wikidata.sql")
+    _run_sql_script(ctx, "import-wikidata/wikidata_tables.sql")
 
 
 ### non-OSM data import
@@ -320,7 +320,7 @@ def import_wikimedia_stats(ctx):
             f'wget --progress=dot:giga -O {target_file} {ctx.wikimedia_stats.url}'
         )
 
-    connection = _open_sql_connection(ctx)
+    connection = _open_sql_connection(ctx, ctx.import_database)
     cursor = connection.cursor()
 
     with gzip.open(target_file, 'rt') as istream:
@@ -347,7 +347,7 @@ def import_wikidata_sitelinks(ctx):
             f'{ctx.wikidata.sitelinks.url}'
         )
 
-    connection = _open_sql_connection(ctx)
+    connection = _open_sql_connection(ctx, ctx.import_database)
     cursor = connection.cursor()
 
     with gzip.open(target_file, 'rt') as istream:
@@ -376,7 +376,7 @@ def import_wikidata_labels(ctx):
 
     with gzip.open(target_file, 'rt') as istream:
         reader = csv.DictReader(istream)
-        connection = _open_sql_connection(ctx)
+        connection = _open_sql_connection(ctx, ctx.import_database)
         cursor = connection.cursor()
 
         cursor.executemany(
