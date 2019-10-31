@@ -43,16 +43,8 @@ INVOKE_OSM_FILE=path_to_an_osm_file pipenv run invoke load-poi
 ```
 
 By default, above commands won't import Wikidata tables, if you wish to import
-this data you can either change the `invoke.yaml` file or run the commands
-bellow after you imported other data:
-
-```bash
-pipenv run invoke import-wikimedia-stats
-pipenv run invoke import-wikidata-sitelinks
-pipenv run invoke import-wikidata-labels
-```
-
-or set `INVOKE_IMPORT_WIKIDATA=1` while importing other data.
+this data you can either change the `invoke.yaml` file or set
+`INVOKE_IMPORT_WIKIDATA=1` while importing other data.
 
 Note: be careful to replace `_` with `-` in the function name
 
