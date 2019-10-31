@@ -410,7 +410,15 @@ def run_post_sql_scripts(ctx):
     logging.info("running postsql scripts")
     _run_sql_script(ctx, "generated_base.sql")
     _run_sql_script(ctx, "generated_poi.sql")
+    override_openmaptile_functions(ctx)
 
+@task
+def override_openmaptile_functions(ctx):
+    """
+    override Openmaptile's weight function to take benefits of Wikimedia
+    metrics.
+    """
+    _run_sql_script(ctx, "import-wikidata/wikidata_functions.sql")
 
 @task
 def load_osm(ctx):
