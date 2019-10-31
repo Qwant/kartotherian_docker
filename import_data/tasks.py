@@ -638,6 +638,32 @@ def init_osm_update(ctx):
         conf_file.write(f'maxInterval={ctx.osm_update.max_interval}\n')
 
 
+def check_if_folder_has_folders(folder, folders):
+    for f in os.listdir(folder):
+        full = os.path.join(folder, f)
+        if os.path.isdir(full) and f in folders:
+            folders.remove(f)
+    if len(folders) > 0:
+        for f in folders:
+            logging.error("'{}' should be present in {}".format(f, folder))
+        return False
+    return True
+
+
+def check_generated_cache(folder):
+    if not os.path.isdir(folder):
+        return False
+    errors = 0
+    checks = 0
+    for f in os.listdir(folder):
+        full = os.path.join(folder, f)
+        if os.path.isdir(full):
+            checks += 1
+            if not check_if_folder_has_folders(full, [TilesLayer.POI, TilesLayer.BASEMAP]):
+                errors += 1
+    return checks > 0 and errors == 0
+
+
 @task
 def run_osm_update(ctx):
     update_env = {
@@ -645,6 +671,9 @@ def run_osm_update(ctx):
         "OSMOSIS_WORKING_DIR": ctx.update_tiles_dir,
         "IMPOSM_DATA_DIR": ctx.generated_files_dir,
     }
+
+    if not check_generated_cache(ctx.generated_files_dir):
+        sys.exit(1)
 
     # osmosis reads proxy parameters from JAVACMD_OPTIONS variable
     proxies = getproxies()

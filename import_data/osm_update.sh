@@ -1,6 +1,5 @@
 #!/bin/bash
 
-set -x
 set -o pipefail
 
 description="OpenStreetMap database update script"
@@ -81,16 +80,16 @@ usage () {
 }
 
 log () {
-    echo "[`date +"%Y-%m-%d %H:%M:%S"`] $$ :INFO: $1" >> $LOG_FILE
+    echo "[`date +"%Y-%m-%d %H:%M:%S"`] $$ :INFO: $1" | tee -a $LOG_FILE
 }
 
 log_error () {
-    echo "[`date +"%Y-%m-%d %H:%M:%S"`] $$ :ERROR: $1" >> $LOG_FILE
+    echo "[`date +"%Y-%m-%d %H:%M:%S"`] $$ :ERROR: $1" | tee -a $LOG_FILE
 
     rm $LOCK_FILE
-    echo "[`date +"%Y-%m-%d %H:%M:%S"`] $$ :ERROR: restore initial state file" >> $LOG_FILE
+    echo "[`date +"%Y-%m-%d %H:%M:%S"`] $$ :ERROR: restore initial state file" | tee -a $LOG_FILE
     mv ${OSMOSIS_WORKING_DIR}/.state.txt ${OSMOSIS_WORKING_DIR}/state.txt &>/dev/null
-    echo "[`date +"%Y-%m-%d %H:%M:%S"`] $$ :ERROR: $(basename $0) terminated in error!" >> $LOG_FILE
+    echo "[`date +"%Y-%m-%d %H:%M:%S"`] $$ :ERROR: $(basename $0) terminated in error!" | tee -a $LOG_FILE
 
     # Message in stdout for console and cron
     echo "$(basename $0) (PID=$$) terminated in error!"
@@ -246,7 +245,7 @@ cp ${OSMOSIS_WORKING_DIR}/state.txt ${OSMOSIS_WORKING_DIR}/.state.txt
 
 if ! $OSMOSIS --read-replication-interval workingDirectory=${OSMOSIS_WORKING_DIR} \
     --simplify-change --write-xml-change \
-    ${TMP_DIR}/${CHANGE_FILE} &>> $LOG_FILE ; then
+    ${TMP_DIR}/${CHANGE_FILE} | tee -a $LOG_FILE ; then
 
     log_error "osmosis failed"
 fi
