@@ -10,17 +10,19 @@ from urllib.parse import urlparse
 
 import requests
 import configparser
-import invoke
 from invoke import task
 from pydantic import BaseModel
 from pydantic.datetime_parse import parse_datetime
+from utils.lock import FileLock
 
 
 logging.basicConfig(level=logging.INFO)
 
+
 class TilesLayer:
     BASEMAP = 'basemap'
     POI = 'poi'
+
 
 def _execute_sql(ctx, sql, db=None, additional_options=""):
     query = f'psql -Xq -h {ctx.pg.host} -p {ctx.pg.port} -U {ctx.pg.user} -c "{sql}" {additional_options}'
@@ -76,7 +78,6 @@ CREATE EXTENSION osml10n;""",
     )
 
     _execute_sql(ctx, f"DROP DATABASE IF EXISTS {ctx.pg.backup_database};")
-
 
 
 def _read_md5(md5_response):
@@ -196,6 +197,7 @@ def _get_pg_conn(ctx):
         f"password={ctx.pg.password} " \
         f"host={ctx.pg.host} " \
         f"port={ctx.pg.port}"
+
 
 @task
 def import_natural_earth(ctx):
@@ -652,6 +654,7 @@ def check_if_folder_has_folders(folder, folders):
 
 def check_generated_cache(folder):
     if not os.path.isdir(folder):
+        logging.error(f"{folder} should be a directory")
         return False
     errors = 0
     checks = 0
@@ -661,7 +664,13 @@ def check_generated_cache(folder):
             checks += 1
             if not check_if_folder_has_folders(full, [TilesLayer.POI, TilesLayer.BASEMAP]):
                 errors += 1
+    if checks == 0:
+        logging.error(f"{folder} should not be empty")
     return checks > 0 and errors == 0
+
+
+def get_import_lock_path(ctx):
+    return f'{ctx.generated_files_dir}/osm_update.lock'
 
 
 @task
@@ -687,10 +696,12 @@ def run_osm_update(ctx):
     if java_cmd_options:
         update_env["JAVACMD_OPTIONS"] = java_cmd_options
 
-    ctx.run(
-        f"{os.path.join(os.getcwd(), 'osm_update.sh')} --config {ctx.imposm_config_dir}",
-        env=update_env,
-    )
+    lock_path = get_import_lock_path(ctx)
+    with FileLock(lock_path) as lock:
+        ctx.run(
+            f"{os.path.join(os.getcwd(), 'osm_update.sh')} --config {ctx.imposm_config_dir}",
+            env=update_env,
+        )
 
 
 ### default task
@@ -706,10 +717,12 @@ def load_all(ctx):
     if not ctx.osm.file and not ctx.osm.url:
         raise Exception("you should provide a osm.file variable or osm.url variable")
 
-    prepare_db(ctx)
-    load_osm(ctx)
-    load_additional_data(ctx)
-    run_post_sql_scripts(ctx)
-    rotate_database(ctx)
-    generate_tiles(ctx)
-    init_osm_update(ctx)
+    lock_path = get_import_lock_path(ctx)
+    with FileLock(lock_path) as lock:
+        prepare_db(ctx)
+        load_osm(ctx)
+        load_additional_data(ctx)
+        run_post_sql_scripts(ctx)
+        rotate_database(ctx)
+        generate_tiles(ctx)
+        init_osm_update(ctx)
