@@ -36,7 +36,6 @@ EXEC_TIME=$(date '+%Y%m%d-%H%M%S')
 LOG_DIR=$OSMOSIS_WORKING_DIR/log
 LOG_FILE=$LOG_DIR/${EXEC_TIME}.$(basename $0 .sh).log
 LOG_MAXDAYS=7  # Log files are kept $LOG_MAXDAYS days
-LOCK_FILE=$OSMOSIS_WORKING_DIR/$(basename $0 .sh).lock
 OSMOSIS=/usr/bin/osmosis
 STOP_FILE=${OSMOSIS_WORKING_DIR}/stop
 INVOKE_CONFIG_FILE="${INVOKE_CONFIG_FILE:-}"
@@ -86,7 +85,6 @@ log () {
 log_error () {
     echo "[`date +"%Y-%m-%d %H:%M:%S"`] $$ :ERROR: $1" | tee -a $LOG_FILE
 
-    rm $LOCK_FILE
     echo "[`date +"%Y-%m-%d %H:%M:%S"`] $$ :ERROR: restore initial state file" | tee -a $LOG_FILE
     mv ${OSMOSIS_WORKING_DIR}/.state.txt ${OSMOSIS_WORKING_DIR}/state.txt &>/dev/null
     echo "[`date +"%Y-%m-%d %H:%M:%S"`] $$ :ERROR: $(basename $0) terminated in error!" | tee -a $LOG_FILE
@@ -98,21 +96,6 @@ log_error () {
 
     exit 1
 }
-
-get_lock () {
-    if [ -s $LOCK_FILE ]; then
-        if ps -p `cat $LOCK_FILE` > /dev/null ; then
-            return 1
-        fi
-    fi
-    echo $$ > $LOCK_FILE
-    return 0
-}
-
-free_lock () {
-    rm $LOCK_FILE
-}
-
 
 run_imposm_update() {
     local IMPOSM_CONFIG_FILE="${IMPOSM_CONFIG_DIR}/$1"
@@ -172,7 +155,7 @@ TMP_DIR=${OSMOSIS_WORKING_DIR}/.$(basename $0).${EXEC_TIME}
 trap 'rm -rf ${TMP_DIR} &>/dev/null' EXIT
 mkdir -p ${TMP_DIR}
 mkdir -p ${LOG_DIR}
-touch $LOG_FILE $LOCK_FILE
+touch $LOG_FILE
 
 # Remove old log files
 find ${LOG_DIR} -name "*.log" -mtime +$LOG_MAXDAYS -delete
@@ -223,11 +206,6 @@ if [ -e $STOP_FILE ]; then
     exit 1
 fi
 
-if ! get_lock ; then
-    log "$(basename $0) process still running: PID=$(cat ${LOCK_FILE})"
-    exit 1
-fi
-
 if [ ! -f $PGPASS ]; then
     log "ERROR: PostgreSQL user $PGUSER password file $PGPASS not found!"
     exit 1
@@ -265,8 +243,6 @@ if [ -s ${TMP_DIR}/${CHANGE_FILE} ]; then
 else
     log "Changes file is empty. Nothing to update."
 fi
-
-free_lock
 
 log "============"
 log "current location: $(pwd)"
