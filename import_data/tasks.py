@@ -670,7 +670,7 @@ def check_generated_cache(folder):
 
 
 def get_import_lock_path(ctx):
-    return f'{ctx.generated_files_dir}/osm_update.lock'
+    return f'{ctx.update_tiles_dir}/osm_update.lock'
 
 
 @task
