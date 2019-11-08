@@ -47,9 +47,9 @@ to download a pbf and load data in postgres and generate tiles you need:
 
 Note that you can specify the PBF you want to give by using the `--osm-file-url` option.
 
-The different way to configure the import can be seen in [this readme](https://github.com/QwantResearch/kartotherian_docker/blob/master/import_data/readme.md).
+The different way to configure the import can be seen in [this readme](https://github.com/QwantResearch/kartotherian_docker/blob/master/import_data/README.md).
 
-Note: the first import might be quite long are some additional data will be downloaded (cf [load_db](https://github.com/QwantResearch/kartotherian_docker/blob/master/load_db/readme.md))
+Note: the first import might be quite long are some additional data will be downloaded (cf [load_db](https://github.com/QwantResearch/kartotherian_docker/blob/master/load_db/README.md))
 
 If you want to use already downloaded data (especially usefull for a quicker dev cycle), you can use a mounted docker volume.
 
