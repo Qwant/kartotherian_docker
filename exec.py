@@ -169,7 +169,7 @@ def run_help():
     print('')
     print('  build         : build basics')
     print('  kartotherian  : launch (and build) kartotherian')
-    print('  load-db       : load data from the given `--osm-file-url` (luxembourg by default)')
+    print('  load-db       : load data from the given `--osm-file` (luxembourg by default)')
     print('  load-db-france: load data (tiles too) for the french country')
     print('  tileview      : run a map server which allows to get detailed tiles information')
     print('  update-tiles  : update the tiles data')

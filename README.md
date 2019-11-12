@@ -45,7 +45,7 @@ to download a pbf and load data in postgres and generate tiles you need:
 
 `./exec.py load-db`
 
-Note that you can specify the PBF you want to give by using the `--osm-file-url` option.
+Note that you can specify the PBF you want to give by using the `--osm-file` option.
 
 The different way to configure the import can be seen in [this readme](https://github.com/QwantResearch/kartotherian_docker/blob/master/import_data/README.md).
 
@@ -66,6 +66,12 @@ For example with this setup you can also provide an already downloaded pbf (it n
 ```
 
 Note: even if the local directoy in `./data` the osm file path is "/data/**input**/" because it's the directory path inside the container.
+
+You can also specify a download url:
+
+```bash
+./exec.py --osm-file https://download.geofabrik.de/europe/luxembourg-latest.osm.pbf load-db
+```
 
 ### Tiles generation
 
