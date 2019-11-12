@@ -3,41 +3,17 @@
 set -o pipefail
 
 description="OpenStreetMap database update script"
-version="0.2/20180716"
-
-# OSMOSIS
-#
-# Osmosis is the tool used to get change files from OSM repository
-# Osmosis working directory contains 3 files:
-#   * download.lock
-#   * configuration.txt: osmosis configuration. maxInterval setting is used to
-#     know how far osmosis is going into a single run. Deactivate that feature
-#     by setting 0 (required for initial update run when planet file is old).
-#   * state.txt: used to know which change files to download. That file is
-#     updated at the end of processing for the next run.
-#
-# Warning! Osmosis is working into /tmp and downloaded files disk usage can be
-# big if working on an old timestamp.
-#
-# Imposm
-#
-# Imposm is used to apply changes.osc compiled by Osmosis on the
-# OpenStreetMap database.
-#
-
+version="0.3/20191112"
 
 # ----------------------------------------------------------------------------
 # Settings
-OSMOSIS_WORKING_DIR=${OSMOSIS_WORKING_DIR:-/data/osmosis}
+OSM_UPDATE_WORKING_DIR=${OSM_UPDATE_WORKING_DIR:-/data/osmosis}
 
 # Internal
-CHANGE_FILE=changes.osc.gz
 EXEC_TIME=$(date '+%Y%m%d-%H%M%S')
-LOG_DIR=$OSMOSIS_WORKING_DIR/log
+LOG_DIR=$OSM_UPDATE_WORKING_DIR/log
 LOG_FILE=$LOG_DIR/${EXEC_TIME}.$(basename $0 .sh).log
 LOG_MAXDAYS=7  # Log files are kept $LOG_MAXDAYS days
-OSMOSIS=/usr/bin/osmosis
-STOP_FILE=${OSMOSIS_WORKING_DIR}/stop
 INVOKE_CONFIG_FILE="${INVOKE_CONFIG_FILE:-}"
 
 # imposm
@@ -67,13 +43,12 @@ usage () {
     echo
     echo "    --config, -c     <path to imposm config dir> [default: /etc/imposm]"
     echo
+    echo "    --input, -i     <path to osm change file (.osc.gz)>"
+    echo
     echo "    --help, -h"
     echo "        display help and version"
     echo
-    echo "    Create a file named $(basename $STOP_FILE) into $OSMOSIS_WORKING_DIR directory"
-    echo "        to put process on hold."
-    echo
-    echo "    Dependencies: osmosis, imposm3, jq"
+    echo "    Dependencies: imposm3, jq"
     echo
     exit 0
 }
@@ -84,9 +59,6 @@ log () {
 
 log_error () {
     echo "[`date +"%Y-%m-%d %H:%M:%S"`] $$ :ERROR: $1" | tee -a $LOG_FILE
-
-    echo "[`date +"%Y-%m-%d %H:%M:%S"`] $$ :ERROR: restore initial state file" | tee -a $LOG_FILE
-    mv ${OSMOSIS_WORKING_DIR}/.state.txt ${OSMOSIS_WORKING_DIR}/state.txt &>/dev/null
     echo "[`date +"%Y-%m-%d %H:%M:%S"`] $$ :ERROR: $(basename $0) terminated in error!" | tee -a $LOG_FILE
 
     # Message in stdout for console and cron
@@ -104,18 +76,17 @@ run_imposm_update() {
     local MAPPING_PATH="${IMPOSM_CONFIG_DIR}/${MAPPING_FILENAME}"
 
     log "apply changes on OSM database"
-    log "${CHANGE_FILE} file size is $(ls -sh ${TMP_DIR}/${CHANGE_FILE} | cut -d' ' -f 1)"
+    log "${CHANGE_FILE} file size is $(ls -sh ${CHANGE_FILE} | cut -d' ' -f 1)"
 
     if ! imposm3 diff -quiet -config $IMPOSM_CONFIG_FILE -connection $PG_CONNECTION_STRING \
         -mapping ${MAPPING_PATH} \
         -cachedir ${IMPOSM_DATA_DIR}/cache/${IMPOSM_FOLDER_NAME} \
         -diffdir ${IMPOSM_DATA_DIR}/diff/${IMPOSM_FOLDER_NAME} \
-        -expiretiles-dir ${OSMOSIS_WORKING_DIR}/expiretiles/${IMPOSM_FOLDER_NAME} \
-        ${TMP_DIR}/${CHANGE_FILE} | tee -a $LOG_FILE ; then
+        -expiretiles-dir ${OSM_UPDATE_WORKING_DIR}/expiretiles/${IMPOSM_FOLDER_NAME} \
+        ${CHANGE_FILE} | tee -a $LOG_FILE ; then
             log_error "imposm3 failed"
     fi
 }
-
 
 create_tiles_jobs() {
     local IMPOSM_CONFIG_FILE="${IMPOSM_CONFIG_DIR}/$1"
@@ -127,7 +98,7 @@ create_tiles_jobs() {
     function concat_with_pipe { local IFS="|"; echo "$*";}
 
     # we load all the tiles generated this day
-    local EXPIRE_TILES_DIRECTORY=${OSMOSIS_WORKING_DIR}/expiretiles/${TILES_LAYER_NAME}
+    local EXPIRE_TILES_DIRECTORY=${OSM_UPDATE_WORKING_DIR}/expiretiles/${TILES_LAYER_NAME}
     EXPIRE_TILES_FILE=$(concat_with_pipe $(find $EXPIRE_TILES_DIRECTORY -type f -newerct `date -d @$START -u -Iseconds`))
 
     if [ -z "$EXPIRE_TILES_FILE" ]; then
@@ -151,9 +122,6 @@ create_tiles_jobs() {
 
 # ----------------------------------------------------------------------------
 
-TMP_DIR=${OSMOSIS_WORKING_DIR}/.$(basename $0).${EXEC_TIME}
-trap 'rm -rf ${TMP_DIR} &>/dev/null' EXIT
-mkdir -p ${TMP_DIR}
 mkdir -p ${LOG_DIR}
 touch $LOG_FILE
 
@@ -161,8 +129,8 @@ touch $LOG_FILE
 find ${LOG_DIR} -name "*.log" -mtime +$LOG_MAXDAYS -delete
 
 
-OPTIONS=ctho
-LONGOPTIONS=config:,tilerator:,help
+OPTIONS=cih
+LONGOPTIONS=config:,input:,help
 
 PARSED=$(getopt --options=$OPTIONS --longoptions=$LONGOPTIONS --name "$0" -- "$@")
 if [[ $? -ne 0 ]]; then
@@ -176,6 +144,10 @@ while true; do
     case "$1" in
         -c|--config)
             IMPOSM_CONFIG_DIR="$2"
+            shift 2
+            ;;
+        -i|--input)
+            CHANGE_FILE="$2"
             shift 2
             ;;
         -h|--help)
@@ -194,42 +166,25 @@ done
 
 # Help and configuration checks
 [ "$HELP" == true ] && usage
-[ ! -f "$OSMOSIS" ] && log_error "$OSMOSIS not found"
-
 
 log "new $(basename $0) process started"
-log "working into directory: ${OSMOSIS_WORKING_DIR}"
-
-
-if [ -e $STOP_FILE ]; then
-    log "$(basename $0) process held!"
-    exit 1
-fi
+log "working into directory: ${OSM_UPDATE_WORKING_DIR}"
 
 if [ ! -f $PGPASS ]; then
     log "ERROR: PostgreSQL user $PGUSER password file $PGPASS not found!"
     exit 1
 fi
 
-
-if [ ! -f ${OSMOSIS_WORKING_DIR}/configuration.txt -o ! -f ${OSMOSIS_WORKING_DIR}/state.txt ]; then
-    log_error "osmosis working directory ${OSMOSIS_WORKING_DIR} is not initialized."
+if [ -z "${CHANGE_FILE}" ]; then
+    log_error "a change file is required as input."
 fi
 
-log "generate changes file into ${TMP_DIR}/${CHANGE_FILE}"
-log "backup of state file"
-cp ${OSMOSIS_WORKING_DIR}/state.txt ${OSMOSIS_WORKING_DIR}/.state.txt
-
-
-if ! $OSMOSIS --read-replication-interval workingDirectory=${OSMOSIS_WORKING_DIR} \
-    --simplify-change --write-xml-change \
-    ${TMP_DIR}/${CHANGE_FILE} | tee -a $LOG_FILE ; then
-
-    log_error "osmosis failed"
+if [ ! -f "${CHANGE_FILE}" ]; then
+    log_error "Change file ${CHANGE_FILE} is not found."
 fi
 
 # Update db and tiles, only if changes file is not empty
-if [ -s ${TMP_DIR}/${CHANGE_FILE} ]; then
+if [ -s ${CHANGE_FILE} ]; then
     # Imposm update for both tiles sources
     run_imposm_update $BASE_IMPOSM_CONFIG_FILENAME
     run_imposm_update $POI_IMPOSM_CONFIG_FILENAME
@@ -248,7 +203,6 @@ log "============"
 log "current location: $(pwd)"
 log "============"
 
-log "${CHANGE_FILE} file size is $(ls -sh ${TMP_DIR}/${CHANGE_FILE} | cut -d' ' -f 1)"
 END=$(date +%s)
 DURATION=$(($END-$START))
 DURATION_STR=$(printf '%dh%02dm%02ds' $(($DURATION/3600)) $(($DURATION%3600/60)) $(($DURATION%60)))

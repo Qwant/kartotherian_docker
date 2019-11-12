@@ -11,6 +11,7 @@ from urllib.parse import urlparse
 import requests
 import configparser
 from invoke import task
+from invoke.exceptions import Failure
 from pydantic import BaseModel
 from pydantic.datetime_parse import parse_datetime
 from utils.lock import FileLock
@@ -567,77 +568,36 @@ def generate_expired_tiles(ctx, tiles_layer, from_zoom, before_zoom, expired_til
 ### osm update
 ##############
 
+def read_current_state(ctx):
+    with open(f'{ctx.update_tiles_dir}/state.txt') as state_file:
+        for line in state_file:
+            if line.startswith('timestamp='):
+                raw_timestamp = line.replace('timestamp=','').strip()
+                # for compatibility with osm replication files
+                raw_timestamp = raw_timestamp.replace('\:',':')
+                if raw_timestamp:
+                    return raw_timestamp
+    raise Exception("Cannot find timestamp in osm state file")
+
+
+def write_new_state(ctx, new_timestamp):
+    with open(f'{ctx.update_tiles_dir}/state.txt', 'w') as state_file:
+        state_file.write(f'timestamp={new_timestamp}\n')
+
+def read_osm_timestamp(ctx, osm_file_path):
+    return ctx.run(f'osmconvert {osm_file_path} --out-timestamp').stdout
+
+
 @task
 def init_osm_update(ctx):
     """
     Init osmosis folder with configuration files and
     latest state.txt file before .pbf timestamp
     """
-    logging.info("initializing osm update...")
-    session = requests.Session()
-
-    class OsmState(BaseModel):
-        """
-        ConfigParser uses lowercased keys
-        "sequenceNumber" from state.txt is renamed to "sequencenumber"
-        """
-        sequencenumber: int
-        timestamp: datetime
-
-    def get_state_url(sequence_number=None):
-        base_url = ctx.osm_update.replication_url
-        if sequence_number is None:
-            # Get last state.txt
-            return f'{base_url}/state.txt'
-        else:
-            return f'{base_url}' \
-                f'/{sequence_number // 1_000_000 :03d}' \
-                f'/{sequence_number // 1000 % 1000 :03d}' \
-                f'/{sequence_number % 1000 :03d}.state.txt'
-
-    def get_state(sequence_number=None):
-        url = get_state_url(sequence_number)
-        resp = session.get(url)
-        resp.raise_for_status()
-        # state file may contain escaped ':' in the timestamp
-        state_string = resp.text.replace('\:',':')
-        c = configparser.ConfigParser()
-        c.read_string('[root]\n'+state_string)
-        return OsmState(**c['root'])
-
-    # Init osmosis working directory
+    logging.info("initializing osm update from osm file timestamp:")
     ctx.run(f'mkdir -p {ctx.update_tiles_dir}')
-    ctx.run(f'touch {ctx.update_tiles_dir}/download.lock')
-
-    raw_osm_datetime = ctx.run(f'osmconvert {ctx.osm.file} --out-timestamp').stdout
-    osm_datetime = parse_datetime(raw_osm_datetime)
-    # Rewind 2 hours as a precaution
-    osm_datetime -= timedelta(hours=2)
-
-    last_state = get_state()
-    sequence_number = last_state.sequencenumber
-    sequence_dt = last_state.timestamp
-
-    for i in range(ctx.osm_update.max_interations):
-        if sequence_dt < osm_datetime:
-            break
-        sequence_number -= 1
-        state = get_state(sequence_number)
-        sequence_dt = state.timestamp
-    else:
-        logging.error(
-            "Failed to init osm update. "
-            "Could not find a replication sequence before %s",
-            osm_datetime,
-        )
-        return
-
-    state_url = get_state_url(sequence_number)
-    ctx.run(f'wget -q "{state_url}" -O {ctx.update_tiles_dir}/state.txt')
-
-    with open(f'{ctx.update_tiles_dir}/configuration.txt', 'w') as conf_file:
-        conf_file.write(f'baseUrl={ctx.osm_update.replication_url}\n')
-        conf_file.write(f'maxInterval={ctx.osm_update.max_interval}\n')
+    raw_osm_datetime = read_osm_timestamp(ctx, ctx.osm.file)
+    write_new_state(ctx, raw_osm_datetime)
 
 
 def check_if_folder_has_folders(folder, folders):
@@ -677,31 +637,35 @@ def get_import_lock_path(ctx):
 def run_osm_update(ctx):
     update_env = {
         "PG_CONNECTION_STRING": f"postgis://{ctx.pg.user}:{ctx.pg.password}@{ctx.pg.host}:{ctx.pg.port}/{ctx.pg.database}",
-        "OSMOSIS_WORKING_DIR": ctx.update_tiles_dir,
+        "OSM_UPDATE_WORKING_DIR": ctx.update_tiles_dir,
         "IMPOSM_DATA_DIR": ctx.generated_files_dir,
     }
 
     if not check_generated_cache(ctx.generated_files_dir):
         sys.exit(1)
 
-    # osmosis reads proxy parameters from JAVACMD_OPTIONS variable
-    proxies = getproxies()
-    java_cmd_options = ""
-    if proxies.get("http"):
-        http_proxy = urlparse(proxies["http"])
-        java_cmd_options += f"-Dhttp.proxyHost={http_proxy.hostname} -Dhttp.proxyPort={http_proxy.port} "
-    if proxies.get("https"):
-        https_proxy = urlparse(proxies["https"])
-        java_cmd_options += f"-Dhttps.proxyHost={https_proxy.hostname} -Dhttps.proxyPort={https_proxy.port} "
-    if java_cmd_options:
-        update_env["JAVACMD_OPTIONS"] = java_cmd_options
-
+    change_file_path = f"{ctx.update_tiles_dir}/changes.osc.gz"
     lock_path = get_import_lock_path(ctx)
     with FileLock(lock_path) as lock:
+        current_osm_timestamp = read_current_state(ctx)
+        try:
+            result = ctx.run(
+                f'osmupdate -v --day --hour --base-url={ctx.osm_update.replication_url} '
+                f'{current_osm_timestamp} {change_file_path}'
+            )
+        except Failure as exc:
+            if exc.result.return_code == 21:
+                logging.info('OSM state is up to date, no change to apply')
+                return
+            raise
+
+        new_osm_timestamp = read_osm_timestamp(ctx, change_file_path)
         ctx.run(
-            f"{os.path.join(os.getcwd(), 'osm_update.sh')} --config {ctx.imposm_config_dir}",
+            f"{os.path.join(os.getcwd(), 'osm_update.sh')} --config {ctx.imposm_config_dir} --input {change_file_path}",
             env=update_env,
         )
+        write_new_state(ctx, new_osm_timestamp)
+        os.remove(change_file_path)
 
 
 ### default task
