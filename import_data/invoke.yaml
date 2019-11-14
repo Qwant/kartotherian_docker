@@ -60,6 +60,4 @@ tiles:
     storage: poi
 
 osm_update:
-  replication_url: https://planet.osm.org/replication/day
-  max_interval: 0 # maximum delay to catch up (in seconds) by osmosis, 0 to fetch all changes
-  max_interations: 300 # maximum number of requests to replication server to find the correct state file
+  replication_url: https://planet.osm.org/replication

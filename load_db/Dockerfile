@@ -3,20 +3,16 @@ FROM python:3.6-stretch@sha256:bccbebc715c9b0c0bf247ba3781248c1b0d075d5ef462ee86
 ENV MAIN_DIR=/srv/import_data
 
 RUN apt-get update && \
-    apt-get install -y \
+    apt-get install -y --no-install-recommends \
         git \
         unzip \
         curl \
-        libpq-dev \
-        libproj-dev \
-        liblua5.2-dev \
-        libgeos++-dev \
         osmctools \
-        sqlite3 \
         gdal-bin \
         postgis \
-        osmosis \
+        postgresql-client \
         jq \
+    && rm -rf /var/lib/apt/lists/* \
 # install imposm 0.8.1 (custom release, waiting for https://github.com/omniscale/imposm3/pull/206 to be merged)
     && wget https://github.com/amatissart/imposm3/releases/download/v0.8.1-qwant-0/imposm-0.8.1-qwant-0-linux-x86-64.tar.gz \
     && tar xvfz imposm-0.8.1-qwant-0-linux-x86-64.tar.gz \
@@ -36,9 +32,7 @@ COPY load_db/config_base.json ${MAIN_DIR}/imposm/
 COPY load_db/config_poi.json ${MAIN_DIR}/imposm/
 
 # needed for sql script, else the BOM in the file makes the query impossible
-RUN locale-gen en_US.UTF-8
 ENV LANG C.UTF-8
-ENV LANGUAGE en_US:en
 ENV LC_ALL C.UTF-8
 
 RUN cd ${MAIN_DIR}/import_data \
