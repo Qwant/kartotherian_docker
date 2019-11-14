@@ -5,15 +5,9 @@ import os
 import os.path
 import time
 from datetime import timedelta, datetime
-from urllib.request import getproxies
-from urllib.parse import urlparse
-
 import requests
-import configparser
 from invoke import task
 from invoke.exceptions import Failure
-from pydantic import BaseModel
-from pydantic.datetime_parse import parse_datetime
 from utils.lock import FileLock
 
 
@@ -649,7 +643,7 @@ def run_osm_update(ctx):
     with FileLock(lock_path) as lock:
         current_osm_timestamp = read_current_state(ctx)
         try:
-            result = ctx.run(
+            ctx.run(
                 f'osmupdate -v --day --hour --base-url={ctx.osm_update.replication_url} '
                 f'{current_osm_timestamp} {change_file_path}'
             )
