@@ -197,7 +197,6 @@ def run_sql_script(ctx):
     # load several psql functions
     _run_sql_script(ctx, "import-sql/language.sql")
     _run_sql_script(ctx, "postgis-vt-util/postgis-vt-util.sql")
-    _run_sql_script(ctx, "import-wikidata/wikidata_tables.sql")
 
 
 ### non-OSM data import
@@ -354,7 +353,7 @@ def import_wikidata_sitelinks(ctx):
         cursor.execute(f'TRUNCATE TABLE {ctx.wikidata.sitelinks.table};')
         cursor.copy_expert(
             f'COPY {ctx.wikidata.sitelinks.table} '
-            f'FROM STDIN DELIMITER ',' CSV HEADER;',
+            f'FROM STDIN DELIMITER \',\' CSV HEADER;',
             istream
         )
 
@@ -396,6 +395,13 @@ def import_wikidata_labels(ctx):
 
         connection.commit()
         connection.close()
+
+@task
+def override_wikidata_weight_functions(ctx):
+    """
+    update sql weight functions to make use of wikidata stats
+    """
+    _run_sql_script(ctx, "import-wikidata/wikidata_tables.sql")
 
 
 ### import pipeline
@@ -791,6 +797,10 @@ def load_all(ctx):
         load_osm(ctx)
         load_additional_data(ctx)
         run_post_sql_scripts(ctx)
+
+        if ctx.import_wikidata:
+            override_wikidata_weight_functions(ctx)
+
         rotate_database(ctx)
         generate_tiles(ctx)
         init_osm_update(ctx)
