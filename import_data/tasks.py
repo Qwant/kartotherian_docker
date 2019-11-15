@@ -312,20 +312,20 @@ def import_wikimedia_stats(ctx):
     """
     import wikimedia stats (for POI ranking through Wikipedia page views)
     """
-    target_file = os.path.join(ctx.data_dir, ctx.wikimedia_stats.file)
+    target_file = os.path.join(ctx.data_dir, ctx.wikidata.stats.file)
 
     if not os.path.isfile(target_file):
         ctx.run(
-            f'wget --progress=dot:giga -O {target_file} {ctx.wikimedia_stats.url}'
+            f'wget --progress=dot:giga -O {target_file} {ctx.wikidata.stats.url}'
         )
 
     connection = _open_sql_connection(ctx, ctx.pg.import_database)
     cursor = connection.cursor()
 
     with gzip.open(target_file, 'rt') as istream:
-        cursor.execute(f'TRUNCATE TABLE {ctx.wikimedia_stats.table};')
+        cursor.execute(f'TRUNCATE TABLE {ctx.wikidata.stats.table};')
         cursor.copy_expert(
-            f'COPY {ctx.wikimedia_stats.table} '
+            f'COPY {ctx.wikidata.stats.table} '
             f'FROM STDIN DELIMITER \',\' CSV HEADER;',
             istream
         )
@@ -442,9 +442,11 @@ def load_additional_data(ctx):
     import_lake(ctx)
     import_border(ctx)
 
-    if ctx.import_wikidata:
+    if ctx.wikidata.stats.enabled:
         import_wikimedia_stats(ctx)
         import_wikidata_sitelinks(ctx)
+
+    if ctx.wikidata.labels.enabled:
         import_wikidata_labels(ctx)
 
 
@@ -798,7 +800,7 @@ def load_all(ctx):
         load_additional_data(ctx)
         run_post_sql_scripts(ctx)
 
-        if ctx.import_wikidata:
+        if ctx.wikidata.stats.enabled:
             override_wikidata_weight_functions(ctx)
 
         rotate_database(ctx)
