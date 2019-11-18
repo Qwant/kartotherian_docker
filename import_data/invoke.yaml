@@ -28,8 +28,8 @@ osm:
 
 # Toggle import of statistics and metadata from Wikidata
 wikidata:
-  # Sitelinks will be required and imported if stats are
   sitelinks:
+    # Sitelinks is required and will be imported if stats are
     url: https://github.com/QwantResearch/wikimedia-dumps/releases/download/10/2019/sitelinks.csv.gz
     file: sitelinks.csv.gz
     table: wd_sitelinks

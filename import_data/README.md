@@ -44,7 +44,8 @@ INVOKE_OSM_FILE=path_to_an_osm_file pipenv run invoke load-poi
 
 By default, above commands won't import Wikidata tables, if you wish to import
 this data you can either change the `invoke.yaml` file or set
-`INVOKE_IMPORT_WIKIDATA=1` while importing other data.
+`INVOKE_WIKIDATA_STATS_ENABLED=1 INVOKE_WIKIDATA_LABELS_ENABLED=1` while
+importing other data.
 
 Note: be careful to replace `_` with `-` in the function name
 
