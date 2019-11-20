@@ -401,7 +401,7 @@ def override_wikidata_weight_functions(ctx):
     """
     update sql weight functions to make use of wikidata stats
     """
-    _run_sql_script(ctx, "import-wikidata/wikidata_tables.sql")
+    _run_sql_script(ctx, "import-wikidata/wikidata_functions.sql")
 
 
 ### import pipeline
@@ -416,15 +416,6 @@ def run_post_sql_scripts(ctx):
     logging.info("running postsql scripts")
     _run_sql_script(ctx, "generated_base.sql")
     _run_sql_script(ctx, "generated_poi.sql")
-    override_openmaptiles_functions(ctx)
-
-@task
-def override_openmaptiles_functions(ctx):
-    """
-    override Openmaptile's weight function to take benefits of Wikimedia
-    metrics.
-    """
-    _run_sql_script(ctx, "import-wikidata/wikidata_functions.sql")
 
 @task
 def load_osm(ctx):
@@ -443,10 +434,12 @@ def load_additional_data(ctx):
     import_border(ctx)
 
     if ctx.wikidata.stats.enabled:
+        _run_sql_script(ctx, "import-wikidata/stats_tables.sql")
         import_wikimedia_stats(ctx)
         import_wikidata_sitelinks(ctx)
 
     if ctx.wikidata.labels.enabled:
+        _run_sql_script(ctx, "import-wikidata/labels_tables.sql")
         import_wikidata_labels(ctx)
 
 
