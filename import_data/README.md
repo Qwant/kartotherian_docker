@@ -42,6 +42,11 @@ So if you want to run the `load-poi` task, you need to run:
 INVOKE_OSM_FILE=path_to_an_osm_file pipenv run invoke load-poi
 ```
 
+By default, above commands won't import Wikidata tables, if you wish to import
+this data you can either change the `invoke.yaml` file or set
+`INVOKE_WIKIDATA_STATS_ENABLED=1 INVOKE_WIKIDATA_LABELS_ENABLED=1` while
+importing other data.
+
 Note: be careful to replace `_` with `-` in the function name
 
 Note: the `pipenv` command should be ran from the `import_data` folder.

@@ -1,6 +1,10 @@
+import csv
 import sys
 import logging
 import json
+import gzip
+import psycopg2
+import psycopg2.extras
 import os
 import os.path
 import time
@@ -10,7 +14,6 @@ from invoke import task
 from invoke.exceptions import Failure
 from utils.lock import FileLock
 
-
 logging.basicConfig(level=logging.INFO)
 
 
@@ -18,12 +21,25 @@ class TilesLayer:
     BASEMAP = 'basemap'
     POI = 'poi'
 
+def _open_sql_connection(ctx, db):
+    connection = psycopg2.connect(
+        user=ctx.pg.user,
+        dbname=db,
+        host=ctx.pg.host,
+        password=ctx.pg.password,
+        port=ctx.pg.port
+    )
+    psycopg2.extras.register_hstore(connection, globally=True)
+    return connection
 
 def _execute_sql(ctx, sql, db=None, additional_options=""):
     query = f'psql -Xq -h {ctx.pg.host} -p {ctx.pg.port} -U {ctx.pg.user} -c "{sql}" {additional_options}'
     if db is not None:
         query += f" -d {db}"
-    return ctx.run(query, env={"PGPASSWORD": ctx.pg.password})
+    return ctx.run(
+        query,
+        env={"PGPASSWORD": ctx.pg.password}
+    )
 
 
 def _db_exists(ctx, db_name):
@@ -288,16 +304,104 @@ def import_border(ctx):
   {ctx.imposm_config_dir}/import-osmborder/import/import_osmborder_lines.sh"
     )
 
+### Wikimedia sites
+###################
 
 @task
-def import_wikidata(ctx):
+def import_wikimedia_stats(ctx):
     """
-    import wikidata (for some translations)
+    import wikimedia stats (for POI ranking through Wikipedia page views)
+    """
+    target_file = os.path.join(ctx.data_dir, ctx.wikidata.stats.file)
 
-    For the moment this does nothing (but we need a table for some openmaptiles function)
+    if not os.path.isfile(target_file):
+        ctx.run(
+            f'wget --progress=dot:giga -O {target_file} {ctx.wikidata.stats.url}'
+        )
+
+    connection = _open_sql_connection(ctx, ctx.pg.import_database)
+    cursor = connection.cursor()
+
+    with gzip.open(target_file, 'rt') as istream:
+        cursor.execute(f'TRUNCATE TABLE {ctx.wikidata.stats.table};')
+        cursor.copy_expert(
+            f'COPY {ctx.wikidata.stats.table} '
+            f'FROM STDIN DELIMITER \',\' CSV HEADER;',
+            istream
+        )
+
+    connection.commit()
+    connection.close()
+
+@task
+def import_wikidata_sitelinks(ctx):
     """
-    create_table = "CREATE TABLE IF NOT EXISTS wd_names (id varchar(20) UNIQUE, page varchar(200) UNIQUE, labels hstore);"
-    _execute_sql(ctx, db=ctx.pg.import_database, sql=create_table)
+    import Wikipedia pages links for Wikidata items
+    """
+    target_file = os.path.join(ctx.data_dir, ctx.wikidata.sitelinks.file)
+
+    if not os.path.isfile(target_file):
+        ctx.run(
+            f'wget --progress=dot:giga -O {target_file} '
+            f'{ctx.wikidata.sitelinks.url}'
+        )
+
+    connection = _open_sql_connection(ctx, ctx.pg.import_database)
+    cursor = connection.cursor()
+
+    with gzip.open(target_file, 'rt') as istream:
+        cursor.execute(f'TRUNCATE TABLE {ctx.wikidata.sitelinks.table};')
+        cursor.copy_expert(
+            f'COPY {ctx.wikidata.sitelinks.table} '
+            f'FROM STDIN DELIMITER \',\' CSV HEADER;',
+            istream
+        )
+
+    connection.commit()
+    connection.close()
+
+@task
+def import_wikidata_labels(ctx):
+    """
+    import labels from Wikidata (for some translations)
+    """
+    target_file = os.path.join(ctx.data_dir, ctx.wikidata.labels.file)
+
+    if not os.path.isfile(target_file):
+        ctx.run(
+            f'wget --progress=dot:giga -O {target_file} '
+            f'{ctx.wikidata.labels.url}'
+        )
+
+    with gzip.open(target_file, 'rt') as istream:
+        reader = csv.DictReader(istream)
+        connection = _open_sql_connection(ctx, ctx.pg.import_database)
+        cursor = connection.cursor()
+
+        cursor.executemany(
+            f'''
+            INSERT INTO {ctx.wikidata.labels.table} (id, labels)
+            VALUES (%s, %s)
+            ON CONFLICT (id) DO
+                UPDATE SET labels = (wd_names.labels || EXCLUDED.labels)
+            ''',
+            map(
+                lambda row: (
+                    row['title'],
+                    {'name:' + row['language']: row['value']}
+                ), reader
+            )
+        )
+
+        connection.commit()
+        connection.close()
+
+@task
+def override_wikidata_weight_functions(ctx):
+    """
+    update sql weight functions to make use of wikidata stats
+    """
+    _run_sql_script(ctx, "import-wikidata/wikidata_functions.sql")
 
 
 ### import pipeline
@@ -312,7 +416,6 @@ def run_post_sql_scripts(ctx):
     logging.info("running postsql scripts")
     _run_sql_script(ctx, "generated_base.sql")
     _run_sql_script(ctx, "generated_poi.sql")
-
 
 @task
 def load_osm(ctx):
@@ -329,7 +432,15 @@ def load_additional_data(ctx):
     import_water_polygon(ctx)
     import_lake(ctx)
     import_border(ctx)
-    import_wikidata(ctx)
+
+    if ctx.wikidata.stats.enabled:
+        _run_sql_script(ctx, "import-wikidata/stats_tables.sql")
+        import_wikimedia_stats(ctx)
+        import_wikidata_sitelinks(ctx)
+
+    if ctx.wikidata.labels.enabled:
+        _run_sql_script(ctx, "import-wikidata/labels_tables.sql")
+        import_wikidata_labels(ctx)
 
 
 @task
@@ -681,6 +792,10 @@ def load_all(ctx):
         load_osm(ctx)
         load_additional_data(ctx)
         run_post_sql_scripts(ctx)
+
+        if ctx.wikidata.stats.enabled:
+            override_wikidata_weight_functions(ctx)
+
         rotate_database(ctx)
         generate_tiles(ctx)
         init_osm_update(ctx)
