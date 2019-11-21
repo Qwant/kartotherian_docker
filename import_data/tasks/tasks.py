@@ -1,3 +1,4 @@
+import concurrent.futures
 import csv
 import sys
 import logging
@@ -16,6 +17,8 @@ import osmium
 
 from .lock import FileLock
 from .download import needs_to_download, download_file
+
+cc_exec = concurrent.futures.ThreadPoolExecutor()
 
 logging.basicConfig(level=logging.INFO)
 
@@ -200,7 +203,7 @@ def import_natural_earth(ctx):
 
     if needs_to_download(ctx, target_file, max_age=timedelta(days=30)):
         ctx.run(
-            f"wget --progress=dot:giga http://naciscdn.org/naturalearth/packages/natural_earth_vector.sqlite.zip \
+            f"wget http://naciscdn.org/naturalearth/packages/natural_earth_vector.sqlite.zip \
         && unzip -oj natural_earth_vector.sqlite.zip -d {ctx.data_dir} \
         && rm natural_earth_vector.sqlite.zip"
         )
@@ -229,7 +232,7 @@ def import_water_polygon(ctx):
     target_file = f"{ctx.data_dir}/water_polygons.shp"
     if needs_to_download(ctx, target_file, max_age=timedelta(days=30)):
         ctx.run(
-            f"wget --progress=dot:giga {ctx.water.polygons_url} \
+            f"wget {ctx.water.polygons_url} \
     && unzip -oj water-polygons-split-3857.zip -d {ctx.data_dir} \
     && rm water-polygons-split-3857.zip"
         )
@@ -384,26 +387,40 @@ def run_post_sql_scripts(ctx):
 def load_osm(ctx):
     if ctx.osm.url:
         get_osm_data(ctx)
-    load_basemap(ctx)
-    load_poi(ctx)
+
+    tasks = [
+        cc_exec.submit(load_basemap, ctx),
+        cc_exec.submit(load_poi, ctx),
+    ]
+
+    for task in tasks:
+        task.result()
+
     run_sql_script(ctx)
 
 
 @task
 def load_additional_data(ctx):
-    import_natural_earth(ctx)
-    import_water_polygon(ctx)
-    import_lake(ctx)
-    import_border(ctx)
+    tasks = [
+        cc_exec.submit(import_natural_earth, ctx),
+        cc_exec.submit(import_water_polygon, ctx),
+        cc_exec.submit(import_lake, ctx),
+        cc_exec.submit(import_border, ctx),
+    ]
 
     if ctx.wikidata.stats.enabled:
         _run_sql_script(ctx, "import-wikidata/stats_tables.sql")
-        import_wikimedia_stats(ctx)
-        import_wikidata_sitelinks(ctx)
+        tasks += [
+            cc_exec.submit(import_wikimedia_stats, ctx),
+            cc_exec.submit(import_wikidata_sitelinks, ctx),
+        ]
 
     if ctx.wikidata.labels.enabled:
         _run_sql_script(ctx, "import-wikidata/labels_tables.sql")
-        import_wikidata_labels(ctx)
+        tasks.append(cc_exec.submit(import_wikidata_labels, ctx))
+
+    for task in tasks:
+        task.result()  # join and raise exceptions
 
 
 @task
