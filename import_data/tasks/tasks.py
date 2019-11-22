@@ -11,7 +11,7 @@ import os.path
 import time
 from datetime import timedelta
 import requests
-from invoke import task
+from invoke import context, task
 from invoke.exceptions import Failure
 import osmium
 
@@ -22,6 +22,60 @@ cc_exec = concurrent.futures.ThreadPoolExecutor()
 
 logging.basicConfig(level=logging.INFO)
 
+
+class PrefixedStream:
+    """
+    Wrapper class around a stream adding a prefix to each writen line.
+    """
+    def __init__(self, src_stream, prefix):
+        self.prefix = prefix
+        self.src_stream = src_stream
+        self.buffer = ''
+
+    def write(self, data):
+        self.buffer += data
+        self.flush()
+
+    def flush(self):
+        lines = self.buffer.split('\n')
+
+        for line in lines[:-1]:
+            self.src_stream.write(
+                '\033[0;90m[{}]\033[0;0m {}\n'.format(self.prefix, line)
+            )
+
+        self.buffer = lines[-1]
+        self.src_stream.flush()
+
+
+class PrefixedContext(context.Context):
+    """
+    Wrapper class around a pyinvoke context adding a prefix to each lines
+    outputed by ctx.run(..).
+    """
+    def __init__(self, ctx, prefix):
+        self.__dict__ = ctx.__dict__.copy()
+        self.prefix = prefix
+
+    def run(self, *args, **kwargs):
+        return super().run(
+            *args,
+            **kwargs,
+            out_stream=PrefixedStream(sys.stdout, self.prefix),
+            err_stream=PrefixedStream(sys.stderr, self.prefix + ':ERR'),
+        )
+
+def format_stdout(fun):
+    """
+    Wrapper decorator around a task adding its name to each line outputed by
+    ctx.run(..).
+    """
+    def upgraded_fun(ctx, *args, **kwargs):
+        ctx = PrefixedContext(ctx, fun.__name__)
+        fun(ctx, *args, **kwargs)
+
+    upgraded_fun.__name__ = fun.__name__
+    return upgraded_fun
 
 class TilesLayer:
     BASEMAP = 'basemap'
@@ -197,13 +251,14 @@ def _get_pg_conn(ctx):
 
 
 @task
+@format_stdout
 def import_natural_earth(ctx):
     logging.info("importing natural earth shapes in postgres")
     target_file = f"{ctx.data_dir}/natural_earth_vector.sqlite"
 
     if needs_to_download(ctx, target_file, max_age=timedelta(days=30)):
         ctx.run(
-            f"wget http://naciscdn.org/naturalearth/packages/natural_earth_vector.sqlite.zip \
+            f"wget --progress=dot:giga http://naciscdn.org/naturalearth/packages/natural_earth_vector.sqlite.zip \
         && unzip -oj natural_earth_vector.sqlite.zip -d {ctx.data_dir} \
         && rm natural_earth_vector.sqlite.zip"
         )
@@ -226,13 +281,14 @@ def import_natural_earth(ctx):
 
 
 @task
+@format_stdout
 def import_water_polygon(ctx):
     logging.info("importing water polygon shapes in postgres")
 
     target_file = f"{ctx.data_dir}/water_polygons.shp"
     if needs_to_download(ctx, target_file, max_age=timedelta(days=30)):
         ctx.run(
-            f"wget {ctx.water.polygons_url} \
+            f"wget --progress=dot:giga {ctx.water.polygons_url} \
     && unzip -oj water-polygons-split-3857.zip -d {ctx.data_dir} \
     && rm water-polygons-split-3857.zip"
         )
@@ -245,6 +301,7 @@ def import_water_polygon(ctx):
 
 
 @task
+@format_stdout
 def import_lake(ctx):
     logging.info("importing the lakes borders in postgres")
     target_file = f"{ctx.data_dir}/lake_centerline.geojson"
@@ -264,6 +321,7 @@ def import_lake(ctx):
 
 
 @task
+@format_stdout
 def import_border(ctx):
     logging.info("importing the borders in postgres")
 
@@ -285,6 +343,7 @@ def import_border(ctx):
 # Wikimedia sites
 ###################
 @task
+@format_stdout
 def import_wikimedia_stats(ctx):
     """
     import wikimedia stats (for POI ranking through Wikipedia page views)
@@ -308,6 +367,7 @@ def import_wikimedia_stats(ctx):
 
 
 @task
+@format_stdout
 def import_wikidata_sitelinks(ctx):
     """
     import Wikipedia pages links for Wikidata items
@@ -331,6 +391,7 @@ def import_wikidata_sitelinks(ctx):
 
 
 @task
+@format_stdout
 def import_wikidata_labels(ctx):
     """
     import labels from Wikidata (for some translations)
@@ -363,6 +424,7 @@ def import_wikidata_labels(ctx):
 
 
 @task
+@format_stdout
 def override_wikidata_weight_functions(ctx):
     """
     update sql weight functions to make use of wikidata stats
@@ -384,6 +446,7 @@ def run_post_sql_scripts(ctx):
 
 
 @task
+@format_stdout
 def load_osm(ctx):
     if ctx.osm.url:
         get_osm_data(ctx)
@@ -400,6 +463,7 @@ def load_osm(ctx):
 
 
 @task
+@format_stdout
 def load_additional_data(ctx):
     tasks = [
         cc_exec.submit(import_natural_earth, ctx),
@@ -420,10 +484,11 @@ def load_additional_data(ctx):
         tasks.append(cc_exec.submit(import_wikidata_labels, ctx))
 
     for task in tasks:
-        task.result()  # join and raise exceptions
+        task.result()
 
 
 @task
+@format_stdout
 def kill_all_access_to_main_db(ctx):
     """
     close all connections to the main database
@@ -437,6 +502,7 @@ def kill_all_access_to_main_db(ctx):
 
 
 @task
+@format_stdout
 def rotate_database(ctx):
     """
     rotate the postgres database
@@ -535,6 +601,7 @@ def create_tiles_jobs(
 
 
 @task
+@format_stdout
 def generate_tiles(ctx):
     """
     Start the tiles generation
@@ -636,6 +703,7 @@ def generate_tiles(ctx):
 
 
 @task
+@format_stdout
 def generate_expired_tiles(ctx, tiles_layer, from_zoom, before_zoom, expired_tiles):
     logging.info("generating expired tiles from %s", expired_tiles)
     create_tiles_jobs(
@@ -673,6 +741,7 @@ def read_osm_timestamp(ctx, osm_file_path):
 
 
 @task
+@format_stdout
 def init_osm_update(ctx):
     """
     Init osmosis folder with configuration files and
@@ -718,6 +787,7 @@ def get_import_lock_path(ctx):
 
 
 @task
+@format_stdout
 def run_osm_update(ctx):
     update_env = {
         "PG_CONNECTION_STRING": f"postgis://{ctx.pg.user}:{ctx.pg.password}@{ctx.pg.host}:{ctx.pg.port}/{ctx.pg.database}",
@@ -755,6 +825,7 @@ def run_osm_update(ctx):
 # default task
 ##############
 @task(default=True)
+@format_stdout
 def load_all(ctx):
     """
     default task called if `invoke` is run without args
