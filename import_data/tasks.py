@@ -260,7 +260,7 @@ def import_water_polygon(ctx):
     ctx.run(
         f"POSTGRES_PASSWORD={ctx.pg.password} POSTGRES_PORT={ctx.pg.port} IMPORT_DATA_DIR={ctx.data_dir} \
   POSTGRES_HOST={ctx.pg.host} POSTGRES_DB={ctx.pg.import_database} POSTGRES_USER={ctx.pg.user} \
-  {ctx.imposm_config_dir}/import-water/import-water.sh"
+  {ctx.imposm_config_dir}/openmaptiles-tools/docker/import-water/import-water.sh"
     )
 
 
@@ -301,7 +301,7 @@ def import_border(ctx):
     ctx.run(
         f"POSTGRES_PASSWORD={ctx.pg.password} POSTGRES_PORT={ctx.pg.port} IMPORT_DIR={ctx.data_dir} \
   POSTGRES_HOST={ctx.pg.host} POSTGRES_DB={ctx.pg.import_database} POSTGRES_USER={ctx.pg.user} \
-  {ctx.imposm_config_dir}/import-osmborder/import/import_osmborder_lines.sh"
+{ctx.imposm_config_dir}/openmaptiles-tools/docker/import-osmborder/import_osmborder_lines.sh"
     )
 
 ### Wikimedia sites

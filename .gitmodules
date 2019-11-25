@@ -1,15 +1,12 @@
 [submodule "openmaptiles"]
 	path = openmaptiles
 	url = https://github.com/QwantResearch/openmaptiles
-[submodule "import_data/import-osmborder"]
-	path = import_data/import-osmborder
-	url = https://github.com/openmaptiles/import-osmborder.git
 [submodule "import_data/import-sql"]
 	path = import_data/import-sql
 	url = https://github.com/openmaptiles/import-sql.git
-[submodule "import_data/import-water"]
-	path = import_data/import-water
-	url = https://github.com/openmaptiles/import-water.git
 [submodule "import_data/postgis-vt-util"]
 	path = import_data/postgis-vt-util
 	url = https://github.com/mapbox/postgis-vt-util.git
+[submodule "import_data/openmaptiles-tools"]
+	path = import_data/openmaptiles-tools
+	url = https://github.com/openmaptiles/openmaptiles-tools.git
