@@ -24,6 +24,7 @@ class TilesLayer:
     BASEMAP = 'basemap'
     POI = 'poi'
 
+
 def _open_sql_connection(ctx, db):
     connection = psycopg2.connect(
         user=ctx.pg.user,
@@ -34,6 +35,7 @@ def _open_sql_connection(ctx, db):
     )
     psycopg2.extras.register_hstore(connection, globally=True)
     return connection
+
 
 def _execute_sql(ctx, sql, db=None, additional_options=""):
     query = f'psql -Xq -h {ctx.pg.host} -p {ctx.pg.port} -U {ctx.pg.user} -c "{sql}" {additional_options}'
@@ -67,7 +69,7 @@ def _wait_until_postgresql_is_ready(ctx):
             logging.info(f'Connection to postgres failed, remaining {30 - x} attempts...')
         time.sleep(1)
         x += 1
-    raise Exception("Postgreql doesn't seem to ready, aborting...")
+    raise Exception("PostgreSQL doesn't seem to ready, aborting...")
 
 
 @task
@@ -101,6 +103,7 @@ def _get_osmupdate_options(ctx, box=None):
         top_right = box.top_right
         bbox_filter = f"-b={bot_left.lon},{bot_left.lat},{top_right.lon},{top_right.lat}"
     return f"-v --day --hour --base-url={ctx.osm_update.replication_url} {bbox_filter}"
+
 
 @task
 def get_osm_data(ctx, update_pbf=True):
@@ -137,7 +140,7 @@ def get_osm_data(ctx, update_pbf=True):
         os.replace(updated_pbf, new_osm_file)
 
 
-## imposm import
+# imposm import
 ################
 
 def _run_imposm_import(ctx, mapping_filename, tileset_name):
@@ -154,14 +157,15 @@ def _run_imposm_import(ctx, mapping_filename, tileset_name):
   -diffdir {ctx.generated_files_dir}/diff/{tileset_name} -cachedir {ctx.generated_files_dir}/cache/{tileset_name}'
     )
 
+
 @task
 def load_basemap(ctx):
     _run_imposm_import(ctx, 'generated_mapping_base.yaml', TilesLayer.BASEMAP)
 
+
 @task
 def load_poi(ctx):
     _run_imposm_import(ctx, 'generated_mapping_poi.yaml', TilesLayer.POI)
-
 
 
 def _run_sql_script(ctx, script_name):
@@ -171,6 +175,7 @@ def _run_sql_script(ctx, script_name):
         env={"PGPASSWORD": ctx.pg.password},
     )
 
+
 @task
 def run_sql_script(ctx):
     # load several psql functions
@@ -178,9 +183,8 @@ def run_sql_script(ctx):
     _run_sql_script(ctx, "postgis-vt-util/postgis-vt-util.sql")
 
 
-### non-OSM data import
+# non-OSM data import
 #######################
-
 def _get_pg_conn(ctx):
     return f"dbname={ctx.pg.import_database} " \
         f"user={ctx.pg.user} " \
@@ -274,9 +278,9 @@ def import_border(ctx):
   {ctx.imposm_config_dir}/import-osmborder/import/import_osmborder_lines.sh"
     )
 
-### Wikimedia sites
-###################
 
+# Wikimedia sites
+###################
 @task
 def import_wikimedia_stats(ctx):
     """
@@ -299,6 +303,7 @@ def import_wikimedia_stats(ctx):
     connection.commit()
     connection.close()
 
+
 @task
 def import_wikidata_sitelinks(ctx):
     """
@@ -320,6 +325,7 @@ def import_wikidata_sitelinks(ctx):
 
     connection.commit()
     connection.close()
+
 
 @task
 def import_wikidata_labels(ctx):
@@ -352,6 +358,7 @@ def import_wikidata_labels(ctx):
         connection.commit()
         connection.close()
 
+
 @task
 def override_wikidata_weight_functions(ctx):
     """
@@ -360,9 +367,8 @@ def override_wikidata_weight_functions(ctx):
     _run_sql_script(ctx, "import-wikidata/wikidata_functions.sql")
 
 
-### import pipeline
+# import pipeline
 ###################
-
 @task
 def run_post_sql_scripts(ctx):
     """
@@ -372,6 +378,7 @@ def run_post_sql_scripts(ctx):
     logging.info("running postsql scripts")
     _run_sql_script(ctx, "generated_base.sql")
     _run_sql_script(ctx, "generated_poi.sql")
+
 
 @task
 def load_osm(ctx):
@@ -442,10 +449,8 @@ def rotate_database(ctx):
     )
 
 
-### tiles generation
+# tiles generation
 ####################
-
-
 def create_tiles_jobs(
     ctx,
     tiles_layer,
@@ -626,16 +631,16 @@ def generate_expired_tiles(ctx, tiles_layer, from_zoom, before_zoom, expired_til
     )
 
 
-### osm update
+# osm update
 ##############
 
 def read_current_state(ctx):
     with open(f'{ctx.update_tiles_dir}/state.txt') as state_file:
         for line in state_file:
             if line.startswith('timestamp='):
-                raw_timestamp = line.replace('timestamp=','').strip()
+                raw_timestamp = line.replace('timestamp=', '').strip()
                 # for compatibility with osm replication files
-                raw_timestamp = raw_timestamp.replace('\:',':')
+                raw_timestamp = raw_timestamp.replace('\:', ':')
                 if raw_timestamp:
                     return raw_timestamp
     raise Exception("Cannot find timestamp in osm state file")
@@ -644,6 +649,7 @@ def read_current_state(ctx):
 def write_new_state(ctx, new_timestamp):
     with open(f'{ctx.update_tiles_dir}/state.txt', 'w') as state_file:
         state_file.write(f'timestamp={new_timestamp}\n')
+
 
 def read_osm_timestamp(ctx, osm_file_path):
     return ctx.run(f'osmconvert {osm_file_path} --out-timestamp').stdout
@@ -729,9 +735,8 @@ def run_osm_update(ctx):
         os.remove(change_file_path)
 
 
-### default task
-################
-
+# default task
+##############
 @task(default=True)
 def load_all(ctx):
     """
