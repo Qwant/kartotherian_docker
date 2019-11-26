@@ -16,8 +16,14 @@ update_tiles_dir: /data/update_tiles_data
 ################################################
 # Data sources
 
+force_downloads: False
+
 water:
+  lakelines_url: https://github.com/openmaptiles/osm-lakelines/releases/download/v0.9/lake_centerline.geojson
   polygons_url: https://osmdata.openstreetmap.de/download/water-polygons-split-3857.zip
+
+border:
+  osmborder_lines_url: https://github.com/openmaptiles/openmaptiles-tools/releases/download/v3.0.0-beta/osmborder_lines.csv.gz
 
 osm:
   ## one of those value needs to be configured
