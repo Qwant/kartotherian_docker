@@ -6,9 +6,8 @@ logger = logging.getLogger(__name__)
 
 def needs_to_download(ctx, file, max_age=None):
     """
-    check if a file already exists in the directory
-    if it's the case, check if we need a more up to date file (by comparing the md5)
-    and if so, clean the old file
+    Check if "file" should be downloaded
+    because it doesn't exist, or is older than "max_age"
     """
     if not os.path.isfile(file):
         return True
