@@ -8,10 +8,9 @@ name = "pypi"
 [packages]
 invoke = "*"
 requests = ">=2.20.0"
-configparser = "*"
-pydantic = "*"
 openmaptiles-tools = ">=0.9.2"
 psycopg2 = "*"
+osmium = "*"
 
 [requires]
 python_version = "3.6"

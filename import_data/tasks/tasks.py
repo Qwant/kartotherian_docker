@@ -8,11 +8,14 @@ import psycopg2.extras
 import os
 import os.path
 import time
-from datetime import timedelta, datetime
+from datetime import timedelta
 import requests
 from invoke import task
 from invoke.exceptions import Failure
-from utils.lock import FileLock
+import osmium
+
+from .lock import FileLock
+from .download import needs_to_download, download_file
 
 logging.basicConfig(level=logging.INFO)
 
@@ -91,50 +94,13 @@ CREATE EXTENSION osml10n;""",
     _execute_sql(ctx, f"DROP DATABASE IF EXISTS {ctx.pg.backup_database};")
 
 
-def _read_md5(md5_response):
-    """the md5 response is usualy "{md5} {name of file}", so we get only the first field"""
-    return next(iter(md5_response.split(' ')), None)
-
-
-def _get_remote_md5(url):
-    """
-    try geting a remote file with the same url name + 'md5' and return the md5 field of the response
-    """
-    md5_url = f'{url}.md5'
-    md5_response = requests.get(md5_url)
-    if md5_response.status_code != 200:
-        return None
-    return _read_md5(md5_response.text)
-
-
-def _compute_md5(ctx, file):
-    r = ctx.run(f"md5sum {file}").stdout
-    return _read_md5(r)
-
-
-def _needs_to_download(ctx, file, url):
-    """
-    check if a file already exists in the directory
-    if it's the case, check if we need a more up to date file (by comparing the md5)
-    and if so, clean the old file
-    """
-    if not os.path.isfile(file):
-        return True
-    # the file already exists, we check the md5 to see if we need to download it again
-    remote_md5 = _get_remote_md5(url)
-    existing_file_md5 = _compute_md5(ctx, file)
-    logging.info(f"existing md5 = {existing_file_md5}, remote md5 = {remote_md5}")
-    if not remote_md5 or remote_md5 != existing_file_md5:
-        logging.warn(
-            f"file {file} already exists, but is not up to date, removing old file"
-        )
-        os.remove(file)
-        return True
-    logging.warn(
-        f"file {file} already exists and is up to date, we don't need to download it again"
-    )
-    return False
-
+def _get_osmupdate_options(ctx, box=None):
+    bbox_filter = ""
+    if box is not None:
+        bot_left = box.bottom_left
+        top_right = box.top_right
+        bbox_filter = f"-b={bot_left.lon},{bot_left.lat},{top_right.lon},{top_right.lat}"
+    return f"-v --day --hour --base-url={ctx.osm_update.replication_url} {bbox_filter}"
 
 @task
 def get_osm_data(ctx):
@@ -146,16 +112,12 @@ def get_osm_data(ctx):
 
     new_osm_file = os.path.join(ctx.data_dir, file_name)
     if ctx.osm.file is not None and ctx.osm.file != new_osm_file:
-        logging.warn(
+        logging.warning(
             f"the osm variable has been configured to {ctx.osm_file}, "
             f"but this will not be taken into account as we will use a newly downloaded file: {new_osm_file}"
         )
     ctx.osm.file = new_osm_file
-
-    if not _needs_to_download(ctx, new_osm_file, ctx.osm.url):
-        return
-
-    ctx.run(f"wget --progress=dot:giga {ctx.osm.url} --output-document={new_osm_file}")
+    download_file(ctx, new_osm_file, ctx.osm.url, max_age=timedelta(days=3))
 
 
 ## imposm import
@@ -215,7 +177,7 @@ def import_natural_earth(ctx):
     logging.info("importing natural earth shapes in postgres")
     target_file = f"{ctx.data_dir}/natural_earth_vector.sqlite"
 
-    if not os.path.isfile(target_file):
+    if needs_to_download(ctx, target_file, max_age=timedelta(days=30)):
         ctx.run(
             f"wget --progress=dot:giga http://naciscdn.org/naturalearth/packages/natural_earth_vector.sqlite.zip \
         && unzip -oj natural_earth_vector.sqlite.zip -d {ctx.data_dir} \
@@ -244,13 +206,7 @@ def import_water_polygon(ctx):
     logging.info("importing water polygon shapes in postgres")
 
     target_file = f"{ctx.data_dir}/water_polygons.shp"
-    to_download = True
-    if os.path.isfile(target_file):
-        existing_file_dt = datetime.utcfromtimestamp(os.path.getmtime(target_file))
-        if datetime.utcnow() - existing_file_dt < timedelta(days=30):
-            to_download = False
-
-    if to_download:
+    if needs_to_download(ctx, target_file, max_age=timedelta(days=30)):
         ctx.run(
             f"wget --progress=dot:giga {ctx.water.polygons_url} \
     && unzip -oj water-polygons-split-3857.zip -d {ctx.data_dir} \
@@ -267,12 +223,8 @@ def import_water_polygon(ctx):
 @task
 def import_lake(ctx):
     logging.info("importing the lakes borders in postgres")
-
     target_file = f"{ctx.data_dir}/lake_centerline.geojson"
-    if not os.path.isfile(target_file):
-        ctx.run(
-            f"wget --progress=dot:giga -L -P {ctx.data_dir} https://github.com/lukasmartinelli/osm-lakelines/releases/download/v0.9/lake_centerline.geojson"
-        )
+    download_file(ctx, target_file, ctx.water.lakelines_url, max_age=timedelta(days=30))
 
     pg_conn = _get_pg_conn(ctx)
     ctx.run(
@@ -292,10 +244,11 @@ def import_border(ctx):
     logging.info("importing the borders in postgres")
 
     target_file = f"{ctx.data_dir}/osmborder_lines.csv"
-    if not os.path.isfile(target_file):
+    gz_file = f"{target_file}.gz"
+    if needs_to_download(ctx, target_file, max_age=timedelta(days=30)):
         ctx.run(
-            f"wget --progress=dot:giga -P {ctx.data_dir} https://github.com/openmaptiles/import-osmborder/releases/download/v0.4/osmborder_lines.csv.gz \
-    && gzip -d {ctx.data_dir}/osmborder_lines.csv.gz"
+            f"wget --progress=dot:giga -O {gz_file} {ctx.border.osmborder_lines_url} \
+    && gzip -fd {gz_file}"
         )
 
     ctx.run(
@@ -313,11 +266,7 @@ def import_wikimedia_stats(ctx):
     import wikimedia stats (for POI ranking through Wikipedia page views)
     """
     target_file = os.path.join(ctx.data_dir, ctx.wikidata.stats.file)
-
-    if not os.path.isfile(target_file):
-        ctx.run(
-            f'wget --progress=dot:giga -O {target_file} {ctx.wikidata.stats.url}'
-        )
+    download_file(ctx, target_file, ctx.wikidata.stats.url)
 
     connection = _open_sql_connection(ctx, ctx.pg.import_database)
     cursor = connection.cursor()
@@ -339,12 +288,7 @@ def import_wikidata_sitelinks(ctx):
     import Wikipedia pages links for Wikidata items
     """
     target_file = os.path.join(ctx.data_dir, ctx.wikidata.sitelinks.file)
-
-    if not os.path.isfile(target_file):
-        ctx.run(
-            f'wget --progress=dot:giga -O {target_file} '
-            f'{ctx.wikidata.sitelinks.url}'
-        )
+    download_file(ctx, target_file, ctx.wikidata.sitelinks.url)
 
     connection = _open_sql_connection(ctx, ctx.pg.import_database)
     cursor = connection.cursor()
@@ -366,12 +310,7 @@ def import_wikidata_labels(ctx):
     import labels from Wikidata (for some translations)
     """
     target_file = os.path.join(ctx.data_dir, ctx.wikidata.labels.file)
-
-    if not os.path.isfile(target_file):
-        ctx.run(
-            f'wget --progress=dot:giga -O {target_file} '
-            f'{ctx.wikidata.labels.url}'
-        )
+    download_file(ctx, target_file, ctx.wikidata.labels.url)
 
     with gzip.open(target_file, 'rt') as istream:
         reader = csv.DictReader(istream)
@@ -754,9 +693,9 @@ def run_osm_update(ctx):
     with FileLock(lock_path) as lock:
         current_osm_timestamp = read_current_state(ctx)
         try:
+            osmupdate_opts = _get_osmupdate_options(ctx)
             ctx.run(
-                f'osmupdate -v --day --hour --base-url={ctx.osm_update.replication_url} '
-                f'{current_osm_timestamp} {change_file_path}'
+                f'osmupdate {osmupdate_opts} {current_osm_timestamp} {change_file_path}'
             )
         except Failure as exc:
             if exc.result.return_code == 21:
