@@ -103,7 +103,7 @@ def _get_osmupdate_options(ctx, box=None):
     return f"-v --day --hour --base-url={ctx.osm_update.replication_url} {bbox_filter}"
 
 @task
-def get_osm_data(ctx):
+def get_osm_data(ctx, update_pbf=True):
     """
     download the osm file and store it in the input_data directory
     """
@@ -118,6 +118,23 @@ def get_osm_data(ctx):
         )
     ctx.osm.file = new_osm_file
     download_file(ctx, new_osm_file, ctx.osm.url, max_age=timedelta(days=3))
+
+    if update_pbf:
+        pbf_reader = osmium.io.Reader(new_osm_file)
+        pbf_bbox = pbf_reader.header().box()
+        if pbf_bbox is not None and pbf_bbox.size() > 60000:
+            # This looks like a planet file: bbox filter is unnecessary
+            pbf_bbox = None
+        osmupdate_opts = _get_osmupdate_options(ctx, pbf_bbox)
+        updated_pbf = f"{new_osm_file}.updated.pbf"
+        try:
+            ctx.run(f'osmupdate {osmupdate_opts} {new_osm_file} {updated_pbf}')
+        except Failure as exc:
+            if exc.result.return_code == 21:
+                logging.info('OSM pbf file is up to date')
+                return
+            raise
+        os.replace(updated_pbf, new_osm_file)
 
 
 ## imposm import
