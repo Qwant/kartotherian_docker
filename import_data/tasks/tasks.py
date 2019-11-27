@@ -41,11 +41,10 @@ class PrefixedStream:
 
         for line in lines[:-1]:
             self.src_stream.write(
-                '\033[0;90m[{}]\033[0;0m {}\n'.format(self.prefix, line)
+                '[{}] {}\n'.format(self.prefix, line)
             )
 
         self.buffer = lines[-1]
-        self.src_stream.flush()
 
 
 class PrefixedContext(context.Context):
