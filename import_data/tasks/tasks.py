@@ -53,7 +53,7 @@ class PrefixedContext(context.Context):
     outputed by ctx.run(..).
     """
     def __init__(self, ctx, prefix):
-        self.__dict__ = ctx.__dict__.copy()
+        super().__init__(ctx.config)
         self.prefix = prefix
 
     def run(self, *args, **kwargs):
