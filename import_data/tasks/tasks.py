@@ -10,6 +10,7 @@ import os
 import os.path
 import time
 from datetime import timedelta
+from functools import wraps
 import requests
 from invoke import context, task
 from invoke.exceptions import Failure
@@ -19,6 +20,13 @@ from .lock import FileLock
 from .download import needs_to_download, download_file
 
 cc_exec = concurrent.futures.ThreadPoolExecutor()
+
+def join_futures(self, *futures):
+    """
+    Wait for the result of all input futures and returns the list of results.
+    Throws an exception if any of the futures fails.
+    """
+    return [f.result() for f in futures]
 
 logging.basicConfig(level=logging.INFO)
 
@@ -69,11 +77,11 @@ def format_stdout(fun):
     Wrapper decorator around a task adding its name to each line outputed by
     ctx.run(..).
     """
+    @wraps(fun)
     def upgraded_fun(ctx, *args, **kwargs):
         ctx = PrefixedContext(ctx, fun.__name__)
         fun(ctx, *args, **kwargs)
 
-    upgraded_fun.__name__ = fun.__name__
     return upgraded_fun
 
 class TilesLayer:
@@ -440,8 +448,10 @@ def run_post_sql_scripts(ctx):
     this file has been generated using https://github.com/QwantResearch/openmaptiles
     """
     logging.info("running postsql scripts")
-    _run_sql_script(ctx, "generated_base.sql")
-    _run_sql_script(ctx, "generated_poi.sql")
+    join_futures(
+        cc_exec.submit(_run_sql_script, ctx, "generated_base.sql"),
+        cc_exec.submit(_run_sql_script, ctx, "generated_poi.sql"),
+    )
 
 
 @task
@@ -450,13 +460,10 @@ def load_osm(ctx):
     if ctx.osm.url:
         get_osm_data(ctx)
 
-    tasks = [
+    join_futures(
         cc_exec.submit(load_basemap, ctx),
         cc_exec.submit(load_poi, ctx),
-    ]
-
-    for task in tasks:
-        task.result()
+    )
 
     run_sql_script(ctx)
 
@@ -482,8 +489,7 @@ def load_additional_data(ctx):
         _run_sql_script(ctx, "import-wikidata/labels_tables.sql")
         tasks.append(cc_exec.submit(import_wikidata_labels, ctx))
 
-    for task in tasks:
-        task.result()
+    join_futures(*tasks)
 
 
 @task
