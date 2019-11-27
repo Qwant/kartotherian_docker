@@ -21,13 +21,6 @@ from .format_stdout import format_stdout
 
 cc_exec = concurrent.futures.ThreadPoolExecutor()
 
-def join_futures(*futures):
-    """
-    Wait for the result of all input futures and returns the list of results.
-    Throws an exception if any of the futures fails.
-    """
-    return [f.result() for f in futures]
-
 logging.basicConfig(level=logging.INFO)
 
 
@@ -395,10 +388,10 @@ def run_post_sql_scripts(ctx):
     this file has been generated using https://github.com/QwantResearch/openmaptiles
     """
     logging.info("running postsql scripts")
-    join_futures(
+    concurrent.futures.wait([
         cc_exec.submit(_run_sql_script, ctx, "generated_base.sql"),
         cc_exec.submit(_run_sql_script, ctx, "generated_poi.sql"),
-    )
+    ])
 
 
 @task
@@ -407,10 +400,8 @@ def load_osm(ctx):
     if ctx.osm.url:
         get_osm_data(ctx)
 
-    join_futures(
-        cc_exec.submit(load_basemap, ctx),
-        cc_exec.submit(load_poi, ctx),
-    )
+    load_basemap(ctx)
+    load_poi(ctx)
 
     run_sql_script(ctx)
 
@@ -436,7 +427,7 @@ def load_additional_data(ctx):
         _run_sql_script(ctx, "import-wikidata/labels_tables.sql")
         tasks.append(cc_exec.submit(import_wikidata_labels, ctx))
 
-    join_futures(*tasks)
+    concurrent.futures.wait(tasks)
 
 
 @task
