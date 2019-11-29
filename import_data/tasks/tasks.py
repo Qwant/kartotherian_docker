@@ -388,10 +388,8 @@ def run_post_sql_scripts(ctx):
     this file has been generated using https://github.com/QwantResearch/openmaptiles
     """
     logging.info("running postsql scripts")
-    concurrent.futures.wait([
-        cc_exec.submit(_run_sql_script, ctx, "generated_base.sql"),
-        cc_exec.submit(_run_sql_script, ctx, "generated_poi.sql"),
-    ])
+    _run_sql_script(ctx, "generated_base.sql")
+    _run_sql_script(ctx, "generated_poi.sql")
 
 
 @task
@@ -399,10 +397,8 @@ def run_post_sql_scripts(ctx):
 def load_osm(ctx):
     if ctx.osm.url:
         get_osm_data(ctx)
-
     load_basemap(ctx)
     load_poi(ctx)
-
     run_sql_script(ctx)
 
 
