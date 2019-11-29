@@ -21,19 +21,9 @@ COMMANDS = [
 def exec_command(command, options):
     if options.get('debug') is True:
         print('==> {}'.format(' '.join(command)))
-    p = subprocess.Popen(
-        command,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.STDOUT)
-    while True:
-        output = p.stdout.read1(100)
-        if len(output) == 0:
-            rc = p.poll()
-            if rc is not None:
-                return rc
-        if len(output) > 0:
-            sys.stdout.buffer.write(output)
-            sys.stdout.buffer.flush()
+    p = subprocess.Popen(command)
+    p.wait()
+    return p.poll()
 
 
 def get_submodules():
