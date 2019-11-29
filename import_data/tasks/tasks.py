@@ -397,8 +397,12 @@ def run_post_sql_scripts(ctx):
 def load_osm(ctx):
     if ctx.osm.url:
         get_osm_data(ctx)
-    load_basemap(ctx)
-    load_poi(ctx)
+
+    concurrent.futures.wait([
+        cc_exec.submit(load_basemap, ctx),
+        cc_exec.submit(load_poi, ctx)
+    ])
+
     run_sql_script(ctx)
 
 
