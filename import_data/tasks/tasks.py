@@ -158,7 +158,8 @@ def _run_imposm_import(ctx, mapping_filename, tileset_name):
   -deployproduction -overwritecache \
   -optimize \
   -quiet \
-  -diffdir {ctx.generated_files_dir}/diff/{tileset_name} -cachedir {ctx.generated_files_dir}/cache/{tileset_name}'
+  -diffdir {ctx.generated_files_dir}/diff/{tileset_name} -cachedir {ctx.generated_files_dir}/cache/{tileset_name} \
+  -dbschema-import {tileset_name}'
     )
 
 
