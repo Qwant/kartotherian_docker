@@ -647,7 +647,6 @@ def generate_tiles(ctx):
 
 
 @task
-@format_stdout
 def generate_expired_tiles(ctx, tiles_layer, from_zoom, before_zoom, expired_tiles):
     logging.info("generating expired tiles from %s", expired_tiles)
     create_tiles_jobs(
