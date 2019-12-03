@@ -110,7 +110,7 @@ def _get_osmupdate_options(ctx, box=None):
 
 
 @task
-def get_osm_data(ctx, update_pbf=True):
+def get_osm_data(ctx):
     """
     download the osm file and store it in the input_data directory
     """
@@ -126,7 +126,7 @@ def get_osm_data(ctx, update_pbf=True):
     ctx.osm.file = new_osm_file
     download_file(ctx, new_osm_file, ctx.osm.url, max_age=timedelta(days=3))
 
-    if update_pbf:
+    if ctx.osm.update_pbf:
         pbf_reader = osmium.io.Reader(new_osm_file)
         pbf_bbox = pbf_reader.header().box()
         if pbf_bbox is not None and pbf_bbox.size() > 60000:
