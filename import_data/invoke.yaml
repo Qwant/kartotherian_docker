@@ -26,11 +26,13 @@ border:
   osmborder_lines_url: https://github.com/openmaptiles/openmaptiles-tools/releases/download/v3.0.0-beta/osmborder_lines.csv.gz
 
 osm:
-  ## one of those value needs to be configured
+  ## one of 'url' or 'file' needs to be configured
   ## URL where to get the osm file
   url:
   ## Path of the file
   file:
+  # Fetch and apply updates on .pbf file before importing
+  update_pbf: True
 
 # Toggle import of statistics and metadata from Wikidata
 wikidata:

@@ -1,3 +1,4 @@
+import concurrent.futures
 import csv
 import sys
 import logging
@@ -16,6 +17,9 @@ import osmium
 
 from .lock import FileLock
 from .download import needs_to_download, download_file
+from .format_stdout import format_stdout
+
+cc_exec = concurrent.futures.ThreadPoolExecutor()
 
 logging.basicConfig(level=logging.INFO)
 
@@ -106,7 +110,7 @@ def _get_osmupdate_options(ctx, box=None):
 
 
 @task
-def get_osm_data(ctx, update_pbf=True):
+def get_osm_data(ctx):
     """
     download the osm file and store it in the input_data directory
     """
@@ -122,7 +126,7 @@ def get_osm_data(ctx, update_pbf=True):
     ctx.osm.file = new_osm_file
     download_file(ctx, new_osm_file, ctx.osm.url, max_age=timedelta(days=3))
 
-    if update_pbf:
+    if ctx.osm.update_pbf:
         pbf_reader = osmium.io.Reader(new_osm_file)
         pbf_bbox = pbf_reader.header().box()
         if pbf_bbox is not None and pbf_bbox.size() > 60000:
@@ -154,7 +158,8 @@ def _run_imposm_import(ctx, mapping_filename, tileset_name):
   -deployproduction -overwritecache \
   -optimize \
   -quiet \
-  -diffdir {ctx.generated_files_dir}/diff/{tileset_name} -cachedir {ctx.generated_files_dir}/cache/{tileset_name}'
+  -diffdir {ctx.generated_files_dir}/diff/{tileset_name} -cachedir {ctx.generated_files_dir}/cache/{tileset_name} \
+  -dbschema-import {tileset_name}'
     )
 
 
@@ -194,6 +199,7 @@ def _get_pg_conn(ctx):
 
 
 @task
+@format_stdout
 def import_natural_earth(ctx):
     logging.info("importing natural earth shapes in postgres")
     target_file = f"{ctx.data_dir}/natural_earth_vector.sqlite"
@@ -223,6 +229,7 @@ def import_natural_earth(ctx):
 
 
 @task
+@format_stdout
 def import_water_polygon(ctx):
     logging.info("importing water polygon shapes in postgres")
 
@@ -242,6 +249,7 @@ def import_water_polygon(ctx):
 
 
 @task
+@format_stdout
 def import_lake(ctx):
     logging.info("importing the lakes borders in postgres")
     target_file = f"{ctx.data_dir}/lake_centerline.geojson"
@@ -261,6 +269,7 @@ def import_lake(ctx):
 
 
 @task
+@format_stdout
 def import_border(ctx):
     logging.info("importing the borders in postgres")
 
@@ -282,6 +291,7 @@ def import_border(ctx):
 # Wikimedia sites
 ###################
 @task
+@format_stdout
 def import_wikimedia_stats(ctx):
     """
     import wikimedia stats (for POI ranking through Wikipedia page views)
@@ -305,6 +315,7 @@ def import_wikimedia_stats(ctx):
 
 
 @task
+@format_stdout
 def import_wikidata_sitelinks(ctx):
     """
     import Wikipedia pages links for Wikidata items
@@ -328,6 +339,7 @@ def import_wikidata_sitelinks(ctx):
 
 
 @task
+@format_stdout
 def import_wikidata_labels(ctx):
     """
     import labels from Wikidata (for some translations)
@@ -360,6 +372,7 @@ def import_wikidata_labels(ctx):
 
 
 @task
+@format_stdout
 def override_wikidata_weight_functions(ctx):
     """
     update sql weight functions to make use of wikidata stats
@@ -381,32 +394,45 @@ def run_post_sql_scripts(ctx):
 
 
 @task
+@format_stdout
 def load_osm(ctx):
     if ctx.osm.url:
         get_osm_data(ctx)
-    load_basemap(ctx)
-    load_poi(ctx)
+
+    concurrent.futures.wait([
+        cc_exec.submit(load_basemap, ctx),
+        cc_exec.submit(load_poi, ctx)
+    ])
+
     run_sql_script(ctx)
 
 
 @task
+@format_stdout
 def load_additional_data(ctx):
-    import_natural_earth(ctx)
-    import_water_polygon(ctx)
-    import_lake(ctx)
-    import_border(ctx)
+    tasks = [
+        cc_exec.submit(import_natural_earth, ctx),
+        cc_exec.submit(import_water_polygon, ctx),
+        cc_exec.submit(import_lake, ctx),
+        cc_exec.submit(import_border, ctx),
+    ]
 
     if ctx.wikidata.stats.enabled:
         _run_sql_script(ctx, "import-wikidata/stats_tables.sql")
-        import_wikimedia_stats(ctx)
-        import_wikidata_sitelinks(ctx)
+        tasks += [
+            cc_exec.submit(import_wikimedia_stats, ctx),
+            cc_exec.submit(import_wikidata_sitelinks, ctx),
+        ]
 
     if ctx.wikidata.labels.enabled:
         _run_sql_script(ctx, "import-wikidata/labels_tables.sql")
-        import_wikidata_labels(ctx)
+        tasks.append(cc_exec.submit(import_wikidata_labels, ctx))
+
+    concurrent.futures.wait(tasks)
 
 
 @task
+@format_stdout
 def kill_all_access_to_main_db(ctx):
     """
     close all connections to the main database
@@ -420,6 +446,7 @@ def kill_all_access_to_main_db(ctx):
 
 
 @task
+@format_stdout
 def rotate_database(ctx):
     """
     rotate the postgres database
@@ -518,6 +545,7 @@ def create_tiles_jobs(
 
 
 @task
+@format_stdout
 def generate_tiles(ctx):
     """
     Start the tiles generation
@@ -656,6 +684,7 @@ def read_osm_timestamp(ctx, osm_file_path):
 
 
 @task
+@format_stdout
 def init_osm_update(ctx):
     """
     Init osmosis folder with configuration files and
@@ -701,6 +730,7 @@ def get_import_lock_path(ctx):
 
 
 @task
+@format_stdout
 def run_osm_update(ctx):
     update_env = {
         "PG_CONNECTION_STRING": f"postgis://{ctx.pg.user}:{ctx.pg.password}@{ctx.pg.host}:{ctx.pg.port}/{ctx.pg.database}",
@@ -738,6 +768,7 @@ def run_osm_update(ctx):
 # default task
 ##############
 @task(default=True)
+@format_stdout
 def load_all(ctx):
     """
     default task called if `invoke` is run without args
