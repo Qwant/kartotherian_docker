@@ -286,6 +286,7 @@ def import_wikimedia_stats(ctx):
     """
     import wikimedia stats (for POI ranking through Wikipedia page views)
     """
+    logging.info("importing wikimedia stats...")
     target_file = os.path.join(ctx.data_dir, ctx.wikidata.stats.file)
     download_file(ctx, target_file, ctx.wikidata.stats.url)
 
@@ -302,6 +303,7 @@ def import_wikimedia_stats(ctx):
 
     connection.commit()
     connection.close()
+    logging.info("importing wikimedia stats done.")
 
 
 @task
@@ -309,6 +311,7 @@ def import_wikidata_sitelinks(ctx):
     """
     import Wikipedia pages links for Wikidata items
     """
+    logging.info("importing wikidata links...")
     target_file = os.path.join(ctx.data_dir, ctx.wikidata.sitelinks.file)
     download_file(ctx, target_file, ctx.wikidata.sitelinks.url)
 
@@ -325,6 +328,7 @@ def import_wikidata_sitelinks(ctx):
 
     connection.commit()
     connection.close()
+    logging.info("importing wikidata links done.")
 
 
 @task
@@ -332,6 +336,7 @@ def import_wikidata_labels(ctx):
     """
     import labels from Wikidata (for some translations)
     """
+    logging.info("importing wikidata labels...")
     target_file = os.path.join(ctx.data_dir, ctx.wikidata.labels.file)
     download_file(ctx, target_file, ctx.wikidata.labels.url)
 
@@ -357,6 +362,7 @@ def import_wikidata_labels(ctx):
 
         connection.commit()
         connection.close()
+    logging.info("importing wikidata labels done.")
 
 
 @task
