@@ -129,19 +129,22 @@ def get_osm_data(ctx):
     if ctx.osm.update_pbf:
         pbf_reader = osmium.io.Reader(new_osm_file)
         pbf_bbox = pbf_reader.header().box()
-        if pbf_bbox is not None and pbf_bbox.size() > 60000:
-            # This looks like a planet file: bbox filter is unnecessary
-            pbf_bbox = None
-        osmupdate_opts = _get_osmupdate_options(ctx, pbf_bbox)
-        updated_pbf = f"{new_osm_file}.updated.pbf"
+        if pbf_bbox is not None and pbf_bbox.size() < 60000:
+            # Updating pbf before the import is only useful for large (planet) files
+            # Moreover, imposm seems to require much more memory when reading .pbf file where
+            # partial updates have been applied.
+            logging.info('The .pbf file is a geographical extract: it will NOT be updated')
+            return
+        osmupdate_opts = _get_osmupdate_options(ctx)
+        temporary_pbf = f"{new_osm_file}.temp.pbf"
         try:
-            ctx.run(f'osmupdate {osmupdate_opts} {new_osm_file} {updated_pbf}')
+            ctx.run(f'osmupdate {osmupdate_opts} {new_osm_file} {temporary_pbf}')
         except Failure as exc:
             if exc.result.return_code == 21:
                 logging.info('OSM pbf file is up to date')
                 return
             raise
-        os.replace(updated_pbf, new_osm_file)
+        os.replace(temporary_pbf, new_osm_file)
 
 
 # imposm import

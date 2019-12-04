@@ -24,6 +24,7 @@ class PrefixedStream:
             self.src_stream.write('[{}] {}\n'.format(self.prefix, line))
 
         self.buffer = lines[-1]
+        self.src_stream.flush()
 
 
 class PrefixedContext(context.Context):
