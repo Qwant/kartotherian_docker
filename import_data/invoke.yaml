@@ -31,7 +31,7 @@ osm:
   url:
   ## Path of the file
   file:
-  # Fetch and apply updates on .pbf file before importing
+  # Fetch and apply updates on .pbf file before importing (applies only for planet files)
   update_pbf: True
 
 # Toggle import of statistics and metadata from Wikidata
