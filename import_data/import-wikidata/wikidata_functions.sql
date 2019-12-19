@@ -28,11 +28,16 @@ RETURNS REAL AS $$
         views_count real;
     BEGIN
         SELECT INTO views_count
-            COALESCE(MAX(wm_stats.views)::real, 0)
-            FROM wm_stats
-            JOIN wd_sitelinks ON (wm_stats.title = wd_sitelinks.title
-                              AND wm_stats.lang = wd_sitelinks.lang)
-            WHERE wd_sitelinks.id = tags->'wikidata';
+            CASE
+                WHEN tags ? 'wikidata' THEN (
+                    SELECT COALESCE(MAX(wm_stats.views)::real, 0)
+                    FROM wm_stats
+                    JOIN wd_sitelinks ON (wm_stats.title = wd_sitelinks.title
+                                      AND wm_stats.lang = wd_sitelinks.lang)
+                    WHERE wd_sitelinks.id = tags->'wikidata'
+                ) ELSE
+                    0
+            END;
         RETURN CASE
             WHEN views_count > min_views THEN
                 0.5 * (1 + LOG(LEAST(max_views, views_count)) / LOG(max_views))
@@ -42,7 +47,6 @@ RETURNS REAL AS $$
                 )
             ELSE
                 0.0
-
         END;
     END
 $$ LANGUAGE plpgsql IMMUTABLE;
