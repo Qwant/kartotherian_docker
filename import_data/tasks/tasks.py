@@ -2,6 +2,7 @@ import concurrent.futures
 import csv
 import sys
 import logging
+import jinja2
 import json
 import gzip
 import psycopg2
@@ -11,6 +12,7 @@ import os.path
 import time
 from datetime import timedelta
 import requests
+from io import StringIO
 from invoke import task
 from invoke.exceptions import Failure
 import osmium
@@ -42,14 +44,32 @@ def _open_sql_connection(ctx, db):
 
 
 def _execute_sql(ctx, sql, db=None, additional_options=""):
-    query = f'psql -Xq -h {ctx.pg.host} -p {ctx.pg.port} -U {ctx.pg.user} -c "{sql}" {additional_options}'
+    query = f'psql -Xq -h {ctx.pg.host} -p {ctx.pg.port} -U {ctx.pg.user} {additional_options}'
     if db is not None:
         query += f" -d {db}"
     return ctx.run(
         query,
-        env={"PGPASSWORD": ctx.pg.password}
+        in_stream=StringIO(sql),
+        env={"PGPASSWORD": ctx.pg.password},
     )
 
+def _run_sql_script(ctx, script_name, template_params=None):
+    """
+    Run SQL commands from a file over the import database.
+    If `template_params` is not None, the file is interpreted as a Jinja
+    template.
+    """
+    script_path = os.path.join(ctx.imposm_config_dir, script_name)
+
+    with open(script_path, 'r') as f:
+        sql_commands = f.read()
+
+        if template_params is not None:
+            sql_commands = (
+                jinja2.Template(sql_commands).render(**template_params)
+            )
+
+        return _execute_sql(ctx, sql_commands, db=ctx.pg.import_database)
 
 def _db_exists(ctx, db_name):
     has_db = _execute_sql(
@@ -174,15 +194,6 @@ def load_basemap(ctx):
 @task
 def load_poi(ctx):
     _run_imposm_import(ctx, 'generated_mapping_poi.yaml', TilesLayer.POI)
-
-
-def _run_sql_script(ctx, script_name):
-    script_path = os.path.join(ctx.imposm_config_dir, script_name)
-    ctx.run(
-        f"psql -Xq -h {ctx.pg.host} -U {ctx.pg.user} -d {ctx.pg.import_database} -p {ctx.pg.port} --set ON_ERROR_STOP='1' -f {script_path}",
-        env={"PGPASSWORD": ctx.pg.password},
-    )
-
 
 @task
 def run_sql_script(ctx):
@@ -386,7 +397,42 @@ def override_wikidata_weight_functions(ctx):
     """
     update sql weight functions to make use of wikidata stats
     """
-    _run_sql_script(ctx, "import-wikidata/wikidata_functions.sql")
+    def compute_views_percentile(fraction):
+        QUERY = f'''
+            SELECT PERCENTILE_DISC({fraction}) WITHIN GROUP (ORDER BY all_poi.max_views)
+            FROM (
+                SELECT MAX(stats.views) AS max_views
+                FROM (
+                        SELECT osm_id, name, tags FROM osm_poi_polygon
+                            UNION ALL
+                        SELECT osm_id, name, tags FROM osm_poi_point
+                    ) AS poi
+                JOIN wd_sitelinks AS site
+                    ON site.id = poi.tags->'wikidata'
+                JOIN wm_stats AS stats
+                    ON site.lang = stats.lang AND site.title = stats.title
+                GROUP BY poi.osm_id
+            ) AS all_poi
+        '''
+        return float(
+            _execute_sql(
+                ctx,
+                QUERY,
+                db=ctx.pg.import_database,
+                additional_options='-tA'
+            ).stdout.strip()
+        )
+
+    params = {
+        'min_views': compute_views_percentile(0.1),
+        'max_views': compute_views_percentile(0.999),
+    }
+
+    _run_sql_script(
+        ctx,
+        'import-wikidata/wikidata_functions.sql',
+        template_params=params
+    )
 
 
 # import pipeline

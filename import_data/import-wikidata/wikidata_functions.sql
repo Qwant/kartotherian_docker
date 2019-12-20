@@ -1,24 +1,3 @@
--- Compute a percentile on the set of page view counts for POIs for which a
--- Wikipedia page was found.
-CREATE OR REPLACE FUNCTION poi_pageviews_percentile(fraction REAL)
-RETURNS INTEGER AS
-$$
-    SELECT PERCENTILE_DISC(fraction) WITHIN GROUP (ORDER BY all_poi.max_views)
-    FROM (
-        SELECT MAX(stats.views) AS max_views
-        FROM (
-                SELECT osm_id, name, tags FROM osm_poi_polygon
-                    UNION ALL
-                SELECT osm_id, name, tags FROM osm_poi_point
-            ) AS poi
-        JOIN wd_sitelinks AS site
-            ON site.id = poi.tags->'wikidata'
-        JOIN wm_stats AS stats
-            ON site.lang = stats.lang AND site.title = stats.title
-        GROUP BY poi.osm_id
-    ) AS all_poi
-$$ LANGUAGE sql IMMUTABLE;
-
 -- Override default `poi_display_weight` function from
 -- https://github.com/QwantResearch/openmaptiles/.
 --
@@ -40,11 +19,11 @@ RETURNS REAL AS $$
         -- Lower limit to the number of view of a Wikipedia page to consider it
         -- relevant. If a page generates less views than this limit, the output
         -- value will be computed as if this page doesn't exist.
-        min_views CONSTANT REAL := poi_pageviews_percentile(0.1);
+        min_views CONSTANT REAL := {{ min_views }};
 
         -- Upper limit to the number of views of a Wikipedia page. Pages with a
         -- greater number of views will have a weight of 1.
-        max_views CONSTANT REAL := poi_pageviews_percentile(0.999);
+        max_views CONSTANT REAL := {{ max_views }};
 
         views_count REAL;
     BEGIN
