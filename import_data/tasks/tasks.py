@@ -69,7 +69,12 @@ def _run_sql_script(ctx, script_name, template_params=None):
                 jinja2.Template(sql_commands).render(**template_params)
             )
 
-        return _execute_sql(ctx, sql_commands, db=ctx.pg.import_database)
+        return _execute_sql(
+            ctx,
+            sql_commands,
+            db=ctx.pg.import_database,
+            additional_options="--set ON_ERROR_STOP='1'"
+        )
 
 def _db_exists(ctx, db_name):
     has_db = _execute_sql(
