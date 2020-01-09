@@ -11,8 +11,8 @@ import os
 import os.path
 import time
 from datetime import timedelta
+from tempfile import NamedTemporaryFile
 import requests
-from io import StringIO
 from invoke import task
 from invoke.exceptions import Failure
 import osmium
@@ -43,14 +43,26 @@ def _open_sql_connection(ctx, db):
     return connection
 
 
-def _execute_sql(ctx, sql, db=None, additional_options=""):
-    query = f'psql -Xq -h {ctx.pg.host} -p {ctx.pg.port} -U {ctx.pg.user} {additional_options}'
+def _execute_sql(ctx, sql, db=None, additional_options=''):
+    tmp_file = NamedTemporaryFile('w')
+    tmp_file.write(sql)
+    tmp_file.flush()
+
+    query = (
+        f'psql -Xq'
+        f' -h {ctx.pg.host}'
+        f' -p {ctx.pg.port}'
+        f' -U {ctx.pg.user}'
+        f' -f {tmp_file.name}'
+        f' {additional_options}'
+    )
+
     if db is not None:
-        query += f" -d {db}"
+        query += f' -d {db}'
+
     return ctx.run(
         query,
-        in_stream=StringIO(sql),
-        env={"PGPASSWORD": ctx.pg.password},
+        env={'PGPASSWORD': ctx.pg.password},
     )
 
 def _run_sql_script(ctx, script_name, template_params=None):
