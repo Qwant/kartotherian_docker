@@ -1,6 +1,6 @@
 -- Override default `poi_display_weight` function from
 -- https://github.com/QwantResearch/openmaptiles/.
--- 
+--
 -- Primarily, this function relies on the count of page views for the Wikipedia
 -- pages of a POI, if no Wikipedia page is found, this will fallback on the
 -- default implementation.
@@ -16,16 +16,16 @@ RETURNS REAL AS $$
         -- https://github.com/QwantResearch/openmaptiles/blob/master/layers/poi/class.sql
         max_rank  CONSTANT REAL := 1000.;
 
-        -- Upper limit to the number of views of a Wikipedia page, this limit
-        -- should be sufficient for a period of time of about a year.
-        max_views CONSTANT REAL := 1e6;
-
         -- Lower limit to the number of view of a Wikipedia page to consider it
         -- relevant. If a page generates less views than this limit, the output
         -- value will be computed as if this page doesn't exist.
-        min_views CONSTANT REAL := 50.;
+        min_views CONSTANT REAL := {{ min_views }};
 
-        views_count real;
+        -- Upper limit to the number of views of a Wikipedia page. Pages with a
+        -- greater number of views will have a weight of 1.
+        max_views CONSTANT REAL := {{ max_views }};
+
+        views_count REAL;
     BEGIN
         SELECT INTO views_count
             CASE
@@ -39,8 +39,9 @@ RETURNS REAL AS $$
                     0
             END;
         RETURN CASE
-            WHEN views_count > min_views THEN
-                0.5 * (1 + LOG(LEAST(max_views, views_count)) / LOG(max_views))
+            WHEN views_count > min_views AND max_views - min_views > 1 THEN
+                0.5 + 0.5 * LOG(LEAST(max_views, views_count) - min_views)
+                             / LOG(max_views - min_views)
             WHEN name <> '' THEN
                 0.5 * (
                     1 - poi_class_rank(poi_class(subclass, mapping_key))::real / max_rank
