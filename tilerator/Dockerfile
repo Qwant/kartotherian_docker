@@ -1,4 +1,4 @@
-FROM node:8-stretch@sha256:fec2d6c325686988c4e0bf1b17cd32954422333d24ed6a97c28c8570054a6e1d
+FROM node:10-stretch@sha256:c46b41071ce455e47f205bf83b7ad6593ad22194639df1298a735f407ded1df6
 
 ENV NODE_ENV=production
 
@@ -21,7 +21,7 @@ RUN apt-get update && \
 
 RUN git clone https://github.com/QwantResearch/kartotherian.git /opt/kartotherian \
     && cd /opt/kartotherian \
-    && git checkout b932ee3254e72aeea6af5935fd53e4269807a86c \
+    && git checkout 100c7acfe46a0f1620f06dd5e77dc65333abbd5e \
     && npm install --production
 
 # install openmaptiles-tools
