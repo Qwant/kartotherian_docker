@@ -2,7 +2,7 @@ version: '3'
 
 services:
   postgres:
-    image: openmaptiles/postgis
+    image: openmaptiles/postgis:3.1.0@sha256:25a19d6705214f1d593773334ad3cb586a1a0be6b79a3e71628d00d2376559c6
     volumes:
       - "pgdata:/var/lib/postgresql/data"
     environment:
