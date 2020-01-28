@@ -214,8 +214,19 @@ def load_poi(ctx):
 
 @task
 def run_sql_script(ctx):
-    # load several psql functions
+    # disable Kanji transliteration (produces invalid utf8)
+    _execute_sql(ctx, db=ctx.pg.import_database,
+        sql="""
+            CREATE OR REPLACE FUNCTION osml10n_kanji_transcript(text) RETURNS text AS $$
+                SELECT NULL::text
+            $$ LANGUAGE SQL IMMUTABLE PARALLEL SAFE;
+        """
+    )
+
+    # load language-related functions
     _run_sql_script(ctx, "import-sql/language.sql")
+
+    # load vector tiles related functions
     _run_sql_script(ctx, "postgis-vt-util/postgis-vt-util.sql")
 
 
