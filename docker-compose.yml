@@ -10,6 +10,7 @@ services:
     environment:
      - POSTGRES_DB=gis
      - POSTGRES_USER=gis
+     - POSTGRES_PASSWORD=gis
 
   cassandra:
     image: cassandra:latest
