@@ -813,6 +813,17 @@ def get_import_lock_path(ctx):
 
 
 @task
+def reindex_poi_geometries(ctx):
+    """
+    Successive updates tend to bloat some of the geometry indexes significantly.
+    This task triggers a forced REINDEX after the update has been applied.
+    """
+    if not ctx.osm_update.reindex_poi_geometries:
+        return
+    _execute_sql(ctx, "REINDEX (VERBOSE) INDEX osm_poi_polygon_geom", db=ctx.pg.database)
+
+
+@task
 @format_stdout
 def run_osm_update(ctx):
     update_env = {

@@ -88,3 +88,4 @@ tiles:
 
 osm_update:
   replication_url: https://planet.osm.org/replication
+  reindex_poi_geometries: True

@@ -15,6 +15,11 @@ LOG_DIR=$OSM_UPDATE_WORKING_DIR/log
 LOG_FILE=$LOG_DIR/${EXEC_TIME}.$(basename $0 .sh).log
 LOG_MAXDAYS=7  # Log files are kept $LOG_MAXDAYS days
 INVOKE_CONFIG_FILE="${INVOKE_CONFIG_FILE:-}"
+INVOKE_OPTION=""
+if [ ! -z "$INVOKE_CONFIG_FILE" ]; then
+    INVOKE_OPTION="-f $INVOKE_CONFIG_FILE"
+fi
+
 
 # imposm
 IMPOSM_CONFIG_DIR="/etc/imposm" # default value, can be set with the --config option
@@ -108,11 +113,6 @@ create_tiles_jobs() {
 
     log "file with tile to regenerate = $EXPIRE_TILES_FILE"
 
-    local INVOKE_OPTION=""
-    if [ ! -z "$INVOKE_CONFIG_FILE" ]; then
-        INVOKE_OPTION="-f $INVOKE_CONFIG_FILE"
-    fi
-
     invoke $INVOKE_OPTION generate-expired-tiles \
         --tiles-layer $TILES_LAYER_NAME \
         --from-zoom $FROM_ZOOM \
@@ -188,6 +188,9 @@ if [ -s ${CHANGE_FILE} ]; then
     # Imposm update for both tiles sources
     run_imposm_update $BASE_IMPOSM_CONFIG_FILENAME
     run_imposm_update $POI_IMPOSM_CONFIG_FILENAME
+
+    # Reindex geometries to avoid index bloat
+    invoke $INVOKE_OPTION reindex-poi-geometries
 
     # Create tiles jobs for both tiles sources
     create_tiles_jobs $BASE_IMPOSM_CONFIG_FILENAME $BASE_TILERATOR_GENERATOR $BASE_TILERATOR_STORAGE
