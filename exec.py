@@ -7,14 +7,14 @@ import json
 
 
 COMMANDS = [
-    "build",
-    "load-db",
-    "load-db-france",
-    "update-tiles",
-    "clean",
-    "logs",
-    "kartotherian",
-    "tileview",
+    'build',
+    'load-db',
+    'load-db-france',
+    'update-tiles',
+    'clean',
+    'logs',
+    'kartotherian',
+    'tileview',
 ]
 
 
@@ -53,6 +53,9 @@ def run_kartotherian(options):
     print('> running kartotherian command')
     return exec_command([
         'docker-compose',
+        '-p', options['namespace'],
+        '-f', 'docker-compose.yml',
+        '-f', 'local-compose.yml',
         'up',
         '--build',
         '-d',
@@ -64,6 +67,7 @@ def run_build(options):
     print('> running build command')
     return exec_command([
         'docker-compose',
+        '-p', options['namespace'],
         '-f', 'docker-compose.yml',
         '-f', 'local-compose.yml',
         'up',
@@ -83,6 +87,7 @@ def run_load_db(options):
         flag = 'INVOKE_OSM_FILE={}'.format(options['osm-file'])
     command = [
         'docker-compose',
+        '-p', options['namespace'],
         '-f', 'docker-compose.yml',
         '-f', 'local-compose.yml',
         'run', '--rm',
@@ -94,7 +99,7 @@ def run_load_db(options):
 
 
 def run_load_db_france(options):
-    options['osm-file'] = "https://download.geofabrik.de/europe/france-latest.osm.pbf"
+    options['osm-file'] = 'https://download.geofabrik.de/europe/france-latest.osm.pbf'
     # got tiles from http://tools.geofabrik.de/calc/?grid=1
     options['tiles-coords'] = '[[15, 10, 5], [16, 10, 5], [15, 11, 5], [16, 11, 5]]'
     run_load_db(options)
@@ -105,6 +110,7 @@ def run_update_tiles(options):
     print('> running update-tiles command')
     return exec_command([
         'docker-compose',
+        '-p', options['namespace'],
         '-f', 'docker-compose.yml',
         '-f', 'local-compose.yml',
         'run', '--rm',
@@ -117,6 +123,7 @@ def run_clean(options):
     print('> running clean command')
     return exec_command([
         'docker-compose',
+        '-p', options['namespace'],
         '-f', 'docker-compose.yml',
         '-f', 'local-compose.yml',
         'down',
@@ -128,6 +135,7 @@ def run_logs(options):
     print('> running logs command')
     command = [
         'docker-compose',
+        '-p', options['namespace'],
         '-f', 'docker-compose.yml',
         '-f', 'local-compose.yml',
         'logs',
@@ -144,6 +152,8 @@ def run_tileview(options):
         return ret
     return exec_command([
         'docker-compose',
+        '-p', options['namespace'],
+        '-f', 'docker-compose.yml',
         '-f', 'local-compose.yml',
         'up',
         '-d', 'tileview',
@@ -171,6 +181,8 @@ def run_help():
     print('  --tiles-coords: needs to be an array of arrays (each of len 3). Defaults to [[66, 43, 7]].')
     print('                  You can find coords by using http://tools.geofabrik.de/calc/?grid=1')
     print('                  Used in load-db(-france) command.')
+    print('  --namespace   : set the --project option of docker-compose, allowing to change name prefix ')
+    print('                  of all used docker images')
     print('  -h | --help   : show this help')
     sys.exit(0)
 
@@ -185,6 +197,7 @@ def parse_args(args):
         'osm-file': 'https://download.geofabrik.de/europe/luxembourg-latest.osm.pbf',
         'filter': [],
         'tiles-coords': '[[66, 43, 7]]',
+        'namespace': 'kartotherian_docker',
     }
     i = 0
     while i < len(args):
@@ -221,6 +234,12 @@ def parse_args(args):
             except Exception as e:
                 print(f'`{args[i - 1]}` option expects an array of [longitude, latitude, zoom]')
                 sys.exit(1)
+            enabled_options[args[i - 1][2:]] = args[i]
+        elif args[i] == '--namespace':
+            if i + 1 >= len(args):
+                print('`--namespace` option expects an argument!')
+                sys.exit(1)
+            i += 1
             enabled_options[args[i - 1][2:]] = args[i]
         elif args[i] == '-h' or args[i] == '--help':
             run_help()
