@@ -2,6 +2,7 @@ import concurrent.futures
 import csv
 import sys
 import logging
+import inspect
 import jinja2
 import json
 import gzip
@@ -20,6 +21,12 @@ import osmium
 from .lock import FileLock
 from .download import needs_to_download, download_file
 from .format_stdout import format_stdout
+
+# used to import upper folder file
+current_dir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
+parent_dir = os.path.dirname(current_dir)
+sys.path.insert(0, parent_dir) 
+from osm_update import run_osm_update
 
 cc_exec = concurrent.futures.ThreadPoolExecutor()
 
@@ -830,6 +837,8 @@ def run_osm_update(ctx):
         "PG_CONNECTION_STRING": f"postgis://{ctx.pg.user}:{ctx.pg.password}@{ctx.pg.host}:{ctx.pg.port}/{ctx.pg.database}",
         "OSM_UPDATE_WORKING_DIR": ctx.update_tiles_dir,
         "IMPOSM_DATA_DIR": ctx.generated_files_dir,
+        "imposm_config_dir": ctx.imposm_config_dir,
+        "change_file": change_file_path,
     }
 
     if not check_generated_cache(ctx.generated_files_dir):
@@ -851,10 +860,8 @@ def run_osm_update(ctx):
             raise
 
         new_osm_timestamp = read_osm_timestamp(ctx, change_file_path)
-        ctx.run(
-            f"{os.path.join(os.getcwd(), 'osm_update.sh')} --config {ctx.imposm_config_dir} --input {change_file_path}",
-            env=update_env,
-        )
+
+        run_osm_update(update_env)
         write_new_state(ctx, new_osm_timestamp)
         os.remove(change_file_path)
 
