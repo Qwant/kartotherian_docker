@@ -4,7 +4,6 @@ import json
 import os
 from os import path
 import subprocess
-import sys
 from datetime import datetime
 
 
@@ -16,18 +15,6 @@ def exec_command(command):
     proc = subprocess.Popen(command)
     proc.wait()
     return proc.poll()
-
-
-def print_usage():
-    print("This is osm_update v{}".format(VERSION))
-    print("")
-    print("OPTIONS:")
-    print("  --config, -c PATH : path to imposm config dir [default: /etc/imposm]")
-    print("  --input, -i PATH  : path to osm change file (.osc.gz)")
-    print("  --help, -h        : display help and version")
-    print("")
-    print("Dependencies: imposm3, jq")
-    os._exit(0)
 
 
 def get_time_now():
@@ -67,7 +54,7 @@ def run_imposm_update(settings, entry):
         [
             "imposm3", "diff", "-quiet",
             "-config", imposm_config_file,
-            "-connection", os.environ["PG_CONNECTION_STRING"],
+            "-connection", settings["pg_connection"],
             "-mapping", mapping_path,
             "-cachedir", path.join(settings["imposm_data_dir"], "cache", imposm_folder_name),
             "-diffdir", path.join(settings["imposm_data_dir"], "diff", imposm_folder_name),
@@ -109,7 +96,7 @@ def create_tiles_jobs(settings, arg):
                 "expiretiles",
                 json_data["tiles_layer_name"])))
 
-    if len(entries) == "":
+    if entries == "":
         log("no expired tiles")
         return True
 
@@ -131,48 +118,34 @@ def create_tiles_jobs(settings, arg):
     return True
 
 
-def parse_args(settings):
-    pos = 1
-    while pos < len(sys.argv):
-        arg = sys.argv[pos]
-        if arg in ("-c", "--config"):
-            pos += 1
-            if pos >= len(sys.argv):
-                log_error("Missing argument after `{}` option".format(arg))
-            settings["imposm_config_dir"] = sys.argv[pos]
-        elif arg in ("-i", "--input"):
-            pos += 1
-            if pos >= len(sys.argv):
-                log_error("Missing argument after `{}` option".format(arg))
-            settings["change_file"] = sys.argv[pos]
-        elif arg in ("-h", "--help"):
-            print_usage()
-        elif arg == "--":
-            break
-        else:
-            log_error("Unknown option `{}`".format(arg))
-            return False
-        pos += 1
-    return True
+def check_settings(settings, keys):
+    errors = 0
+    for key in keys:
+        if settings.get(key) is None:
+            log_error("Missing `{}` setting".format(key))
+    return errors == 0
 
 
-def run_osm_update(settings):
-    settings = settings.copy() # to not modify original
+def run_osm_update(pg_connection, osm_update_working_dir, imposm_data_dir, imposm_config_dir, change_file):
+    settings = {
+        "pg_connection": pg_connection,
+        "osm_update_working_dir": osm_update_working_dir,
+        "imposm_data_dir": imposm_data_dir,
+        "imposm_config_dir": imposm_config_dir,
+        "change_file": change_file,
+    }
+
     invoke_config_file = os.environ.get("INVOKE_CONFIG_FILE", "")
     # Settings
     settings["start"] = int(datetime.now().timestamp())
-    settings["osm_update_working_dir"] = os.environ.get("OSM_UPDATE_WORKING_DIR", "/data/osmosis")
-    settings["osmosis_working_dir"] = os.environ.get("OSMOSIS_WORKING_DIR", "/data/osmosis")
     settings["exec_time"] = get_time_now()
-    settings["invoke_config_file"] = invoke_config_file
     settings["invoke_option"] = ""
-    if invoke_config_file != "":
+    if settings["invoke_option"] != "":
         settings["invoke_option"] = "-f {}".format(invoke_config_file)
     # imposm
     if settings.get("imposm_config_dir", "") == "":
         # default value, can be set with the --config option
         settings["imposm_config_dir"] = "/etc/imposm"
-    settings["imposm_data_dir"] = os.environ.get("IMPOSM_DATA_DIR", "/data/imposm")
     # base tiles
     settings["base_imposm_config_filename"] = "config_base.json"
     # poi tiles
@@ -180,6 +153,9 @@ def run_osm_update(settings):
     # tilerator
     settings["from_zoom"] = 11
     settings["before_zoom"] = 15 # exclusive
+
+    if not check_settings(settings, ["osm_update_working_dir", "imposm_data_dir"]):
+        return False
 
     log("new osm_update process started")
     log("working into directory: {}".format(settings["osm_update_working_dir"]))
@@ -220,16 +196,3 @@ def run_osm_update(settings):
     log("osm_update successfully terminated!")
 
     return True
-
-
-def main():
-    settings = {}
-    if not parse_args(settings):
-        return False
-    return run_osm_update(settings)
-
-
-if __name__ == "__main__":
-    if not main():
-        log_error("Run failed...")
-        os._exit(1)
