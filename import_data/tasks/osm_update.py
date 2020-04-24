@@ -7,10 +7,6 @@ import subprocess
 from datetime import datetime
 
 
-DESCRIPTION = "OpenStreetMap database update script"
-VERSION = "0.3/20191112"
-
-
 def exec_command(command):
     proc = subprocess.Popen(command)
     proc.wait()
@@ -39,9 +35,20 @@ def format_file_size(size):
     return '{}B'.format(size)
 
 
+def load_json(path):
+    try:
+        with open(path) as json_file:
+            return json.load(json_file)
+    except Exception as err:
+        log_error("Couldn't parse JSON from `{}`: {}".format(path, err))
+    return None
+
+
 def run_imposm_update(settings, entry):
     imposm_config_file = path.join(settings["imposm_config_dir"], entry)
-    json_data = json.load(imposm_config_file)
+    json_data = load_json(imposm_config_file)
+    if json_data is None:
+        return False
     imposm_folder_name = json_data["tiles_layer_name"]
     mapping_path = path.join(settings["imposm_config_dir"], json_data["mapping_filename"])
 
@@ -83,7 +90,9 @@ def get_all_files(settings, folder):
 
 def create_tiles_jobs(settings, arg):
     imposm_config_file = path.join(settings["imposm_config_dir"], arg)
-    json_data = json.load(imposm_config_file)
+    json_data = load_json(imposm_config_file)
+    if json_data is None:
+        return False
 
     log("Creating tiles jobs for `{}`".format(imposm_config_file))
 
@@ -123,10 +132,11 @@ def check_settings(settings, keys):
     for key in keys:
         if settings.get(key) is None:
             log_error("Missing `{}` setting".format(key))
+            errors += 1
     return errors == 0
 
 
-def run_osm_update(pg_connection, osm_update_working_dir, imposm_data_dir, imposm_config_dir, change_file):
+def osm_update(pg_connection, osm_update_working_dir, imposm_data_dir, imposm_config_dir, change_file):
     settings = {
         "pg_connection": pg_connection,
         "osm_update_working_dir": osm_update_working_dir,

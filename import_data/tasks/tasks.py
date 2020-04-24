@@ -2,7 +2,6 @@ import concurrent.futures
 import csv
 import sys
 import logging
-import inspect
 import jinja2
 import json
 import gzip
@@ -21,7 +20,7 @@ import osmium
 from .lock import FileLock
 from .download import needs_to_download, download_file
 from .format_stdout import format_stdout
-from .osm_update import run_osm_update
+from .osm_update import osm_update
 
 cc_exec = concurrent.futures.ThreadPoolExecutor()
 
@@ -848,7 +847,7 @@ def run_osm_update(ctx):
 
         new_osm_timestamp = read_osm_timestamp(ctx, change_file_path)
 
-        run_osm_update(
+        osm_update(
             f"postgis://{ctx.pg.user}:{ctx.pg.password}@{ctx.pg.host}:{ctx.pg.port}/{ctx.pg.database}",
             ctx.update_tiles_dir,
             ctx.generated_files_dir,
