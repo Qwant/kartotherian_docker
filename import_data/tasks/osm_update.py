@@ -136,7 +136,7 @@ def check_settings(settings, keys):
     return errors == 0
 
 
-def osm_update(pg_connection, osm_update_working_dir, imposm_data_dir, imposm_config_dir, change_file):
+def osm_update(ctx, pg_connection, osm_update_working_dir, imposm_data_dir, imposm_config_dir, change_file):
     settings = {
         "pg_connection": pg_connection,
         "osm_update_working_dir": osm_update_working_dir,
@@ -145,13 +145,9 @@ def osm_update(pg_connection, osm_update_working_dir, imposm_data_dir, imposm_co
         "change_file": change_file,
     }
 
-    invoke_config_file = os.environ.get("INVOKE_CONFIG_FILE", "")
     # Settings
     settings["start"] = int(datetime.now().timestamp())
     settings["exec_time"] = get_time_now()
-    settings["invoke_option"] = ""
-    if settings["invoke_option"] != "":
-        settings["invoke_option"] = "-f {}".format(invoke_config_file)
     # imposm
     if settings.get("imposm_config_dir", "") == "":
         # default value, can be set with the --config option
@@ -184,11 +180,10 @@ def osm_update(pg_connection, osm_update_working_dir, imposm_data_dir, imposm_co
                 or not run_imposm_update(settings, settings["poi_imposm_config_filename"])):
             return False
 
+        # We make the import here to prevent a circular dependency if put at the top.
+        from .tasks import reindex_poi_geometries
         # Reindex geometries to avoid index bloat
-        args = ["invoke", settings["invoke_option"], "reindex-poi-geometries"]
-        if exec_command(args) != 0:
-            log_error("Failed to run `{}`".format(args))
-            return False
+        reindex_poi_geometries(ctx)
 
         # Create tiles jobs for both tiles sources
         if (not create_tiles_jobs(settings, settings["base_imposm_config_filename"])
