@@ -35,12 +35,12 @@ def format_file_size(size):
     return '{}B'.format(size)
 
 
-def load_json(path):
+def load_json(file_path):
     try:
-        with open(path) as json_file:
+        with open(file_path) as json_file:
             return json.load(json_file)
     except Exception as err:
-        log_error("Couldn't parse JSON from `{}`: {}".format(path, err))
+        log_error("Couldn't parse JSON from `{}`: {}".format(file_path, err))
     return None
 
 
@@ -79,7 +79,7 @@ def run_imposm_update(settings, entry):
 
 def get_all_files(settings, folder):
     entries = []
-    for entry in os.listdir(path):
+    for entry in os.listdir(folder):
         full_path = path.join(folder, entry)
         if path.isdir(full_path):
             entries.extend(get_all_files(settings, full_path))
@@ -112,13 +112,13 @@ def create_tiles_jobs(settings, arg):
     log("file with tile to regenerate = {}".format(entries))
 
     args = ["invoke"]
-    if settings["invoke_option"] != "":
+    if settings.get("invoke_option", "") != "":
         args.append(settings["invoke_option"])
     args.extend([
         "generate-expired-tiles",
         "--tiles-layer", json_data["tiles_layer_name"],
-        "--from-zoom", settings["from_zoom"],
-        "--before-zoom", settings["before_zoom"],
+        "--from-zoom", str(settings["from_zoom"]),
+        "--before-zoom", str(settings["before_zoom"]),
         "--expired-tiles", entries
     ])
     if exec_command(args) != 0:

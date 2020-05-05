@@ -848,6 +848,7 @@ def run_osm_update(ctx):
         new_osm_timestamp = read_osm_timestamp(ctx, change_file_path)
 
         osm_update(
+            ctx,
             f"postgis://{ctx.pg.user}:{ctx.pg.password}@{ctx.pg.host}:{ctx.pg.port}/{ctx.pg.database}",
             ctx.update_tiles_dir,
             ctx.generated_files_dir,
