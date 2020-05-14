@@ -20,6 +20,7 @@ import osmium
 from .lock import FileLock
 from .download import needs_to_download, download_file
 from .format_stdout import format_stdout
+from .osm_update import osm_update
 
 cc_exec = concurrent.futures.ThreadPoolExecutor()
 
@@ -98,13 +99,13 @@ def _db_exists(ctx, db_name):
 
 
 def _wait_until_postgresql_is_ready(ctx):
-    logging.info(f'Trying to connect to postgres...')
+    logging.info('Trying to connect to postgres...')
     query = f'pg_isready -h {ctx.pg.host} -p {ctx.pg.port} -U {ctx.pg.user}'
     x = 0
     while x < 30:
         try:
             ctx.run(query, env={"PGPASSWORD": ctx.pg.password})
-            logging.info(f'Success!')
+            logging.info('Success!')
             return
         except:
             logging.info(f'Connection to postgres failed, remaining {30 - x} attempts...')
@@ -674,7 +675,7 @@ def generate_tiles(ctx):
             f"generating tiles for {ctx.tiles.x} / {ctx.tiles.y}, z = {ctx.tiles.z}"
         )
         logging.warn("/!\\================================/!\\")
-        logging.warn("Please not that this way of giving position is DEPRECATED! use `coords` instead");
+        logging.warn("Please not that this way of giving position is DEPRECATED! use `coords` instead")
         logging.warn("/!\\================================/!\\")
         create_tiles_jobs(
             ctx,
@@ -751,7 +752,7 @@ def read_current_state(ctx):
             if line.startswith('timestamp='):
                 raw_timestamp = line.replace('timestamp=', '').strip()
                 # for compatibility with osm replication files
-                raw_timestamp = raw_timestamp.replace('\:', ':')
+                raw_timestamp = raw_timestamp.replace('\\:', ':')
                 if raw_timestamp:
                     return raw_timestamp
     raise Exception("Cannot find timestamp in osm state file")
@@ -826,12 +827,6 @@ def reindex_poi_geometries(ctx):
 @task
 @format_stdout
 def run_osm_update(ctx):
-    update_env = {
-        "PG_CONNECTION_STRING": f"postgis://{ctx.pg.user}:{ctx.pg.password}@{ctx.pg.host}:{ctx.pg.port}/{ctx.pg.database}",
-        "OSM_UPDATE_WORKING_DIR": ctx.update_tiles_dir,
-        "IMPOSM_DATA_DIR": ctx.generated_files_dir,
-    }
-
     if not check_generated_cache(ctx.generated_files_dir):
         sys.exit(1)
 
@@ -851,9 +846,14 @@ def run_osm_update(ctx):
             raise
 
         new_osm_timestamp = read_osm_timestamp(ctx, change_file_path)
-        ctx.run(
-            f"{os.path.join(os.getcwd(), 'osm_update.sh')} --config {ctx.imposm_config_dir} --input {change_file_path}",
-            env=update_env,
+
+        osm_update(
+            ctx,
+            f"postgis://{ctx.pg.user}:{ctx.pg.password}@{ctx.pg.host}:{ctx.pg.port}/{ctx.pg.database}",
+            ctx.update_tiles_dir,
+            ctx.generated_files_dir,
+            ctx.imposm_config_dir,
+            change_file_path
         )
         write_new_state(ctx, new_osm_timestamp)
         os.remove(change_file_path)

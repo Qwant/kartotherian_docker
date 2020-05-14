@@ -51,6 +51,5 @@ WORKDIR ${MAIN_DIR}/import_data
 COPY load_db/import_data.sh ./import_data.sh
 COPY load_db/config.yml ./config.yml
 RUN chmod +x ./import_data.sh
-RUN chmod +x ./osm_update.sh
 
 ENTRYPOINT ["./import_data.sh"]
