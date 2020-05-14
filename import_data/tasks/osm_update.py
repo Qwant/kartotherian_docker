@@ -193,10 +193,10 @@ def osm_update(ctx, pg_connection, osm_update_working_dir, imposm_data_dir, impo
     log("============")
     log("current location: {}".format(os.getcwd()))
     log("============")
-    elapsed = settings["start"] - int(datetime.now().timestamp())
+    elapsed = int(datetime.now().timestamp()) - settings["start"]
     log("osm_update duration: {}h{:02}m{:02}s".format(
-        elapsed / 3600,
-        elapsed % 3600 / 60,
+        elapsed // 3600,
+        elapsed % 3600 // 60,
         elapsed % 60))
     log("osm_update successfully terminated!")
 
