@@ -1,6 +1,11 @@
 version: '3'
 
 services:
+  cassandra:
+    environment:
+      - "MAX_HEAP_SIZE=1G"
+      - "HEAP_NEWSIZE=250M"
+
 
   tilerator:
     ports:

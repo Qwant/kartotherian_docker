@@ -13,7 +13,7 @@ services:
      - POSTGRES_PASSWORD=gis
 
   cassandra:
-    image: cassandra:latest
+    image: cassandra:3
     volumes:
      - "cassandra_data:/var/lib/cassandra"
 
