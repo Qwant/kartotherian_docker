@@ -1,9 +1,6 @@
 [submodule "openmaptiles"]
 	path = openmaptiles
 	url = https://github.com/QwantResearch/openmaptiles
-[submodule "import_data/import-sql"]
-	path = import_data/import-sql
-	url = https://github.com/openmaptiles/import-sql.git
 [submodule "import_data/postgis-vt-util"]
 	path = import_data/postgis-vt-util
 	url = https://github.com/mapbox/postgis-vt-util.git

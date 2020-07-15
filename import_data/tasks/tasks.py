@@ -1,21 +1,22 @@
 import concurrent.futures
 import csv
-import sys
-import logging
-import jinja2
-import json
 import gzip
-import psycopg2
-import psycopg2.extras
+import json
+import logging
 import os
 import os.path
+import sys
 import time
 from datetime import timedelta
 from tempfile import NamedTemporaryFile
+
+import jinja2
+import osmium
+import psycopg2
+import psycopg2.extras
 import requests
 from invoke import task
 from invoke.exceptions import Failure
-import osmium
 
 from .lock import FileLock
 from .download import needs_to_download, download_file
@@ -225,7 +226,7 @@ def run_sql_script(ctx):
     )
 
     # load language-related functions
-    _run_sql_script(ctx, "import-sql/language.sql")
+    _run_sql_script(ctx, f"{ctx.imposm_config_dir}/openmaptiles-tools/sql/zzz_language.sql")
 
     # load vector tiles related functions
     _run_sql_script(ctx, "postgis-vt-util/postgis-vt-util.sql")
@@ -240,6 +241,14 @@ def _get_pg_conn(ctx):
         f"host={ctx.pg.host} " \
         f"port={ctx.pg.port}"
 
+def _get_pg_env(ctx):
+    return {
+        "POSTGRES_PASSWORD": ctx.pg.password,
+        "POSTGRES_PORT": ctx.pg.port,
+        "POSTGRES_HOST": ctx.pg.host,
+        "POSTGRES_DB": ctx.pg.import_database,
+        "POSTGRES_USER": ctx.pg.user,
+    }
 
 @task
 @format_stdout
@@ -278,16 +287,18 @@ def import_water_polygon(ctx):
 
     target_file = f"{ctx.data_dir}/water_polygons.shp"
     if needs_to_download(ctx, target_file, max_age=timedelta(days=30)):
-        ctx.run(
-            f"wget --progress=dot:giga {ctx.water.polygons_url} \
-    && unzip -oj water-polygons-split-3857.zip -d {ctx.data_dir} \
-    && rm water-polygons-split-3857.zip"
-        )
+        filename = "water-polygons-split.zip"
+        ctx.run(f"mkdir -p {ctx.data_dir}/water_polygons")
+        ctx.run(f"wget --progress=dot:giga -O {filename} {ctx.water.polygons_url}")
+        ctx.run(f"unzip -oj {filename} -d {ctx.data_dir}/water_polygons")
+        ctx.run(f"rm {filename}")
+
+    env = _get_pg_env(ctx)
+    env["IMPORT_DATA_DIR"] = ctx.data_dir
 
     ctx.run(
-        f"POSTGRES_PASSWORD={ctx.pg.password} POSTGRES_PORT={ctx.pg.port} IMPORT_DATA_DIR={ctx.data_dir} \
-  POSTGRES_HOST={ctx.pg.host} POSTGRES_DB={ctx.pg.import_database} POSTGRES_USER={ctx.pg.user} \
-  {ctx.imposm_config_dir}/openmaptiles-tools/docker/import-water/import-water.sh"
+        f"{ctx.imposm_config_dir}/openmaptiles-tools/docker/import-data/import_data.sh water-polygons",
+        env=env,
     )
 
 
@@ -319,15 +330,15 @@ def import_border(ctx):
     target_file = f"{ctx.data_dir}/osmborder_lines.csv"
     gz_file = f"{target_file}.gz"
     if needs_to_download(ctx, target_file, max_age=timedelta(days=30)):
-        ctx.run(
-            f"wget --progress=dot:giga -O {gz_file} {ctx.border.osmborder_lines_url} \
-    && gzip -fd {gz_file}"
-        )
+        ctx.run(f"wget --progress=dot:giga -O {gz_file} {ctx.border.osmborder_lines_url}")
+        ctx.run(f"gzip -fd {gz_file}")
+
+    env = _get_pg_env(ctx)
+    env["IMPORT_DIR"] = ctx.data_dir
 
     ctx.run(
-        f"POSTGRES_PASSWORD={ctx.pg.password} POSTGRES_PORT={ctx.pg.port} IMPORT_DIR={ctx.data_dir} \
-  POSTGRES_HOST={ctx.pg.host} POSTGRES_DB={ctx.pg.import_database} POSTGRES_USER={ctx.pg.user} \
-{ctx.imposm_config_dir}/openmaptiles-tools/docker/import-osmborder/import_osmborder_lines.sh"
+        f"{ctx.imposm_config_dir}/import_data/openmaptiles-tools/bin/import-borders",
+        env=env,
     )
 
 
