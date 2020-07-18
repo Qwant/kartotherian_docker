@@ -1,20 +1,11 @@
-#!/usr/bin/env python3
-
 import json
 import os
 from os import path
-import subprocess
 from datetime import datetime
 
 
-def exec_command(command):
-    proc = subprocess.Popen(command)
-    proc.wait()
-    return proc.poll()
-
-
 def get_time_now():
-    return datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    return datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
 
 
 def log(msg):
@@ -41,14 +32,12 @@ def load_json(file_path):
             return json.load(json_file)
     except Exception as err:
         log_error("Couldn't parse JSON from `{}`: {}".format(file_path, err))
-    return None
+        raise
 
 
-def run_imposm_update(settings, entry):
+def run_imposm_update(ctx, settings, entry):
     imposm_config_file = path.join(settings["imposm_config_dir"], entry)
     json_data = load_json(imposm_config_file)
-    if json_data is None:
-        return False
     imposm_folder_name = json_data["tiles_layer_name"]
     mapping_path = path.join(settings["imposm_config_dir"], json_data["mapping_filename"])
 
@@ -57,24 +46,24 @@ def run_imposm_update(settings, entry):
         settings["change_file"],
         format_file_size(os.path.getsize(settings["change_file"]))))
 
-    if exec_command(
-        [
-            "imposm3", "diff", "-quiet",
-            "-config", imposm_config_file,
-            "-connection", settings["pg_connection"],
-            "-mapping", mapping_path,
-            "-cachedir", path.join(settings["imposm_data_dir"], "cache", imposm_folder_name),
-            "-diffdir", path.join(settings["imposm_data_dir"], "diff", imposm_folder_name),
-            "-expiretiles-dir", path.join(
+    try:
+        ctx.run(f"""
+            imposm3 diff -quiet
+            -config {imposm_config_file},
+            -connection {settings["pg_connection"]}
+            -mapping {mapping_path}
+            -cachedir {path.join(settings["imposm_data_dir"], "cache", imposm_folder_name)}
+            -diffdir {path.join(settings["imposm_data_dir"], "diff", imposm_folder_name)},
+            -expiretiles-dir {path.join(
                 settings["osm_update_working_dir"],
                 "expiretiles",
-                imposm_folder_name),
-            settings["change_file"]
-        ]
-    ) != 0:
+                imposm_folder_name)
+            }
+            {settings["change_file"]}
+        """)
+    except Exception:
         log_error("imposm3 failed")
-        return False
-    return True
+        raise
 
 
 def get_all_files(settings, folder):
@@ -88,11 +77,10 @@ def get_all_files(settings, folder):
     return entries
 
 
-def create_tiles_jobs(settings, arg):
+def create_tiles_jobs(ctx, settings, arg):
+    from ..tasks import generate_expired_tiles
     imposm_config_file = path.join(settings["imposm_config_dir"], arg)
     json_data = load_json(imposm_config_file)
-    if json_data is None:
-        return False
 
     log("Creating tiles jobs for `{}`".format(imposm_config_file))
 
@@ -107,24 +95,17 @@ def create_tiles_jobs(settings, arg):
 
     if entries == "":
         log("no expired tiles")
-        return True
+        return
 
     log("file with tile to regenerate = {}".format(entries))
 
-    args = ["invoke"]
-    if settings.get("invoke_option", "") != "":
-        args.append(settings["invoke_option"])
-    args.extend([
-        "generate-expired-tiles",
-        "--tiles-layer", json_data["tiles_layer_name"],
-        "--from-zoom", str(settings["from_zoom"]),
-        "--before-zoom", str(settings["before_zoom"]),
-        "--expired-tiles", entries
-    ])
-    if exec_command(args) != 0:
-        log_error("Failed to run command `{}`".format(args))
-        return False
-    return True
+    generate_expired_tiles(
+        ctx,
+        tiles_layer=json_data["tiles_layer_name"],
+        from_zoom=settings["from_zoom"],
+        before_zoom=settings["before_zoom"],
+        expired_tiles=entries
+    )
 
 
 def check_settings(settings, keys):
@@ -158,7 +139,7 @@ def osm_update(ctx, pg_connection, osm_update_working_dir, imposm_data_dir, impo
     settings["poi_imposm_config_filename"] = "config_poi.json"
     # tilerator
     settings["from_zoom"] = 11
-    settings["before_zoom"] = 15 # exclusive
+    settings["before_zoom"] = 15  # exclusive
 
     if not check_settings(settings, ["osm_update_working_dir", "imposm_data_dir"]):
         return False
@@ -167,18 +148,15 @@ def osm_update(ctx, pg_connection, osm_update_working_dir, imposm_data_dir, impo
     log("working into directory: {}".format(settings["osm_update_working_dir"]))
 
     if settings.get("change_file") is None:
-        log_error("A change file is required as input.")
-        return False
+        raise Exception("A change file is required as input.")
     if not path.isfile(settings["change_file"]):
-        log_error("Change file `{}` was not found.".format(settings["change_file"]))
-        return False
+        raise Exception("Change file `{}` was not found.".format(settings["change_file"]))
 
     # Update db and tiles, only if changes file is not empty
     if os.path.getsize(settings["change_file"]) != 0:
         # Imposm update for both tiles sources
-        if (not run_imposm_update(settings, settings["base_imposm_config_filename"])
-                or not run_imposm_update(settings, settings["poi_imposm_config_filename"])):
-            return False
+        run_imposm_update(ctx, settings, settings["base_imposm_config_filename"])
+        run_imposm_update(ctx, settings, settings["poi_imposm_config_filename"])
 
         # We make the import here to prevent a circular dependency if put at the top.
         from .tasks import reindex_poi_geometries
@@ -186,9 +164,8 @@ def osm_update(ctx, pg_connection, osm_update_working_dir, imposm_data_dir, impo
         reindex_poi_geometries(ctx)
 
         # Create tiles jobs for both tiles sources
-        if (not create_tiles_jobs(settings, settings["base_imposm_config_filename"])
-                or not create_tiles_jobs(settings, settings["poi_imposm_config_filename"])):
-            return False
+        create_tiles_jobs(ctx, settings, settings["base_imposm_config_filename"])
+        create_tiles_jobs(ctx, settings, settings["poi_imposm_config_filename"])
 
     log("============")
     log("current location: {}".format(os.getcwd()))
