@@ -25,6 +25,16 @@ from .osm_update import osm_update
 
 cc_exec = concurrent.futures.ThreadPoolExecutor()
 
+def join(*futures):
+    run = concurrent.futures.wait(futures, return_when=concurrent.futures.FIRST_EXCEPTION)
+
+    # NOTE: If some day we need to extend this function to return the result of
+    #       input futures, we need to be carefull to keep the order since
+    #       `run.done` is a set.
+    for result in run.done:
+        if result.exception() is not None:
+            raise result.exception()
+
 logging.basicConfig(level=logging.INFO)
 
 
@@ -117,10 +127,10 @@ def _wait_until_postgresql_is_ready(ctx):
 
 @task
 def prepare_db(ctx):
+    """
+    Create the import database and remove the old backup one
+    """
     _wait_until_postgresql_is_ready(ctx)
-    """
-    create the import database and remove the old backup one
-    """
     _execute_sql(ctx, f"DROP DATABASE IF EXISTS {ctx.pg.import_database};")
 
     logging.info(f"creating {ctx.pg.import_database} database")
@@ -244,7 +254,7 @@ def _get_pg_conn(ctx):
 def _get_pg_env(ctx):
     return {
         "POSTGRES_PASSWORD": ctx.pg.password,
-        "POSTGRES_PORT": ctx.pg.port,
+        "POSTGRES_PORT": str(ctx.pg.port),
         "POSTGRES_HOST": ctx.pg.host,
         "POSTGRES_DB": ctx.pg.import_database,
         "POSTGRES_USER": ctx.pg.user,
@@ -294,12 +304,10 @@ def import_water_polygon(ctx):
         ctx.run(f"rm {filename}")
 
     env = _get_pg_env(ctx)
-    env["IMPORT_DATA_DIR"] = ctx.data_dir
+    env["DATA_DIR"] = ctx.data_dir
 
-    ctx.run(
-        f"{ctx.imposm_config_dir}/openmaptiles-tools/docker/import-data/import_data.sh water-polygons",
-        env=env,
-    )
+    import_script = f"{ctx.imposm_config_dir}/openmaptiles-tools/docker/import-data/import_data.sh"
+    ctx.run(f"{import_script} water-polygons", env=env)
 
 
 @task
@@ -336,10 +344,8 @@ def import_border(ctx):
     env = _get_pg_env(ctx)
     env["IMPORT_DIR"] = ctx.data_dir
 
-    ctx.run(
-        f"{ctx.imposm_config_dir}/import_data/openmaptiles-tools/bin/import-borders",
-        env=env,
-    )
+    import_script = f"{ctx.imposm_config_dir}/openmaptiles-tools/bin/import-borders"
+    ctx.run(f"{import_script} load {target_file}", env=env)
 
 
 # Wikimedia sites
@@ -494,10 +500,10 @@ def load_osm(ctx):
     if ctx.osm.url:
         get_osm_data(ctx)
 
-    concurrent.futures.wait([
+    join(
         cc_exec.submit(load_basemap, ctx),
-        cc_exec.submit(load_poi, ctx)
-    ])
+        cc_exec.submit(load_poi, ctx),
+    )
 
     run_sql_script(ctx)
 
@@ -523,7 +529,7 @@ def load_additional_data(ctx):
         _run_sql_script(ctx, "import-wikidata/labels_tables.sql")
         tasks.append(cc_exec.submit(import_wikidata_labels, ctx))
 
-    concurrent.futures.wait(tasks)
+    join(*tasks)
 
 
 @task
