@@ -1,4 +1,4 @@
-FROM node:8-stretch as builder
+FROM node:10-stretch as builder
 
 RUN apt update && apt install -y libstdc++6
 

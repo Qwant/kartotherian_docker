@@ -78,13 +78,17 @@ tiles:
   parts: 8
   ## url of tilerator API
   tilerator_url: http://tilerator
-  # names of the tilerator sources
-  base_sources:
-    generator: substbasemap
-    storage: basemap
-  poi_sources:
-    generator: gen_poi
-    storage: poi
+  tilesets:
+    basemap:
+      name: basemap
+      mapping_filename: generated_mapping_base.yaml
+      generator_source: substbasemap
+      storage_source: basemap
+    poi:
+      name: poi
+      mapping_filename: generated_mapping_poi.yaml
+      generator_source: gen_poi
+      storage_source: poi
 
 osm_update:
   replication_url: https://planet.osm.org/replication

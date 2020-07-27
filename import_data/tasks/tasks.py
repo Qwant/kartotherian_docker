@@ -27,11 +27,6 @@ cc_exec = concurrent.futures.ThreadPoolExecutor()
 logging.basicConfig(level=logging.INFO)
 
 
-class TilesLayer:
-    BASEMAP = 'basemap'
-    POI = 'poi'
-
-
 def _open_sql_connection(ctx, db):
     connection = psycopg2.connect(
         user=ctx.pg.user,
@@ -188,30 +183,30 @@ def get_osm_data(ctx):
 # imposm import
 ################
 
-def _run_imposm_import(ctx, mapping_filename, tileset_name):
+def _run_imposm_import(ctx, tileset_config):
     ctx.run(
         f'time imposm3 \
   import \
   -write --connection "postgis://{ctx.pg.user}:{ctx.pg.password}@{ctx.pg.host}:{ctx.pg.port}/{ctx.pg.import_database}" \
   -read {ctx.osm.file} \
   -diff \
-  -mapping {os.path.join(ctx.imposm_config_dir, mapping_filename)} \
+  -mapping {os.path.join(ctx.imposm_config_dir, tileset_config.mapping_filename)} \
   -deployproduction -overwritecache \
   -optimize \
   -quiet \
-  -diffdir {ctx.generated_files_dir}/diff/{tileset_name} -cachedir {ctx.generated_files_dir}/cache/{tileset_name} \
-  -dbschema-import {tileset_name}'
+  -diffdir {ctx.generated_files_dir}/diff/{tileset_config.name} -cachedir {ctx.generated_files_dir}/cache/{tileset_config.name} \
+  -dbschema-import {tileset_config.name}'
     )
 
 
 @task
 def load_basemap(ctx):
-    _run_imposm_import(ctx, 'generated_mapping_base.yaml', TilesLayer.BASEMAP)
+    _run_imposm_import(ctx, ctx.tiles.tilesets.basemap)
 
 
 @task
 def load_poi(ctx):
-    _run_imposm_import(ctx, 'generated_mapping_poi.yaml', TilesLayer.POI)
+    _run_imposm_import(ctx, ctx.tiles.tilesets.poi)
 
 @task
 def run_sql_script(ctx):
@@ -564,7 +559,7 @@ def rotate_database(ctx):
 ####################
 def create_tiles_jobs(
     ctx,
-    tiles_layer,
+    tileset_name,
     from_zoom,
     before_zoom,
     z,
@@ -582,22 +577,14 @@ def create_tiles_jobs(
         "deleteEmpty": "true",
         "zoom": z,
     }
-    if tiles_layer == TilesLayer.BASEMAP:
-        params.update(
-            {
-                "generatorId": ctx.tiles.base_sources.generator,
-                "storageId": ctx.tiles.base_sources.storage,
-            }
-        )
-    elif tiles_layer == TilesLayer.POI:
-        params.update(
-            {
-                "generatorId": ctx.tiles.poi_sources.generator,
-                "storageId": ctx.tiles.poi_sources.storage,
-            }
-        )
-    else:
-        raise Exception("invalid tiles_layer")
+
+    tileset_config = ctx.tiles.tilesets[tileset_name]
+    params.update(
+        {
+            "generatorId": tileset_config.generator_source,
+            "storageId": tileset_config.storage_source,
+        }
+    )
 
     if x:
         params["x"] = x
@@ -611,7 +598,7 @@ def create_tiles_jobs(
         # this tells tilerator not to generate a tile if there is not tile at the previous zoom
         # this saves a lots of time since we won't generate tiles on oceans
         params["checkZoom"] = check_base_layer_level
-        params["sourceId"] = ctx.tiles.base_sources.storage
+        params["sourceId"] = ctx.tiles.tilesets.basemap.storage_source
     if expired_tiles_filepath:
         params["filepath"] = expired_tiles_filepath
 
@@ -642,7 +629,7 @@ def generate_tiles(ctx):
         # we first generate all the tiles for the first levels
         create_tiles_jobs(
             ctx,
-            tiles_layer=TilesLayer.BASEMAP,
+            tileset_name=ctx.tiles.tilesets.basemap.name,
             z=0,
             from_zoom=0,
             before_zoom=10
@@ -652,7 +639,7 @@ def generate_tiles(ctx):
         # it speed up greatly the tiles generation by not even trying to generate tiles for oceans (and desert)
         create_tiles_jobs(
             ctx,
-            tiles_layer=TilesLayer.BASEMAP,
+            tileset_name=ctx.tiles.tilesets.basemap.name,
             z=10,
             from_zoom=10,
             before_zoom=15,
@@ -664,7 +651,7 @@ def generate_tiles(ctx):
         # it's a bit of a trick but works fine
         create_tiles_jobs(
             ctx,
-            tiles_layer=TilesLayer.POI,
+            tileset_name=ctx.tiles.tilesets.poi.name,
             z=14,
             from_zoom=14,
             before_zoom=15,
@@ -679,7 +666,7 @@ def generate_tiles(ctx):
         logging.warn("/!\\================================/!\\")
         create_tiles_jobs(
             ctx,
-            tiles_layer=TilesLayer.BASEMAP,
+            tileset_name=ctx.tiles.tilesets.basemap.name,
             x=ctx.tiles.x,
             y=ctx.tiles.y,
             z=ctx.tiles.z,
@@ -688,7 +675,7 @@ def generate_tiles(ctx):
         )
         create_tiles_jobs(
             ctx,
-            tiles_layer=TilesLayer.POI,
+            tileset_name=ctx.tiles.tilesets.poi.name,
             x=ctx.tiles.x,
             y=ctx.tiles.y,
             z=ctx.tiles.z,
@@ -710,7 +697,7 @@ def generate_tiles(ctx):
             )
             create_tiles_jobs(
                 ctx,
-                tiles_layer=TilesLayer.BASEMAP,
+                tileset_name=ctx.tiles.tilesets.basemap.name,
                 x=entry[0],
                 y=entry[1],
                 z=entry[2],
@@ -719,7 +706,7 @@ def generate_tiles(ctx):
             )
             create_tiles_jobs(
                 ctx,
-                tiles_layer=TilesLayer.POI,
+                tileset_name=ctx.tiles.tilesets.poi.name,
                 x=entry[0],
                 y=entry[1],
                 z=entry[2],
@@ -731,11 +718,11 @@ def generate_tiles(ctx):
 
 
 @task
-def generate_expired_tiles(ctx, tiles_layer, from_zoom, before_zoom, expired_tiles):
+def generate_expired_tiles(ctx, tileset_name, from_zoom, before_zoom, expired_tiles):
     logging.info("generating expired tiles from %s", expired_tiles)
     create_tiles_jobs(
         ctx,
-        tiles_layer=tiles_layer,
+        tileset_name=tileset_name,
         z=from_zoom,
         from_zoom=from_zoom,
         before_zoom=before_zoom,
@@ -792,7 +779,7 @@ def check_if_folder_has_folders(folder, folders):
     return True
 
 
-def check_generated_cache(folder):
+def check_generated_cache(ctx, folder):
     if not os.path.isdir(folder):
         logging.error(f"{folder} should be a directory")
         return False
@@ -802,7 +789,7 @@ def check_generated_cache(folder):
         full = os.path.join(folder, f)
         if os.path.isdir(full):
             checks += 1
-            if not check_if_folder_has_folders(full, [TilesLayer.POI, TilesLayer.BASEMAP]):
+            if not check_if_folder_has_folders(full, [ctx.tiles.tilesets.poi.name, ctx.tiles.tilesets.basemap.name]):
                 errors += 1
     if checks == 0:
         logging.error(f"{folder} should not be empty")
@@ -827,7 +814,7 @@ def reindex_poi_geometries(ctx):
 @task
 @format_stdout
 def run_osm_update(ctx):
-    if not check_generated_cache(ctx.generated_files_dir):
+    if not check_generated_cache(ctx, ctx.generated_files_dir):
         sys.exit(1)
 
     change_file_path = f"{ctx.update_tiles_dir}/changes.osc.gz"
@@ -850,9 +837,6 @@ def run_osm_update(ctx):
         osm_update(
             ctx,
             f"postgis://{ctx.pg.user}:{ctx.pg.password}@{ctx.pg.host}:{ctx.pg.port}/{ctx.pg.database}",
-            ctx.update_tiles_dir,
-            ctx.generated_files_dir,
-            ctx.imposm_config_dir,
             change_file_path
         )
         write_new_state(ctx, new_osm_timestamp)
