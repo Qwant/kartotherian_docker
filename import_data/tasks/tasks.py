@@ -271,11 +271,9 @@ def import_natural_earth(ctx):
         download_url = "http://naciscdn.org/naturalearth/packages/natural_earth_vector.sqlite.zip"
         downloaded_zip = "natural_earth_vector.sqlite.zip"
         ctx.run(
-            f"""
-            wget --progress=dot:giga {download_url}
-            && unzip -oj {downloaded_zip} -d {ctx.data_dir}
-            && rm {downloaded_zip}
-            """
+            f"wget --progress=dot:giga {download_url}"
+            f" && unzip -oj {downloaded_zip} -d {ctx.data_dir}"
+            f" && rm {downloaded_zip}"
         )
 
     pg_conn = _get_pg_conn(ctx)
@@ -300,15 +298,13 @@ def import_water_polygon(ctx):
     if needs_to_download(ctx, target_file, max_age=timedelta(days=30)):
         downloaded_zip = "water-polygons-split-3857.zip"
         ctx.run(
-            f"""
-            wget --progress=dot:giga {ctx.water.polygons_url}
-            && unzip -oj {downloaded_zip} -d {ctx.data_dir}
-            && rm {downloaded_zip}
-            """
+            f"wget --progress=dot:giga {ctx.water.polygons_url}"
+            f" && unzip -oj {downloaded_zip} -d {ctx.data_dir}"
+            f" && rm {downloaded_zip}"
         )
 
     env = _pg_env(ctx)
-    env["IMPORT_DIR"] = ctx.data_dir
+    env["IMPORT_DATA_DIR"] = ctx.data_dir
     ctx.run(f"{ctx.imposm_config_dir}/import-water/import-water.sh", env=env)
 
 
@@ -337,15 +333,13 @@ def import_border(ctx):
     if needs_to_download(ctx, target_file, max_age=timedelta(days=30)):
         downloaded_zip = f"{target_file}.gz"
         ctx.run(
-            f"""
-            wget --progress=dot:giga -O {downloaded_zip} {ctx.border.osmborder_lines_url}
-            && gzip -fd {downloaded_zip}
-            """
+            f"wget --progress=dot:giga -O {downloaded_zip} {ctx.border.osmborder_lines_url}"
+            f" && gzip -fd {downloaded_zip}"
         )
 
     env = _pg_env(ctx)
     env["IMPORT_DIR"] = ctx.data_dir
-    ctx.run(f"{ctx.imposm_config_dir}/import-osmborder/import/import_osmborder_lines.sh")
+    ctx.run(f"{ctx.imposm_config_dir}/import-osmborder/import/import_osmborder_lines.sh", env=env)
 
 
 # Wikimedia sites
@@ -823,7 +817,7 @@ def run_osm_update(ctx):
 
     change_file_path = f"{ctx.update_tiles_dir}/changes.osc.gz"
     lock_path = get_import_lock_path(ctx)
-    with FileLock(lock_path) as lock:
+    with FileLock(lock_path) as _lock:
         current_osm_timestamp = read_current_state(ctx)
         try:
             osmupdate_opts = _get_osmupdate_options(ctx)
@@ -849,13 +843,14 @@ def load_all(ctx):
     """
     default task called if `invoke` is run without args
 
-    This is the main tasks that import all the datas into postgres and start the tiles generation process
+    This is the main tasks that import all the datas into postgres and start
+    the tiles generation process
     """
     if not ctx.osm.file and not ctx.osm.url:
         raise Exception("you should provide a osm.file variable or osm.url variable")
 
     lock_path = get_import_lock_path(ctx)
-    with FileLock(lock_path) as lock:
+    with FileLock(lock_path) as _lock:
         prepare_db(ctx)
         load_osm(ctx)
         load_additional_data(ctx)
