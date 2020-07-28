@@ -22,7 +22,7 @@ class PrefixedStream:
         lines = self.buffer.split("\n")
 
         for line in lines[:-1]:
-            self.src_stream.write("[{}] {}\n".format(self.prefix, line))
+            self.src_stream.write(f"[{self.prefix}] {line}\n")
 
         self.buffer = lines[-1]
         self.src_stream.flush()

@@ -746,7 +746,7 @@ def check_if_folder_has_folders(folder, folders):
             folders.remove(f)
     if len(folders) > 0:
         for f in folders:
-            logging.error("'{}' should be present in {}".format(f, folder))
+            logging.error(f"'{f}' should be present in {folder}")
         return False
     return True
 

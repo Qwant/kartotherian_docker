@@ -20,7 +20,7 @@ COMMANDS = [
 
 def exec_command(command, options):
     if options.get("debug") is True:
-        print("==> {}".format(" ".join(command)))
+        print("==>", " ".join(command))
     p = subprocess.Popen(command)
     p.wait()
     return p.poll()
@@ -94,9 +94,9 @@ def run_load_db(options):
         return ret
     print("> running load-db command")
     if options["osm-file"].startswith("https://") or options["osm-file"].startswith("http://"):
-        flag = "INVOKE_OSM_URL={}".format(options["osm-file"])
+        flag = f"INVOKE_OSM_URL={options['osm-file']}"
     else:
-        flag = "INVOKE_OSM_FILE={}".format(options["osm-file"])
+        flag = f"INVOKE_OSM_FILE={options['osm-file']}"
     command = [
         "docker-compose",
         "-p",
@@ -110,7 +110,7 @@ def run_load_db(options):
         "-e",
         flag,
         "-e",
-        "INVOKE_TILES_COORDS={}".format(options["tiles-coords"]),
+        f"INVOKE_TILES_COORDS={options['tiles-coords']}",
         "load_db",
     ]
     return exec_command(command, options)
@@ -266,7 +266,7 @@ def parse_args(args):
             enabled_options[args[i - 1][2:]] = args[i]
         elif args[i] == "--tiles-coords":
             if i + 1 >= len(args):
-                print("`{}` option expects an argument!".format(args[i]))
+                print(f"`{args[i]}` option expects an argument!")
                 sys.exit(1)
             i += 1
             try:
@@ -295,9 +295,7 @@ def parse_args(args):
             sys.exit(0)
         else:
             print(
-                "Unknown option `{}`, run with with `-h` or `--help` to see the list of commands".format(
-                    args[i]
-                )
+                f"Unknown option `{args[i]}`, run with with `-h` or `--help` to see the list of commands"
             )
             sys.exit(1)
         i += 1
@@ -309,10 +307,10 @@ def main():
     options = parse_args(sys.argv[1:])
     for key in options:
         if key in COMMANDS and options[key] is True:
-            func_name = "run_{}".format(key.replace("-", "_"))
+            func_name = "run_" + key.replace("-", "_")
             ret = definitions[func_name](options)
             if ret != 0:
-                print("{} command failed".format(key))
+                print(f"{key} command failed")
                 sys.exit(ret)
 
 
