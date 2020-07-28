@@ -5,7 +5,7 @@ import fcntl
 class FileLock:
     def __init__(self, path):
         # Open the file and acquire a lock on the file before operating
-        self.file = open(path, 'a+')
+        self.file = open(path, "a+")
         # Get an exclusive lock (EX), non-blocking (NB)
         try:
             fcntl.flock(self.file, fcntl.LOCK_EX | fcntl.LOCK_NB)

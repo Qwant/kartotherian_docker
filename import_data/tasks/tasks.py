@@ -29,37 +29,31 @@ logging.basicConfig(level=logging.INFO)
 
 def _open_sql_connection(ctx, db):
     connection = psycopg2.connect(
-        user=ctx.pg.user,
-        dbname=db,
-        host=ctx.pg.host,
-        password=ctx.pg.password,
-        port=ctx.pg.port
+        user=ctx.pg.user, dbname=db, host=ctx.pg.host, password=ctx.pg.password, port=ctx.pg.port
     )
     psycopg2.extras.register_hstore(connection, globally=True)
     return connection
 
 
-def _execute_sql(ctx, sql, db=None, additional_options=''):
-    tmp_file = NamedTemporaryFile('w')
+def _execute_sql(ctx, sql, db=None, additional_options=""):
+    tmp_file = NamedTemporaryFile("w")
     tmp_file.write(sql)
     tmp_file.flush()
 
     query = (
-        f'psql -Xq'
-        f' -h {ctx.pg.host}'
-        f' -p {ctx.pg.port}'
-        f' -U {ctx.pg.user}'
-        f' -f {tmp_file.name}'
-        f' {additional_options}'
+        f"psql -Xq"
+        f" -h {ctx.pg.host}"
+        f" -p {ctx.pg.port}"
+        f" -U {ctx.pg.user}"
+        f" -f {tmp_file.name}"
+        f" {additional_options}"
     )
 
     if db is not None:
-        query += f' -d {db}'
+        query += f" -d {db}"
 
-    return ctx.run(
-        query,
-        env={'PGPASSWORD': ctx.pg.password},
-    )
+    return ctx.run(query, env={"PGPASSWORD": ctx.pg.password},)
+
 
 def _run_sql_script(ctx, script_name, template_params=None):
     """
@@ -69,41 +63,38 @@ def _run_sql_script(ctx, script_name, template_params=None):
     """
     script_path = os.path.join(ctx.imposm_config_dir, script_name)
 
-    with open(script_path, 'r') as f:
+    with open(script_path, "r") as f:
         sql_commands = f.read()
 
         if template_params is not None:
-            sql_commands = (
-                jinja2.Template(sql_commands).render(**template_params)
-            )
+            sql_commands = jinja2.Template(sql_commands).render(**template_params)
 
         return _execute_sql(
             ctx,
             sql_commands,
             db=ctx.pg.import_database,
-            additional_options="--set ON_ERROR_STOP='1'"
+            additional_options="--set ON_ERROR_STOP='1'",
         )
+
 
 def _db_exists(ctx, db_name):
     has_db = _execute_sql(
-        ctx,
-        f"SELECT 1 FROM pg_database WHERE datname='{db_name}';",
-        additional_options="-tA",
+        ctx, f"SELECT 1 FROM pg_database WHERE datname='{db_name}';", additional_options="-tA",
     )
     return has_db.stdout == "1\n"
 
 
 def _wait_until_postgresql_is_ready(ctx):
-    logging.info('Trying to connect to postgres...')
-    query = f'pg_isready -h {ctx.pg.host} -p {ctx.pg.port} -U {ctx.pg.user}'
+    logging.info("Trying to connect to postgres...")
+    query = f"pg_isready -h {ctx.pg.host} -p {ctx.pg.port} -U {ctx.pg.user}"
     x = 0
     while x < 30:
         try:
             ctx.run(query, env={"PGPASSWORD": ctx.pg.password})
-            logging.info('Success!')
+            logging.info("Success!")
             return
         except:
-            logging.info(f'Connection to postgres failed, remaining {30 - x} attempts...')
+            logging.info(f"Connection to postgres failed, remaining {30 - x} attempts...")
         time.sleep(1)
         x += 1
     raise Exception("PostgreSQL doesn't seem to ready, aborting...")
@@ -166,15 +157,15 @@ def get_osm_data(ctx):
             # Updating pbf before the import is only useful for large (planet) files
             # Moreover, imposm seems to require much more memory when reading .pbf file where
             # partial updates have been applied.
-            logging.info('The .pbf file is a geographical extract: it will NOT be updated')
+            logging.info("The .pbf file is a geographical extract: it will NOT be updated")
             return
         osmupdate_opts = _get_osmupdate_options(ctx)
         temporary_pbf = f"{new_osm_file}.temp.pbf"
         try:
-            ctx.run(f'osmupdate {osmupdate_opts} {new_osm_file} {temporary_pbf}')
+            ctx.run(f"osmupdate {osmupdate_opts} {new_osm_file} {temporary_pbf}")
         except Failure as exc:
             if exc.result.return_code == 21:
-                logging.info('OSM pbf file is up to date')
+                logging.info("OSM pbf file is up to date")
                 return
             raise
         os.replace(temporary_pbf, new_osm_file)
@@ -182,6 +173,7 @@ def get_osm_data(ctx):
 
 # imposm import
 ################
+
 
 def _run_imposm_import(ctx, tileset_config):
     ctx.run(
@@ -208,15 +200,18 @@ def load_basemap(ctx):
 def load_poi(ctx):
     _run_imposm_import(ctx, ctx.tiles.tilesets.poi)
 
+
 @task
 def run_sql_script(ctx):
     # disable Kanji transliteration (produces invalid utf8)
-    _execute_sql(ctx, db=ctx.pg.import_database,
+    _execute_sql(
+        ctx,
+        db=ctx.pg.import_database,
         sql="""
             CREATE OR REPLACE FUNCTION osml10n_kanji_transcript(text) RETURNS text AS $$
                 SELECT NULL::text
             $$ LANGUAGE SQL IMMUTABLE PARALLEL SAFE;
-        """
+        """,
     )
 
     # load language-related functions
@@ -229,11 +224,13 @@ def run_sql_script(ctx):
 # non-OSM data import
 #######################
 def _get_pg_conn(ctx):
-    return f"dbname={ctx.pg.import_database} " \
-        f"user={ctx.pg.user} " \
-        f"password={ctx.pg.password} " \
-        f"host={ctx.pg.host} " \
+    return (
+        f"dbname={ctx.pg.import_database} "
+        f"user={ctx.pg.user} "
+        f"password={ctx.pg.password} "
+        f"host={ctx.pg.host} "
         f"port={ctx.pg.port}"
+    )
 
 
 @task
@@ -341,12 +338,10 @@ def import_wikimedia_stats(ctx):
     connection = _open_sql_connection(ctx, ctx.pg.import_database)
     cursor = connection.cursor()
 
-    with gzip.open(target_file, 'rt') as istream:
-        cursor.execute(f'TRUNCATE TABLE {ctx.wikidata.stats.table};')
+    with gzip.open(target_file, "rt") as istream:
+        cursor.execute(f"TRUNCATE TABLE {ctx.wikidata.stats.table};")
         cursor.copy_expert(
-            f'COPY {ctx.wikidata.stats.table} '
-            f'FROM STDIN DELIMITER \',\' CSV HEADER;',
-            istream
+            f"COPY {ctx.wikidata.stats.table} " f"FROM STDIN DELIMITER ',' CSV HEADER;", istream
         )
 
     connection.commit()
@@ -367,12 +362,10 @@ def import_wikidata_sitelinks(ctx):
     connection = _open_sql_connection(ctx, ctx.pg.import_database)
     cursor = connection.cursor()
 
-    with gzip.open(target_file, 'rt') as istream:
-        cursor.execute(f'TRUNCATE TABLE {ctx.wikidata.sitelinks.table};')
+    with gzip.open(target_file, "rt") as istream:
+        cursor.execute(f"TRUNCATE TABLE {ctx.wikidata.sitelinks.table};")
         cursor.copy_expert(
-            f'COPY {ctx.wikidata.sitelinks.table} '
-            f'FROM STDIN DELIMITER \',\' CSV HEADER;',
-            istream
+            f"COPY {ctx.wikidata.sitelinks.table} " f"FROM STDIN DELIMITER ',' CSV HEADER;", istream
         )
 
     connection.commit()
@@ -390,24 +383,19 @@ def import_wikidata_labels(ctx):
     target_file = os.path.join(ctx.data_dir, ctx.wikidata.labels.file)
     download_file(ctx, target_file, ctx.wikidata.labels.url)
 
-    with gzip.open(target_file, 'rt') as istream:
+    with gzip.open(target_file, "rt") as istream:
         reader = csv.DictReader(istream)
         connection = _open_sql_connection(ctx, ctx.pg.import_database)
         cursor = connection.cursor()
 
         cursor.executemany(
-            f'''
+            f"""
             INSERT INTO {ctx.wikidata.labels.table} (id, labels)
             VALUES (%s, %s)
             ON CONFLICT (id) DO
                 UPDATE SET labels = (wd_names.labels || EXCLUDED.labels)
-            ''',
-            map(
-                lambda row: (
-                    row['title'],
-                    {'name:' + row['language']: row['value']}
-                ), reader
-            )
+            """,
+            map(lambda row: (row["title"], {"name:" + row["language"]: row["value"]}), reader),
         )
 
         connection.commit()
@@ -421,8 +409,9 @@ def override_wikidata_weight_functions(ctx):
     """
     update sql weight functions to make use of wikidata stats
     """
+
     def compute_views_percentile(fraction):
-        QUERY = f'''
+        QUERY = f"""
             SELECT PERCENTILE_DISC({fraction}) WITHIN GROUP (ORDER BY all_poi.max_views)
             FROM (
                 SELECT MAX(stats.views) AS max_views
@@ -437,26 +426,19 @@ def override_wikidata_weight_functions(ctx):
                     ON site.lang = stats.lang AND site.title = stats.title
                 GROUP BY poi.osm_id
             ) AS all_poi
-        '''
+        """
         return float(
             _execute_sql(
-                ctx,
-                QUERY,
-                db=ctx.pg.import_database,
-                additional_options='-tA'
+                ctx, QUERY, db=ctx.pg.import_database, additional_options="-tA"
             ).stdout.strip()
         )
 
     params = {
-        'min_views': compute_views_percentile(0.1),
-        'max_views': compute_views_percentile(0.999),
+        "min_views": compute_views_percentile(0.1),
+        "max_views": compute_views_percentile(0.999),
     }
 
-    _run_sql_script(
-        ctx,
-        'import-wikidata/wikidata_functions.sql',
-        template_params=params
-    )
+    _run_sql_script(ctx, "import-wikidata/wikidata_functions.sql", template_params=params)
 
 
 # import pipeline
@@ -478,10 +460,7 @@ def load_osm(ctx):
     if ctx.osm.url:
         get_osm_data(ctx)
 
-    concurrent.futures.wait([
-        cc_exec.submit(load_basemap, ctx),
-        cc_exec.submit(load_poi, ctx)
-    ])
+    concurrent.futures.wait([cc_exec.submit(load_basemap, ctx), cc_exec.submit(load_poi, ctx)])
 
     run_sql_script(ctx)
 
@@ -537,17 +516,13 @@ def rotate_database(ctx):
         return
     kill_all_access_to_main_db(ctx)
     if _db_exists(ctx, ctx.pg.database):
-        logging.info(
-            f"rotating database, moving {ctx.pg.database} -> {ctx.pg.backup_database}"
-        )
+        logging.info(f"rotating database, moving {ctx.pg.database} -> {ctx.pg.backup_database}")
         _execute_sql(
             ctx,
             f"ALTER DATABASE {ctx.pg.database} RENAME TO {ctx.pg.backup_database};",
             db=ctx.pg.import_database,
         )
-    logging.info(
-        f"rotating database, moving {ctx.pg.import_database} -> {ctx.pg.database}"
-    )
+    logging.info(f"rotating database, moving {ctx.pg.import_database} -> {ctx.pg.database}")
     _execute_sql(
         ctx,
         f"ALTER DATABASE {ctx.pg.import_database} RENAME TO {ctx.pg.database};",
@@ -628,11 +603,7 @@ def generate_tiles(ctx):
         # for the planet we tweak the tiles generation a bit to speed it up
         # we first generate all the tiles for the first levels
         create_tiles_jobs(
-            ctx,
-            tileset_name=ctx.tiles.tilesets.basemap.name,
-            z=0,
-            from_zoom=0,
-            before_zoom=10
+            ctx, tileset_name=ctx.tiles.tilesets.basemap.name, z=0, from_zoom=0, before_zoom=10
         )
         # from the zoom 10 we generate only the tiles if there is a parent tiles
         # since tilerator does not generate tiles if the parent tile is composed only of 1 element
@@ -658,11 +629,11 @@ def generate_tiles(ctx):
             check_base_layer_level=13,
         )
     elif ctx.tiles.x and ctx.tiles.y and ctx.tiles.z:
-        logging.info(
-            f"generating tiles for {ctx.tiles.x} / {ctx.tiles.y}, z = {ctx.tiles.z}"
-        )
+        logging.info(f"generating tiles for {ctx.tiles.x} / {ctx.tiles.y}, z = {ctx.tiles.z}")
         logging.warn("/!\\================================/!\\")
-        logging.warn("Please not that this way of giving position is DEPRECATED! use `coords` instead")
+        logging.warn(
+            "Please not that this way of giving position is DEPRECATED! use `coords` instead"
+        )
         logging.warn("/!\\================================/!\\")
         create_tiles_jobs(
             ctx,
@@ -690,11 +661,11 @@ def generate_tiles(ctx):
             sys.exit(1)
         for entry in data:
             if len(entry) != 3:
-                logging.warn(f"Expected entry [longitude, latitude, zoom], got {len(entry)} elements")
+                logging.warn(
+                    f"Expected entry [longitude, latitude, zoom], got {len(entry)} elements"
+                )
                 continue
-            logging.info(
-                f"generating tiles for {entry[0]} / {entry[1]}, z = {entry[2]}"
-            )
+            logging.info(f"generating tiles for {entry[0]} / {entry[1]}, z = {entry[2]}")
             create_tiles_jobs(
                 ctx,
                 tileset_name=ctx.tiles.tilesets.basemap.name,
@@ -733,25 +704,26 @@ def generate_expired_tiles(ctx, tileset_name, from_zoom, before_zoom, expired_ti
 # osm update
 ##############
 
+
 def read_current_state(ctx):
-    with open(f'{ctx.update_tiles_dir}/state.txt') as state_file:
+    with open(f"{ctx.update_tiles_dir}/state.txt") as state_file:
         for line in state_file:
-            if line.startswith('timestamp='):
-                raw_timestamp = line.replace('timestamp=', '').strip()
+            if line.startswith("timestamp="):
+                raw_timestamp = line.replace("timestamp=", "").strip()
                 # for compatibility with osm replication files
-                raw_timestamp = raw_timestamp.replace('\\:', ':')
+                raw_timestamp = raw_timestamp.replace("\\:", ":")
                 if raw_timestamp:
                     return raw_timestamp
     raise Exception("Cannot find timestamp in osm state file")
 
 
 def write_new_state(ctx, new_timestamp):
-    with open(f'{ctx.update_tiles_dir}/state.txt', 'w') as state_file:
-        state_file.write(f'timestamp={new_timestamp}\n')
+    with open(f"{ctx.update_tiles_dir}/state.txt", "w") as state_file:
+        state_file.write(f"timestamp={new_timestamp}\n")
 
 
 def read_osm_timestamp(ctx, osm_file_path):
-    return ctx.run(f'osmconvert {osm_file_path} --out-timestamp').stdout
+    return ctx.run(f"osmconvert {osm_file_path} --out-timestamp").stdout
 
 
 @task
@@ -762,7 +734,7 @@ def init_osm_update(ctx):
     latest state.txt file before .pbf timestamp
     """
     logging.info("initializing osm update from osm file timestamp:")
-    ctx.run(f'mkdir -p {ctx.update_tiles_dir}')
+    ctx.run(f"mkdir -p {ctx.update_tiles_dir}")
     raw_osm_datetime = read_osm_timestamp(ctx, ctx.osm.file)
     write_new_state(ctx, raw_osm_datetime)
 
@@ -789,7 +761,9 @@ def check_generated_cache(ctx, folder):
         full = os.path.join(folder, f)
         if os.path.isdir(full):
             checks += 1
-            if not check_if_folder_has_folders(full, [ctx.tiles.tilesets.poi.name, ctx.tiles.tilesets.basemap.name]):
+            if not check_if_folder_has_folders(
+                full, [ctx.tiles.tilesets.poi.name, ctx.tiles.tilesets.basemap.name]
+            ):
                 errors += 1
     if checks == 0:
         logging.error(f"{folder} should not be empty")
@@ -797,7 +771,7 @@ def check_generated_cache(ctx, folder):
 
 
 def get_import_lock_path(ctx):
-    return f'{ctx.update_tiles_dir}/osm_update.lock'
+    return f"{ctx.update_tiles_dir}/osm_update.lock"
 
 
 @task
@@ -823,12 +797,10 @@ def run_osm_update(ctx):
         current_osm_timestamp = read_current_state(ctx)
         try:
             osmupdate_opts = _get_osmupdate_options(ctx)
-            ctx.run(
-                f'osmupdate {osmupdate_opts} {current_osm_timestamp} {change_file_path}'
-            )
+            ctx.run(f"osmupdate {osmupdate_opts} {current_osm_timestamp} {change_file_path}")
         except Failure as exc:
             if exc.result.return_code == 21:
-                logging.info('OSM state is up to date, no change to apply')
+                logging.info("OSM state is up to date, no change to apply")
                 return
             raise
 
@@ -837,7 +809,7 @@ def run_osm_update(ctx):
         osm_update(
             ctx,
             f"postgis://{ctx.pg.user}:{ctx.pg.password}@{ctx.pg.host}:{ctx.pg.port}/{ctx.pg.database}",
-            change_file_path
+            change_file_path,
         )
         write_new_state(ctx, new_osm_timestamp)
         os.remove(change_file_path)

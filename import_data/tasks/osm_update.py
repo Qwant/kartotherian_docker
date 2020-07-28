@@ -22,12 +22,12 @@ def log_error(msg):
 
 def format_file_size(size):
     if size > 1000000000:
-        return '{}GB'.format(size / 1000000000)
+        return "{}GB".format(size / 1000000000)
     elif size > 1000000:
-        return '{}MB'.format(size / 1000000)
+        return "{}MB".format(size / 1000000)
     elif size > 1000:
-        return '{}KB'.format(size / 1000)
-    return '{}B'.format(size)
+        return "{}KB".format(size / 1000)
+    return "{}B".format(size)
 
 
 def load_json(file_path):
@@ -44,10 +44,7 @@ def run_imposm_update(ctx, tileset, change_file, pg_connection):
     mapping_path = path.join(ctx.imposm_config_dir, tileset.mapping_filename)
 
     log("apply changes on OSM database")
-    log("{} file size is {}".format(
-        change_file,
-        format_file_size(os.path.getsize(change_file))
-    ))
+    log("{} file size is {}".format(change_file, format_file_size(os.path.getsize(change_file))))
 
     try:
         ctx.run(
@@ -84,12 +81,7 @@ def create_tiles_jobs(ctx, tileset_config, start_ts):
     # Get all tiles updated since start timestamp
     entries = "|".join(
         get_all_files(
-            path.join(
-                ctx.update_tiles_dir,
-                "expiretiles",
-                tileset_config.name
-            ),
-            start_ts,
+            path.join(ctx.update_tiles_dir, "expiretiles", tileset_config.name), start_ts,
         )
     )
 
@@ -104,7 +96,7 @@ def create_tiles_jobs(ctx, tileset_config, start_ts):
         tileset_name=tileset_config.name,
         from_zoom=UPDATE_TILES_FROM_ZOOM,
         before_zoom=UPDATE_TILES_BEFORE_ZOOM,
-        expired_tiles=entries
+        expired_tiles=entries,
     )
 
 
@@ -129,11 +121,16 @@ def osm_update(ctx, pg_connection, change_file):
     # Update db and tiles, only if changes file is not empty
     if os.path.getsize(change_file) != 0:
         # Imposm update for both tiles sources
-        run_imposm_update(ctx, ctx.tiles.tilesets.basemap, change_file=change_file, pg_connection=pg_connection)
-        run_imposm_update(ctx, ctx.tiles.tilesets.poi, change_file=change_file, pg_connection=pg_connection)
+        run_imposm_update(
+            ctx, ctx.tiles.tilesets.basemap, change_file=change_file, pg_connection=pg_connection
+        )
+        run_imposm_update(
+            ctx, ctx.tiles.tilesets.poi, change_file=change_file, pg_connection=pg_connection
+        )
 
         # We make the import here to prevent a circular dependency if put at the top.
         from .tasks import reindex_poi_geometries
+
         # Reindex geometries to avoid index bloat
         reindex_poi_geometries(ctx)
 
@@ -145,10 +142,11 @@ def osm_update(ctx, pg_connection, change_file):
     log("current location: {}".format(os.getcwd()))
     log("============")
     elapsed = int(datetime.now().timestamp()) - start_timestamp
-    log("osm_update duration: {}h{:02}m{:02}s".format(
-        elapsed // 3600,
-        elapsed % 3600 // 60,
-        elapsed % 60))
+    log(
+        "osm_update duration: {}h{:02}m{:02}s".format(
+            elapsed // 3600, elapsed % 3600 // 60, elapsed % 60
+        )
+    )
     log("osm_update successfully terminated!")
 
     return True

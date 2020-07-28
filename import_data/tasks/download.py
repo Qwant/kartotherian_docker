@@ -4,6 +4,7 @@ from datetime import datetime
 
 logger = logging.getLogger(__name__)
 
+
 def needs_to_download(ctx, file, max_age=None):
     """
     Check if "file" should be downloaded
@@ -21,9 +22,7 @@ def needs_to_download(ctx, file, max_age=None):
         if datetime.utcnow() - existing_file_dt > max_age:
             return True
 
-    logger.warning(
-        f"file {file} already exists, we don't need to download it again"
-    )
+    logger.warning(f"file {file} already exists, we don't need to download it again")
     return False
 
 
