@@ -22,9 +22,24 @@ from .download import needs_to_download, download_file
 from .format_stdout import format_stdout
 from .osm_update import osm_update
 
+logging.basicConfig(level=logging.INFO)
+
 cc_exec = concurrent.futures.ThreadPoolExecutor()
 
-logging.basicConfig(level=logging.INFO)
+
+def join(*futures):
+    """
+    Wait for all input futures and raise an exception as soon as one of the
+    futures does so.
+    """
+    run = concurrent.futures.wait(futures, return_when=concurrent.futures.FIRST_EXCEPTION)
+
+    # NOTE: If some day we need to extend this function to return the result of
+    #       input futures, we need to be carefull to keep the order since
+    #       `run.done` is a set.
+    for result in run.done:
+        if result.exception() is not None:
+            raise result.exception()
 
 
 def _pg_env(ctx):
@@ -470,8 +485,7 @@ def load_osm(ctx):
     if ctx.osm.url:
         get_osm_data(ctx)
 
-    concurrent.futures.wait([cc_exec.submit(load_basemap, ctx), cc_exec.submit(load_poi, ctx)])
-
+    join(cc_exec.submit(load_basemap, ctx), cc_exec.submit(load_poi, ctx))
     run_sql_script(ctx)
 
 
@@ -496,7 +510,7 @@ def load_additional_data(ctx):
         _run_sql_script(ctx, "import-wikidata/labels_tables.sql")
         tasks.append(cc_exec.submit(import_wikidata_labels, ctx))
 
-    concurrent.futures.wait(tasks)
+    join(*tasks)
 
 
 @task
@@ -822,9 +836,7 @@ def run_osm_update(ctx):
 
         new_osm_timestamp = read_osm_timestamp(ctx, change_file_path)
 
-        osm_update(
-            ctx, _pg_conn_str(ctx), change_file_path
-        )
+        osm_update(ctx, _pg_conn_str(ctx), change_file_path)
         write_new_state(ctx, new_osm_timestamp)
         os.remove(change_file_path)
 
