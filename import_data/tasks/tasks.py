@@ -27,6 +27,21 @@ cc_exec = concurrent.futures.ThreadPoolExecutor()
 logging.basicConfig(level=logging.INFO)
 
 
+def _pg_env(ctx):
+    return {
+        "POSTGRES_PASSWORD": ctx.pg.password,
+        "POSTGRES_PORT": str(ctx.pg.port),
+        "POSTGRES_HOST": ctx.pg.host,
+        "POSTGRES_DB": ctx.pg.import_database,
+        "POSTGRES_USER": ctx.pg.user,
+    }
+
+
+def _pg_conn_str(ctx):
+    pg = ctx.pg
+    return f"postgis://{pg.user}:{pg.password}@{pg.host}:{pg.port}/{pg.import_database}"
+
+
 def _open_sql_connection(ctx, db):
     connection = psycopg2.connect(
         user=ctx.pg.user, dbname=db, host=ctx.pg.host, password=ctx.pg.password, port=ctx.pg.port
@@ -114,11 +129,12 @@ def prepare_db(ctx):
         ctx,
         db=ctx.pg.import_database,
         sql="""
-CREATE EXTENSION postgis;
-CREATE EXTENSION hstore;
-CREATE EXTENSION unaccent;
-CREATE EXTENSION fuzzystrmatch;
-CREATE EXTENSION osml10n;""",
+            CREATE EXTENSION postgis;
+            CREATE EXTENSION hstore;
+            CREATE EXTENSION unaccent;
+            CREATE EXTENSION fuzzystrmatch;
+            CREATE EXTENSION osml10n;
+        """,
     )
 
     _execute_sql(ctx, f"DROP DATABASE IF EXISTS {ctx.pg.backup_database};")
@@ -144,8 +160,9 @@ def get_osm_data(ctx):
     new_osm_file = os.path.join(ctx.data_dir, file_name)
     if ctx.osm.file is not None and ctx.osm.file != new_osm_file:
         logging.warning(
-            f"the osm variable has been configured to {ctx.osm_file}, "
-            f"but this will not be taken into account as we will use a newly downloaded file: {new_osm_file}"
+            f"the osm variable has been configured to {ctx.osm_file}, but this"
+            f" will not be taken into account as we will use a newly downloaded"
+            f" file: {new_osm_file}"
         )
     ctx.osm.file = new_osm_file
     download_file(ctx, new_osm_file, ctx.osm.url, max_age=timedelta(days=3))
@@ -177,17 +194,13 @@ def get_osm_data(ctx):
 
 def _run_imposm_import(ctx, tileset_config):
     ctx.run(
-        f'time imposm3 \
-  import \
-  -write --connection "postgis://{ctx.pg.user}:{ctx.pg.password}@{ctx.pg.host}:{ctx.pg.port}/{ctx.pg.import_database}" \
-  -read {ctx.osm.file} \
-  -diff \
-  -mapping {os.path.join(ctx.imposm_config_dir, tileset_config.mapping_filename)} \
-  -deployproduction -overwritecache \
-  -optimize \
-  -quiet \
-  -diffdir {ctx.generated_files_dir}/diff/{tileset_config.name} -cachedir {ctx.generated_files_dir}/cache/{tileset_config.name} \
-  -dbschema-import {tileset_config.name}'
+        "time imposm3 import -write -diff -quiet -optimize -deployproduction -overwritecache"
+        f' -write --connection "{_pg_conn_str(ctx)}"'
+        f" -read {ctx.osm.file}"
+        f" -mapping {os.path.join(ctx.imposm_config_dir, tileset_config.mapping_filename)}"
+        f" -diffdir {ctx.generated_files_dir}/diff/{tileset_config.name}"
+        f" -cachedir {ctx.generated_files_dir}/cache/{tileset_config.name}"
+        f" -dbschema-import {tileset_config.name}"
     )
 
 
@@ -225,11 +238,11 @@ def run_sql_script(ctx):
 #######################
 def _get_pg_conn(ctx):
     return (
-        f"dbname={ctx.pg.import_database} "
-        f"user={ctx.pg.user} "
-        f"password={ctx.pg.password} "
-        f"host={ctx.pg.host} "
-        f"port={ctx.pg.port}"
+        f"dbname={ctx.pg.import_database}"
+        f" user={ctx.pg.user}"
+        f" password={ctx.pg.password}"
+        f" host={ctx.pg.host}"
+        f" port={ctx.pg.port}"
     )
 
 
@@ -240,26 +253,26 @@ def import_natural_earth(ctx):
     target_file = f"{ctx.data_dir}/natural_earth_vector.sqlite"
 
     if needs_to_download(ctx, target_file, max_age=timedelta(days=30)):
+        download_url = "http://naciscdn.org/naturalearth/packages/natural_earth_vector.sqlite.zip"
+        downloaded_zip = "natural_earth_vector.sqlite.zip"
         ctx.run(
-            f"wget --progress=dot:giga http://naciscdn.org/naturalearth/packages/natural_earth_vector.sqlite.zip \
-        && unzip -oj natural_earth_vector.sqlite.zip -d {ctx.data_dir} \
-        && rm natural_earth_vector.sqlite.zip"
+            f"""
+            wget --progress=dot:giga {download_url}
+            && unzip -oj {downloaded_zip} -d {ctx.data_dir}
+            && rm {downloaded_zip}
+            """
         )
 
     pg_conn = _get_pg_conn(ctx)
     ctx.run(
-        f'PGCLIENTENCODING=LATIN1 ogr2ogr \
-    -progress \
-    -f Postgresql \
-    -s_srs EPSG:4326 \
-    -t_srs EPSG:3857 \
-    -clipsrc -180.1 -85.0511 180.1 85.0511 \
-    PG:"{pg_conn}" \
-    -lco GEOMETRY_NAME=geometry \
-    -lco DIM=2 \
-    -nlt GEOMETRY \
-    -overwrite \
-    {ctx.data_dir}/natural_earth_vector.sqlite'
+        (
+            "ogr2ogr -progress -overwrite -f Postgresql"
+            " -s_srs EPSG:4326 -t_srs EPSG:3857"
+            " -clipsrc -180.1 -85.0511 180.1 85.0511"
+            " -lco GEOMETRY_NAME=geometry -lco DIM=2 -nlt GEOMETRY"
+            f' PG:"{pg_conn}" {ctx.data_dir}/natural_earth_vector.sqlite'
+        ),
+        env={"PGCLIENTENCODING": "LATIN1"},
     )
 
 
@@ -270,17 +283,18 @@ def import_water_polygon(ctx):
 
     target_file = f"{ctx.data_dir}/water_polygons.shp"
     if needs_to_download(ctx, target_file, max_age=timedelta(days=30)):
+        downloaded_zip = "water-polygons-split-3857.zip"
         ctx.run(
-            f"wget --progress=dot:giga {ctx.water.polygons_url} \
-    && unzip -oj water-polygons-split-3857.zip -d {ctx.data_dir} \
-    && rm water-polygons-split-3857.zip"
+            f"""
+            wget --progress=dot:giga {ctx.water.polygons_url}
+            && unzip -oj {downloaded_zip} -d {ctx.data_dir}
+            && rm {downloaded_zip}
+            """
         )
 
-    ctx.run(
-        f"POSTGRES_PASSWORD={ctx.pg.password} POSTGRES_PORT={ctx.pg.port} IMPORT_DATA_DIR={ctx.data_dir} \
-  POSTGRES_HOST={ctx.pg.host} POSTGRES_DB={ctx.pg.import_database} POSTGRES_USER={ctx.pg.user} \
-  {ctx.imposm_config_dir}/import-water/import-water.sh"
-    )
+    env = _pg_env(ctx)
+    env["IMPORT_DIR"] = ctx.data_dir
+    ctx.run(f"{ctx.imposm_config_dir}/import-water/import-water.sh", env=env)
 
 
 @task
@@ -292,14 +306,10 @@ def import_lake(ctx):
 
     pg_conn = _get_pg_conn(ctx)
     ctx.run(
-        f'PGCLIENTENCODING=UTF8 ogr2ogr \
-    -f Postgresql \
-    -s_srs EPSG:4326 \
-    -t_srs EPSG:3857 \
-    PG:"{pg_conn}" \
-    {ctx.data_dir}/lake_centerline.geojson \
-    -overwrite \
-    -nln "lake_centerline"'
+        "PGCLIENTENCODING=UTF8 ogr2ogr -overwrite -f Postgresql"
+        " -s_srs EPSG:4326 -t_srs EPSG:3857"
+        ' -nln "lake_centerline"'
+        f' PG:"{pg_conn}" {ctx.data_dir}/lake_centerline.geojson'
     )
 
 
@@ -309,18 +319,18 @@ def import_border(ctx):
     logging.info("importing the borders in postgres")
 
     target_file = f"{ctx.data_dir}/osmborder_lines.csv"
-    gz_file = f"{target_file}.gz"
     if needs_to_download(ctx, target_file, max_age=timedelta(days=30)):
+        downloaded_zip = f"{target_file}.gz"
         ctx.run(
-            f"wget --progress=dot:giga -O {gz_file} {ctx.border.osmborder_lines_url} \
-    && gzip -fd {gz_file}"
+            f"""
+            wget --progress=dot:giga -O {downloaded_zip} {ctx.border.osmborder_lines_url}
+            && gzip -fd {downloaded_zip}
+            """
         )
 
-    ctx.run(
-        f"POSTGRES_PASSWORD={ctx.pg.password} POSTGRES_PORT={ctx.pg.port} IMPORT_DIR={ctx.data_dir} \
-  POSTGRES_HOST={ctx.pg.host} POSTGRES_DB={ctx.pg.import_database} POSTGRES_USER={ctx.pg.user} \
-  {ctx.imposm_config_dir}/import-osmborder/import/import_osmborder_lines.sh"
-    )
+    env = _pg_env(ctx)
+    env["IMPORT_DIR"] = ctx.data_dir
+    ctx.run(f"{ctx.imposm_config_dir}/import-osmborder/import/import_osmborder_lines.sh")
 
 
 # Wikimedia sites
@@ -498,7 +508,11 @@ def kill_all_access_to_main_db(ctx):
     logging.info(f"killing all connections to the main database")
     _execute_sql(
         ctx,
-        f"SELECT pid, pg_terminate_backend (pid) FROM pg_stat_activity WHERE datname = '{ctx.pg.database}';",
+        f"""
+        SELECT pid, pg_terminate_backend (pid)
+        FROM pg_stat_activity
+        WHERE datname = '{ctx.pg.database}';
+        """,
         db=ctx.pg.import_database,
     )
 
@@ -600,14 +614,15 @@ def generate_tiles(ctx):
     """
     if ctx.tiles.planet:
         logging.info("generating tiles for the planet")
-        # for the planet we tweak the tiles generation a bit to speed it up
-        # we first generate all the tiles for the first levels
+        # for the planet we tweak the tiles generation a bit to speed it up we
+        # first generate all the tiles for the first levels
         create_tiles_jobs(
             ctx, tileset_name=ctx.tiles.tilesets.basemap.name, z=0, from_zoom=0, before_zoom=10
         )
-        # from the zoom 10 we generate only the tiles if there is a parent tiles
-        # since tilerator does not generate tiles if the parent tile is composed only of 1 element
-        # it speed up greatly the tiles generation by not even trying to generate tiles for oceans (and desert)
+        # from the zoom 10 we generate only the tiles if there is a parent
+        # tiles since tilerator does not generate tiles if the parent tile is
+        # composed only of 1 element it speed up greatly the tiles generation
+        # by not even trying to generate tiles for oceans (and desert)
         create_tiles_jobs(
             ctx,
             tileset_name=ctx.tiles.tilesets.basemap.name,
@@ -616,10 +631,11 @@ def generate_tiles(ctx):
             before_zoom=15,
             check_previous_layer=True,
         )
-        # for the poi, we generate only tiles if we have a base tile on the level 13
-        # Note: we check the level 13 and not 14 because the tilegeneration process is in the background
-        # and we might not have finished all basemap 14th zoom level tiles when starting the poi generation
-        # it's a bit of a trick but works fine
+        # for the poi, we generate only tiles if we have a base tile on the
+        # level 13 Note: we check the level 13 and not 14 because the
+        # tilegeneration process is in the background and we might not have
+        # finished all basemap 14th zoom level tiles when starting the poi
+        # generation it's a bit of a trick but works fine
         create_tiles_jobs(
             ctx,
             tileset_name=ctx.tiles.tilesets.poi.name,
@@ -630,11 +646,11 @@ def generate_tiles(ctx):
         )
     elif ctx.tiles.x and ctx.tiles.y and ctx.tiles.z:
         logging.info(f"generating tiles for {ctx.tiles.x} / {ctx.tiles.y}, z = {ctx.tiles.z}")
-        logging.warn("/!\\================================/!\\")
         logging.warn(
-            "Please not that this way of giving position is DEPRECATED! use `coords` instead"
+            "/!\\================================/!\\\n"
+            "Please note that this way of giving position is DEPRECATED! use `coords` instead\n"
+            "/!\\================================/!\\"
         )
-        logging.warn("/!\\================================/!\\")
         create_tiles_jobs(
             ctx,
             tileset_name=ctx.tiles.tilesets.basemap.name,
@@ -807,9 +823,7 @@ def run_osm_update(ctx):
         new_osm_timestamp = read_osm_timestamp(ctx, change_file_path)
 
         osm_update(
-            ctx,
-            f"postgis://{ctx.pg.user}:{ctx.pg.password}@{ctx.pg.host}:{ctx.pg.port}/{ctx.pg.database}",
-            change_file_path,
+            ctx, _pg_conn_str(ctx), change_file_path
         )
         write_new_state(ctx, new_osm_timestamp)
         os.remove(change_file_path)
