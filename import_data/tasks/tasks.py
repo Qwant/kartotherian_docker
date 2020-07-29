@@ -39,7 +39,7 @@ def join(*futures):
     #       `run.done` is a set.
     for result in run.done:
         if result.exception() is not None:
-            raise result.exception()
+            raise Exception("concurrent task failed") from result.exception()
 
 
 def _pg_env(ctx):
