@@ -82,7 +82,7 @@ def _execute_sql(ctx, sql, db=None, additional_options=""):
     if db is not None:
         query += f" -d {db}"
 
-    return ctx.run(query, env={"PGPASSWORD": ctx.pg.password},)
+    return ctx.run(query, env={"PGPASSWORD": ctx.pg.password})
 
 
 def _run_sql_script(ctx, script_name, template_params=None):
@@ -109,7 +109,7 @@ def _run_sql_script(ctx, script_name, template_params=None):
 
 def _db_exists(ctx, db_name):
     has_db = _execute_sql(
-        ctx, f"SELECT 1 FROM pg_database WHERE datname='{db_name}';", additional_options="-tA",
+        ctx, f"SELECT 1 FROM pg_database WHERE datname='{db_name}';", additional_options="-tA"
     )
     return has_db.stdout == "1\n"
 
@@ -835,8 +835,11 @@ def run_osm_update(ctx):
         os.remove(change_file_path)
 
 
-@task
 def test_tile_generation(ctx):
+    """
+    Check that tilerator generation finishes successfully.
+    """
+
     def get_tilerator_result():
         stats = requests.get(f"{ctx.tiles.tilerator_url}/jobs/stats").json()
 
@@ -853,17 +856,31 @@ def test_tile_generation(ctx):
         time.sleep(1)
 
     stats = get_tilerator_result()
-    print(
-        f"Generated {stats['complete']} tiles ({stats['failed']} failed) in "
-        f"{stats['duration']:.2f} minutes"
-    )
-    return stats["failed"] == 0
+    print(f"[test_tile_generation] Generated {stats['complete']} tiles ({stats['failed']} failed)")
+    return stats["failed"] == 0 and stats["complete"] != 0
+
+
+def test_postgres_loaded(ctx):
+    """
+    Check that POIs are successfully loaded in the database.
+    """
+    tables = ["osm_poi_point", "osm_poi_polygon"]
+
+    def poi_exists(name):
+        raw_res = _execute_sql(ctx, f"SELECT COUNT(*) FROM {name}", additional_options="-tA",)
+        return int(raw_res.stdout.strip()) > 0
+
+    count_exists = sum(poi_exists(name) for name in tables)
+    print(f"[test_poi_loaded] {count_exists}/{len(tables)} tables filled")
+    return count_exists == len(tables)
 
 
 @task
 def test(ctx):
-    return_codes = [test_tile_generation(ctx)]
-    return any(code != 0 for code in return_codes)
+    success = [test_tile_generation(ctx), test_postgres_loaded(ctx)]
+
+    if not all(success):
+        sys.exit(1)
 
 
 # default task

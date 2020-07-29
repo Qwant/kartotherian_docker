@@ -27,7 +27,10 @@ script: >
         pip install --pre black
         black --diff --check .
     elif [ "$SERVICE" == "test" ]; then
-        ./exec.py --debug load-db --env INVOKE_WIKIDATA_STATS_ENABLED=0
+        ./exec.py --debug load-db \
+            --env INVOKE_WIKIDATA_STATS_ENABLED=0 \
+            --osm-file https://download.geofabrik.de/europe/monaco-latest.osm.pbf \
+            --tiles-coords "[[266, 186, 9]]"
         ./exec.py --debug test
     else
         export DOCKER_IMAGE="${DOCKER_IMAGE_PREFIX}_$SERVICE"
