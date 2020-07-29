@@ -52,9 +52,9 @@ def _pg_env(ctx):
     }
 
 
-def _pg_conn_str(ctx):
+def _pg_conn_str(ctx, db):
     pg = ctx.pg
-    return f"postgis://{pg.user}:{pg.password}@{pg.host}:{pg.port}/{pg.import_database}"
+    return f"postgis://{pg.user}:{pg.password}@{pg.host}:{pg.port}/{db}"
 
 
 def _open_sql_connection(ctx, db):
@@ -210,7 +210,7 @@ def get_osm_data(ctx):
 def _run_imposm_import(ctx, tileset_config):
     ctx.run(
         "time imposm3 import -write -diff -quiet -optimize -deployproduction -overwritecache"
-        f' --connection "{_pg_conn_str(ctx)}"'
+        f' --connection "{_pg_conn_str(ctx, ctx.pg.import_database)}"'
         f" -read {ctx.osm.file}"
         f" -mapping {os.path.join(ctx.imposm_config_dir, tileset_config.mapping_filename)}"
         f" -diffdir {ctx.generated_files_dir}/diff/{tileset_config.name}"
@@ -830,7 +830,7 @@ def run_osm_update(ctx):
 
         new_osm_timestamp = read_osm_timestamp(ctx, change_file_path)
 
-        osm_update(ctx, _pg_conn_str(ctx), change_file_path)
+        osm_update(ctx, _pg_conn_str(ctx, ctx.pg.database), change_file_path)
         write_new_state(ctx, new_osm_timestamp)
         os.remove(change_file_path)
 
