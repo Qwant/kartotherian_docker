@@ -849,7 +849,6 @@ def test_tile_generation(ctx):
         return {
             "complete": stats["completeCount"],
             "failed": stats["failedCount"],
-            "duration": stats["workTime"] / 60000,
         }
 
     while not get_tilerator_result():
