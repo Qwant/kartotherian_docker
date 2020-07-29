@@ -867,7 +867,7 @@ def test_postgres_loaded(ctx):
 
     def poi_exists(name):
         raw_res = _execute_sql(ctx, f"SELECT COUNT(*) FROM {name}", additional_options="-tA",)
-        return int(raw_res.stdout.strip()) > 0
+        return int(raw_res.stdout.strip() or "0") > 0
 
     count_exists = sum(poi_exists(name) for name in tables)
     print(f"[test_poi_loaded] {count_exists}/{len(tables)} tables filled")

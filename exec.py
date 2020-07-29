@@ -16,7 +16,7 @@ BUILD_COMMANDS = ["build", "kartotherian", "test"] + LOAD_DB_COMMANDS
 
 def exec_command(command, debug=False):
     if debug:
-        print("===>", " ".join(command), file=sys.stderr)
+        print("===>", " ".join(command), file=sys.stderr, flush=True)
 
     p = subprocess.Popen(command)
     p.wait()
