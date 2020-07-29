@@ -210,7 +210,7 @@ def get_osm_data(ctx):
 def _run_imposm_import(ctx, tileset_config):
     ctx.run(
         "time imposm3 import -write -diff -quiet -optimize -deployproduction -overwritecache"
-        f' -write --connection "{_pg_conn_str(ctx)}"'
+        f' --connection "{_pg_conn_str(ctx)}"'
         f" -read {ctx.osm.file}"
         f" -mapping {os.path.join(ctx.imposm_config_dir, tileset_config.mapping_filename)}"
         f" -diffdir {ctx.generated_files_dir}/diff/{tileset_config.name}"
