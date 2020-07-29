@@ -11,7 +11,7 @@ from itertools import chain
 LOAD_DB_COMMANDS = ["load-db", "load-db-france", "tileview"]
 
 # Commands that will require a build
-BUILD_COMMANDS = ["build", "kartotherian"] + LOAD_DB_COMMANDS
+BUILD_COMMANDS = ["build", "kartotherian", "test"] + LOAD_DB_COMMANDS
 
 
 def exec_command(command, debug=False):
@@ -25,17 +25,21 @@ def exec_command(command, debug=False):
 
 def docker_exec(docker_cmd, namespace, debug=False):
     init_submodule_if_not(debug)
-    return exec_command(
+    res_code = exec_command(
         ["docker-compose", "-p", namespace, "-f", "docker-compose.yml", "-f", "local-compose.yml"]
         + docker_cmd,
         debug,
     )
 
+    if res_code != 0:
+        print("Docker command failed")
+        sys.exit(res_code)
+
 
 def docker_run(params, namespace, debug=False, env={}):
     env_params = list(chain.from_iterable(["-e", f"{key}={val}"] for key, val in env.items()))
     command = ["run", "--rm"] + env_params + params
-    return docker_exec(command, namespace, debug)
+    docker_exec(command, namespace, debug)
 
 
 def get_submodules():
@@ -93,6 +97,7 @@ def build_argparser():
             ("update-tiles", "update the tiles data"),
             ("clean", "stop and remove running docker instances"),
             ("logs", "show docker logs (can be filtered with `--filter` option)"),
+            ("test", "run tests on generated tiles and db"),
         ]
     }
 
@@ -166,6 +171,9 @@ def main():
 
     if args.command == "logs":
         docker_exec(["logs"], args.namespace, args.debug)
+
+    if args.command == "test":
+        docker_run(["load_db", "test"], args.namespace, args.debug)
 
 
 if __name__ == "__main__":

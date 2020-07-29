@@ -835,6 +835,37 @@ def run_osm_update(ctx):
         os.remove(change_file_path)
 
 
+@task
+def test_tile_generation(ctx):
+    def get_tilerator_result():
+        stats = requests.get(f"{ctx.tiles.tilerator_url}/jobs/stats").json()
+
+        if stats["activeCount"] or stats["inactiveCount"] != 0:
+            return None
+
+        return {
+            "complete": stats["completeCount"],
+            "failed": stats["failedCount"],
+            "duration": stats["workTime"] / 60000,
+        }
+
+    while not get_tilerator_result():
+        time.sleep(1)
+
+    stats = get_tilerator_result()
+    print(
+        f"Generated {stats['complete']} tiles ({stats['failed']} failed) in "
+        f"{stats['duration']:.2f} minutes"
+    )
+    return stats["failed"] == 0
+
+
+@task
+def test(ctx):
+    return_codes = [test_tile_generation(ctx)]
+    return any(code != 0 for code in return_codes)
+
+
 # default task
 ##############
 @task(default=True)
