@@ -121,6 +121,14 @@ def build_argparser():
             """,
         )
 
+        subcommands[cmd].add_argument(
+            "--env",
+            "-e",
+            action="append",
+            default=[],
+            help="Set environement variable during docker run.",
+        )
+
     # `logs` specific parameters
 
     subcommands["logs"].add_argument(
@@ -141,12 +149,11 @@ def main():
         is_url = re.match("https?://.*", args.osm_file)
         file_key = "INVOKE_OSM_URL" if is_url else "INVOKE_OSM_FILE"
 
-        docker_run(
-            ["load_db"],
-            args.namespace,
-            args.debug,
-            env={file_key: args.osm_file, "INVOKE_TILES_COORDS": args.tiles_coords},
-        )
+        env = {arg.split("=")[0]: arg.split("=")[1] for arg in args.env}
+        env["INVOKE_TILES_COORDS"] = args.tiles_coords
+        env[file_key] = args.osm_file
+
+        docker_run(["load_db"], args.namespace, args.debug, env=env)
 
     if args.command == "tileview":
         docker_exec(["up", "-d", "tileview"], args.namespace, args.debug)
