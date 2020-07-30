@@ -95,6 +95,7 @@ def build_argparser():
             ("load-db-france", "load data (tiles too) for the french country"),
             ("tileview", "run a map server which allows to get detailed tiles information"),
             ("update-tiles", "update the tiles data"),
+            ("stop", "stop kartotherian"),
             ("clean", "stop and remove running docker instances"),
             ("logs", "show docker logs (can be filtered with `--filter` option)"),
             ("test", "run tests on generated tiles and db"),
@@ -165,6 +166,9 @@ def main():
 
     if args.command == "update-tiles":
         docker_run(["load_db", "run-osm-update"], args.namespace, args.debug)
+
+    if args.command == "stop":
+        docker_exec(["stop"], args.namespace, args.debug)
 
     if args.command == "clean":
         docker_exec(["down", "-v"], args.namespace, args.debug)
