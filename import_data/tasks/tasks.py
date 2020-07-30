@@ -65,7 +65,7 @@ def _open_sql_connection(ctx, db):
     return connection
 
 
-def _execute_sql(ctx, sql, db=None, additional_options=""):
+def _execute_sql(ctx, sql, db=None, additional_options="", quiet=False):
     tmp_file = NamedTemporaryFile("w")
     tmp_file.write(sql)
     tmp_file.flush()
@@ -82,7 +82,8 @@ def _execute_sql(ctx, sql, db=None, additional_options=""):
     if db is not None:
         query += f" -d {db}"
 
-    return ctx.run(query, env={"PGPASSWORD": ctx.pg.password})
+    hide = "out" if quiet else None
+    return ctx.run(query, env={"PGPASSWORD": ctx.pg.password}, hide=hide)
 
 
 def _run_sql_script(ctx, script_name, template_params=None):
@@ -109,7 +110,10 @@ def _run_sql_script(ctx, script_name, template_params=None):
 
 def _db_exists(ctx, db_name):
     has_db = _execute_sql(
-        ctx, f"SELECT 1 FROM pg_database WHERE datname='{db_name}';", additional_options="-tA"
+        ctx,
+        f"SELECT 1 FROM pg_database WHERE datname='{db_name}';",
+        additional_options="-tA",
+        quiet=True,
     )
     return has_db.stdout == "1\n"
 
@@ -448,7 +452,7 @@ def override_wikidata_weight_functions(ctx):
         """
         return float(
             _execute_sql(
-                ctx, QUERY, db=ctx.pg.import_database, additional_options="-tA"
+                ctx, QUERY, db=ctx.pg.import_database, additional_options="-tA", quiet=True
             ).stdout.strip()
         )
 
@@ -866,7 +870,9 @@ def test_postgres_loaded(ctx):
     tables = ["osm_poi_point", "osm_poi_polygon"]
 
     def poi_exists(name):
-        raw_res = _execute_sql(ctx, f"SELECT COUNT(*) FROM {name}", additional_options="-tA",)
+        raw_res = _execute_sql(
+            ctx, f"SELECT COUNT(*) FROM {name}", additional_options="-tA", quiet=True
+        )
         return int(raw_res.stdout.strip() or "0") > 0
 
     count_exists = sum(poi_exists(name) for name in tables)
