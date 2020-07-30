@@ -1,268 +1,165 @@
 #!/usr/bin/env python3
 
+import argparse
 import subprocess
+import re
 import sys
 import os
-import json
+from itertools import chain
+
+# Commands that will require a load db
+LOAD_DB_COMMANDS = ["load-db", "load-db-france", "tileview"]
+
+# Commands that will require a build
+BUILD_COMMANDS = ["build", "kartotherian"] + LOAD_DB_COMMANDS
 
 
-COMMANDS = [
-    'build',
-    'load-db',
-    'load-db-france',
-    'update-tiles',
-    'clean',
-    'logs',
-    'kartotherian',
-    'tileview',
-]
+def exec_command(command, debug=False):
+    if debug:
+        print("===>", " ".join(command), file=sys.stderr)
 
-
-def exec_command(command, options):
-    if options.get('debug') is True:
-        print('==> {}'.format(' '.join(command)))
     p = subprocess.Popen(command)
     p.wait()
     return p.poll()
 
 
+def docker_exec(docker_cmd, namespace, debug=False):
+    init_submodule_if_not(debug)
+    return exec_command(
+        ["docker-compose", "-p", namespace, "-f", "docker-compose.yml", "-f", "local-compose.yml"]
+        + docker_cmd,
+        debug,
+    )
+
+
+def docker_run(params, namespace, debug=False, env={}):
+    env_params = list(chain.from_iterable(["-e", f"{key}={val}"] for key, val in env.items()))
+    command = ["run", "--rm"] + env_params + params
+    return docker_exec(command, namespace, debug)
+
+
 def get_submodules():
     dirs = []
+
     try:
-        with open('.gitmodules', 'r') as f:
+        with open(".gitmodules", "r") as f:
             for line in f:
                 line = line.strip()
-                if not line.startswith('path = '):
+                if not line.startswith("path = "):
                     continue
-                dirs.append(line.split('path = ')[1])
+                dirs.append(line.split("path = ")[1])
     except Exception as err:
-        print(f'error happened when trying to get submodules: {err}')
+        print(f"error happened when trying to get submodules: {err}")
+
     return dirs
 
 
-def init_submodule_if_not(options):
+def init_submodule_if_not(debug=False):
     submodules = get_submodules()
+
     for sub in submodules:
         if len(os.listdir(sub)) == 0:
-            if exec_command(['git', 'submodule', 'update', '--init', sub], options) != 0:
+            if exec_command(["git", "submodule", "update", "--init", sub], debug) != 0:
                 print(f'Failed to update submodule "{sub}"')
 
 
-def run_kartotherian(options):
-    init_submodule_if_not(options)
-    print('> running kartotherian command')
-    return exec_command([
-        'docker-compose',
-        '-p', options['namespace'],
-        '-f', 'docker-compose.yml',
-        '-f', 'local-compose.yml',
-        'up',
-        '--build',
-        '-d',
-    ], options)
+def build_argparser():
+    parser = argparse.ArgumentParser(
+        prog="kartotherian_docker",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        description="""
+            Generally, it runs in this order: build > load-db(-france) > kartotherian (> logs)
+            To update, it runs in this order: build > load-db(-france) > update-tiles (> logs)
+            To debug, it runs in this order:  build > load-db(-france) > tileview (> logs)
+        """,
+    )
 
+    parser.add_argument("--debug", action="store_true", help="show more information on the run")
+    parser.add_argument(
+        "--namespace",
+        default="kartotherian_docker",
+        help="set the --project option of docker-compose, allowing to change name prefix",
+    )
 
-def run_build(options):
-    init_submodule_if_not(options)
-    print('> running build command')
-    return exec_command([
-        'docker-compose',
-        '-p', options['namespace'],
-        '-f', 'docker-compose.yml',
-        '-f', 'local-compose.yml',
-        'up',
-        '--build',
-        '-d',
-    ], options)
-
-
-def run_load_db(options):
-    ret = run_build(options)
-    if ret != 0:
-        return ret
-    print('> running load-db command')
-    if options['osm-file'].startswith('https://') or options['osm-file'].startswith('http://'):
-        flag = 'INVOKE_OSM_URL={}'.format(options['osm-file'])
-    else:
-        flag = 'INVOKE_OSM_FILE={}'.format(options['osm-file'])
-    command = [
-        'docker-compose',
-        '-p', options['namespace'],
-        '-f', 'docker-compose.yml',
-        '-f', 'local-compose.yml',
-        'run', '--rm',
-        '-e', flag,
-        '-e', 'INVOKE_TILES_COORDS={}'.format(options['tiles-coords']),
-        'load_db',
-    ]
-    return exec_command(command, options)
-
-
-def run_load_db_france(options):
-    options['osm-file'] = 'https://download.geofabrik.de/europe/france-latest.osm.pbf'
-    # got tiles from http://tools.geofabrik.de/calc/?grid=1
-    options['tiles-coords'] = '[[15, 10, 5], [16, 10, 5], [15, 11, 5], [16, 11, 5]]'
-    run_load_db(options)
-
-
-def run_update_tiles(options):
-    # needs to be run after load-db, adding a check for it would be nice.
-    print('> running update-tiles command')
-    return exec_command([
-        'docker-compose',
-        '-p', options['namespace'],
-        '-f', 'docker-compose.yml',
-        '-f', 'local-compose.yml',
-        'run', '--rm',
-        'load_db',
-        'run-osm-update',
-    ], options)
-
-
-def run_clean(options):
-    print('> running clean command')
-    return exec_command([
-        'docker-compose',
-        '-p', options['namespace'],
-        '-f', 'docker-compose.yml',
-        '-f', 'local-compose.yml',
-        'down',
-        '-v',
-    ], options)
-
-
-def run_logs(options):
-    print('> running logs command')
-    command = [
-        'docker-compose',
-        '-p', options['namespace'],
-        '-f', 'docker-compose.yml',
-        '-f', 'local-compose.yml',
-        'logs',
-    ]
-    for f in options['filter']:
-        command.append(f)
-    return exec_command(command, options)
-
-
-def run_tileview(options):
-    print('> running tileview command')
-    ret = run_load_db(options)
-    if ret != 0:
-        return ret
-    return exec_command([
-        'docker-compose',
-        '-p', options['namespace'],
-        '-f', 'docker-compose.yml',
-        '-f', 'local-compose.yml',
-        'up',
-        '-d', 'tileview',
-    ], options)
-
-
-def run_help():
-    print('== kartotherian_docker options ==')
-    print('')
-    print('Generally, it runs in this order: build > load-db(-france) > kartotherian (> logs)')
-    print('To update, it runs in this order: build > load-db(-france) > update-tiles (> logs)')
-    print('To debug, it runs in this order:  build > load-db(-france) > tileview (> logs)')
-    print('')
-    print('  build         : build basics')
-    print('  kartotherian  : launch (and build) kartotherian')
-    print('  load-db       : load data from the given `--osm-file` (luxembourg by default)')
-    print('  load-db-france: load data (tiles too) for the french country')
-    print('  tileview      : run a map server which allows to get detailed tiles information')
-    print('  update-tiles  : update the tiles data')
-    print('  clean         : stop and remove running docker instances')
-    print('  logs          : show docker logs (can be filtered with `--filter` option)')
-    print('  --debug       : show more information on the run')
-    print('  --filter      : container to show on `logs` command')
-    print('  --osm-file    : file or URL to be used for pbf file in `load-db`, luxembourg by default')
-    print('  --tiles-coords: needs to be an array of arrays (each of len 3). Defaults to [[66, 43, 7]].')
-    print('                  You can find coords by using http://tools.geofabrik.de/calc/?grid=1')
-    print('                  Used in load-db(-france) command.')
-    print('  --namespace   : set the --project option of docker-compose, allowing to change name prefix ')
-    print('                  of all used docker images')
-    print('  -h | --help   : show this help')
-    sys.exit(0)
-
-
-def parse_args(args):
-    if len(args) == 0:
-        run_help()
-        sys.exit(0)
-    available_options = ['--no-dependency-run', '--debug']
-    available_options.extend(COMMANDS)
-    enabled_options = {
-        'osm-file': 'https://download.geofabrik.de/europe/luxembourg-latest.osm.pbf',
-        'filter': [],
-        'tiles-coords': '[[66, 43, 7]]',
-        'namespace': 'kartotherian_docker',
+    subparsers = parser.add_subparsers(dest="command")
+    subcommands = {
+        cmd: subparsers.add_parser(cmd, help=cmd_help)
+        for cmd, cmd_help in [
+            ("build", "build basics"),
+            ("kartotherian", "launch (and build) kartotherian"),
+            ("load-db", "load data from the given `--osm-file` (luxembourg by default)"),
+            ("load-db-france", "load data (tiles too) for the french country"),
+            ("tileview", "run a map server which allows to get detailed tiles information"),
+            ("update-tiles", "update the tiles data"),
+            ("clean", "stop and remove running docker instances"),
+            ("logs", "show docker logs (can be filtered with `--filter` option)"),
+        ]
     }
-    i = 0
-    while i < len(args):
-        if args[i] in available_options:
-            if args[i].startswith('--'):
-                args[i] = args[i][2:]
-            enabled_options[args[i]] = True
-        elif args[i] == '--filter':
-            if i + 1 >= len(args):
-                print('`--filter` option expects an argument!')
-                sys.exit(1)
-            i += 1
-            enabled_options[args[i - 1][2:]].append(args[i])
-        elif args[i] == '--osm-file':
-            if i + 1 >= len(args):
-                print('`--osm-file` option expects an argument!')
-                sys.exit(1)
-            i += 1
-            enabled_options[args[i - 1][2:]] = args[i]
-        elif args[i] == '--tiles-coords':
-            if i + 1 >= len(args):
-                print('`{}` option expects an argument!'.format(args[i]))
-                sys.exit(1)
-            i += 1
-            try:
-                d = json.loads(args[i])
-                if not isinstance(d, list):
-                    print(f'`{args[i - 1]}` option expects an array of [longitude, latitude, zoom]')
-                    sys.exit(1)
-                for x in d:
-                    if not isinstance(x, list) or len(x) != 3:
-                        print(f'`{args[i - 1]}` option expects an array of [longitude, latitude, zoom]')
-                        sys.exit(1)
-            except Exception as e:
-                print(f'`{args[i - 1]}` option expects an array of [longitude, latitude, zoom]')
-                sys.exit(1)
-            enabled_options[args[i - 1][2:]] = args[i]
-        elif args[i] == '--namespace':
-            if i + 1 >= len(args):
-                print('`--namespace` option expects an argument!')
-                sys.exit(1)
-            i += 1
-            enabled_options[args[i - 1][2:]] = args[i]
-        elif args[i] == '-h' or args[i] == '--help':
-            run_help()
-            sys.exit(0)
-        else:
-            print('Unknown option `{}`, run with with `-h` or `--help` to see the list of commands'
-                .format(args[i]))
-            sys.exit(1)
-        i += 1
-    return enabled_options
+
+    # DB loading specific parameters
+
+    for cmd in LOAD_DB_COMMANDS:
+        def_file = "europe/luxembourg" if cmd != "load-db-france" else "europe/france"
+        def_coords = (
+            "[[66, 43, 7]]"
+            if cmd != "load-db-france"
+            else "[[15, 10, 5], [16, 10, 5], [15, 11, 5], [16, 11, 5]]"
+        )
+
+        subcommands[cmd].add_argument(
+            "--osm-file",
+            default=f"https://download.geofabrik.de/{def_file}-latest.osm.pbf",
+            help="file or URL to be used for pbf file, luxembourg by default",
+        )
+
+        subcommands[cmd].add_argument(
+            "--tiles-coords",
+            default=def_coords,
+            help="""
+                Needs to be an array of arrays (each of len 3).
+                You can find coords by using http://tools.geofabrik.de/calc/?grid=1
+            """,
+        )
+
+    # `logs` specific parameters
+
+    subcommands["logs"].add_argument(
+        "--filter", action="append", default=[], help="container to show"
+    )
+
+    return parser
 
 
 def main():
-    definitions = globals()
-    options = parse_args(sys.argv[1:])
-    for key in options:
-        if key in COMMANDS and options[key] is True:
-            func_name = 'run_{}'.format(key.replace('-', '_'))
-            ret = definitions[func_name](options)
-            if ret != 0:
-                print('{} command failed'.format(key))
-                sys.exit(ret)
+    parser = build_argparser()
+    args = parser.parse_args()
+
+    if args.command in BUILD_COMMANDS:
+        docker_exec(["up", "--build", "-d"], args.namespace, args.debug)
+
+    if args.command in LOAD_DB_COMMANDS:
+        is_url = re.match("https?://.*", args.osm_file)
+        file_key = "INVOKE_OSM_URL" if is_url else "INVOKE_OSM_FILE"
+
+        docker_run(
+            ["load_db"],
+            args.namespace,
+            args.debug,
+            env={file_key: args.osm_file, "INVOKE_TILES_COORDS": args.tiles_coords},
+        )
+
+    if args.command == "tileview":
+        docker_exec(["up", "-d", "tileview"], args.namespace, args.debug)
+
+    if args.command == "update-tiles":
+        docker_run(["load_db", "run-osm-update"], args.namespace, args.debug)
+
+    if args.command == "clean":
+        docker_exec(["down", "-v"], args.namespace, args.debug)
+
+    if args.command == "logs":
+        docker_exec(["logs"], args.namespace, args.debug)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
