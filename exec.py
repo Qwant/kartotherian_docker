@@ -10,9 +10,6 @@ from itertools import chain
 # Commands that will require a load db
 LOAD_DB_COMMANDS = ["load-db", "load-db-france", "tileview"]
 
-# Commands that will require a build
-BUILD_COMMANDS = ["build", "kartotherian", "test"] + LOAD_DB_COMMANDS
-
 
 def exec_command(command, debug=False):
     if debug:
@@ -79,6 +76,7 @@ def build_argparser():
     )
 
     parser.add_argument("--debug", action="store_true", help="show more information on the run")
+    parser.add_argument("--no-build", dest="build", action="store_false", help="skip build step")
     parser.add_argument(
         "--namespace",
         default="kartotherian_docker",
@@ -89,7 +87,6 @@ def build_argparser():
     subcommands = {
         cmd: subparsers.add_parser(cmd, help=cmd_help)
         for cmd, cmd_help in [
-            ("build", "build basics"),
             ("kartotherian", "launch (and build) kartotherian"),
             ("load-db", "load data from the given `--osm-file` (luxembourg by default)"),
             ("load-db-france", "load data (tiles too) for the french country"),
@@ -148,8 +145,12 @@ def main():
     parser = build_argparser()
     args = parser.parse_args()
 
-    if args.command in BUILD_COMMANDS:
-        docker_exec(["up", "--build", "-d"], args.namespace, args.debug)
+    up_cmd = ["up", "-d"]
+
+    if args.build:
+        up_cmd.append("--build")
+
+    docker_exec(up_cmd, args.namespace, args.debug)
 
     if args.command in LOAD_DB_COMMANDS:
         is_url = re.match("https?://.*", args.osm_file)

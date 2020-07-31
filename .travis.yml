@@ -31,7 +31,7 @@ script: >
             --env INVOKE_WIKIDATA_STATS_ENABLED=0 \
             --osm-file https://download.geofabrik.de/europe/monaco-latest.osm.pbf \
             --tiles-coords "[[266, 186, 9]]"
-        ./exec.py --debug test
+        ./exec.py --debug --no-build test
     else
         export DOCKER_IMAGE="${DOCKER_IMAGE_PREFIX}_$SERVICE"
         docker build --label "org.label-schema.vcs-ref=$TRAVIS_COMMIT" -t $DOCKER_IMAGE -f ./$SERVICE/Dockerfile .
