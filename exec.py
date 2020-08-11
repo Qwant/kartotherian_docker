@@ -10,13 +10,10 @@ from itertools import chain
 # Commands that will require a load db
 LOAD_DB_COMMANDS = ["load-db", "load-db-france", "tileview"]
 
-# Commands that will require a build
-BUILD_COMMANDS = ["build", "kartotherian"] + LOAD_DB_COMMANDS
-
 
 def exec_command(command, debug=False):
     if debug:
-        print("===>", " ".join(command), file=sys.stderr)
+        print("===>", " ".join(command), file=sys.stderr, flush=True)
 
     p = subprocess.Popen(command)
     p.wait()
@@ -25,17 +22,21 @@ def exec_command(command, debug=False):
 
 def docker_exec(docker_cmd, namespace, debug=False):
     init_submodule_if_not(debug)
-    return exec_command(
+    res_code = exec_command(
         ["docker-compose", "-p", namespace, "-f", "docker-compose.yml", "-f", "local-compose.yml"]
         + docker_cmd,
         debug,
     )
 
+    if res_code != 0:
+        print("Docker command failed")
+        sys.exit(res_code)
+
 
 def docker_run(params, namespace, debug=False, env={}):
     env_params = list(chain.from_iterable(["-e", f"{key}={val}"] for key, val in env.items()))
     command = ["run", "--rm"] + env_params + params
-    return docker_exec(command, namespace, debug)
+    docker_exec(command, namespace, debug)
 
 
 def get_submodules():
@@ -75,6 +76,7 @@ def build_argparser():
     )
 
     parser.add_argument("--debug", action="store_true", help="show more information on the run")
+    parser.add_argument("--no-build", dest="build", action="store_false", help="skip build step")
     parser.add_argument(
         "--namespace",
         default="kartotherian_docker",
@@ -85,14 +87,15 @@ def build_argparser():
     subcommands = {
         cmd: subparsers.add_parser(cmd, help=cmd_help)
         for cmd, cmd_help in [
-            ("build", "build basics"),
             ("kartotherian", "launch (and build) kartotherian"),
             ("load-db", "load data from the given `--osm-file` (luxembourg by default)"),
             ("load-db-france", "load data (tiles too) for the french country"),
             ("tileview", "run a map server which allows to get detailed tiles information"),
             ("update-tiles", "update the tiles data"),
+            ("stop", "stop kartotherian"),
             ("clean", "stop and remove running docker instances"),
             ("logs", "show docker logs (can be filtered with `--filter` option)"),
+            ("test", "run tests on generated tiles and db"),
         ]
     }
 
@@ -121,6 +124,14 @@ def build_argparser():
             """,
         )
 
+        subcommands[cmd].add_argument(
+            "--env",
+            "-e",
+            action="append",
+            default=[],
+            help="Set environement variable during docker run.",
+        )
+
     # `logs` specific parameters
 
     subcommands["logs"].add_argument(
@@ -134,19 +145,22 @@ def main():
     parser = build_argparser()
     args = parser.parse_args()
 
-    if args.command in BUILD_COMMANDS:
-        docker_exec(["up", "--build", "-d"], args.namespace, args.debug)
+    up_cmd = ["up", "-d"]
+
+    if args.build:
+        up_cmd.append("--build")
+
+    docker_exec(up_cmd, args.namespace, args.debug)
 
     if args.command in LOAD_DB_COMMANDS:
         is_url = re.match("https?://.*", args.osm_file)
         file_key = "INVOKE_OSM_URL" if is_url else "INVOKE_OSM_FILE"
 
-        docker_run(
-            ["load_db"],
-            args.namespace,
-            args.debug,
-            env={file_key: args.osm_file, "INVOKE_TILES_COORDS": args.tiles_coords},
-        )
+        env = {arg.split("=")[0]: arg.split("=")[1] for arg in args.env}
+        env["INVOKE_TILES_COORDS"] = args.tiles_coords
+        env[file_key] = args.osm_file
+
+        docker_run(["load_db"], args.namespace, args.debug, env=env)
 
     if args.command == "tileview":
         docker_exec(["up", "-d", "tileview"], args.namespace, args.debug)
@@ -154,11 +168,17 @@ def main():
     if args.command == "update-tiles":
         docker_run(["load_db", "run-osm-update"], args.namespace, args.debug)
 
+    if args.command == "stop":
+        docker_exec(["stop"], args.namespace, args.debug)
+
     if args.command == "clean":
         docker_exec(["down", "-v"], args.namespace, args.debug)
 
     if args.command == "logs":
         docker_exec(["logs"], args.namespace, args.debug)
+
+    if args.command == "test":
+        docker_run(["load_db", "test"], args.namespace, args.debug)
 
 
 if __name__ == "__main__":
