@@ -19,11 +19,11 @@ RETURNS REAL AS $$
         -- Lower limit to the number of view of a Wikipedia page to consider it
         -- relevant. If a page generates less views than this limit, the output
         -- value will be computed as if this page doesn't exist.
-        min_views CONSTANT REAL := {{ min_views }};
+        min_views CONSTANT REAL := {{ min_views }};
 
         -- Upper limit to the number of views of a Wikipedia page. Pages with a
         -- greater number of views will have a weight of 1.
-        max_views CONSTANT REAL := {{ max_views }};
+        max_views CONSTANT REAL := {{ max_views }};
 
         views_count REAL;
     BEGIN

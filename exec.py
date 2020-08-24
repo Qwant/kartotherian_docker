@@ -145,12 +145,11 @@ def main():
     parser = build_argparser()
     args = parser.parse_args()
 
-    up_cmd = ["up", "-d"]
-
-    if args.build:
-        up_cmd.append("--build")
-
-    docker_exec(up_cmd, args.namespace, args.debug)
+    if args.command == "clean":
+        docker_exec(["down", "-v"], args.namespace, args.debug)
+    else:
+        up_cmd = ["up", "-d"] + (["--build"] if args.build else [])
+        docker_exec(up_cmd, args.namespace, args.debug)
 
     if args.command in LOAD_DB_COMMANDS:
         is_url = re.match("https?://.*", args.osm_file)
@@ -170,9 +169,6 @@ def main():
 
     if args.command == "stop":
         docker_exec(["stop"], args.namespace, args.debug)
-
-    if args.command == "clean":
-        docker_exec(["down", "-v"], args.namespace, args.debug)
 
     if args.command == "logs":
         docker_exec(["logs"], args.namespace, args.debug)
