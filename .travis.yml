@@ -24,7 +24,7 @@ before_install:
 
 script: >
     if [ "$SERVICE" == "linter" ]; then
-        pip install --pre black
+        pip install --pre black=="20.8b1"
         black --diff --check .
     elif [ "$SERVICE" == "test" ]; then
         ./exec.py --debug load-db \

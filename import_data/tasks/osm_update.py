@@ -82,7 +82,8 @@ def create_tiles_jobs(ctx, tileset_config, start_ts):
     # Get all tiles updated since start timestamp
     entries = "|".join(
         get_all_files(
-            path.join(ctx.update_tiles_dir, "expiretiles", tileset_config.name), start_ts,
+            path.join(ctx.update_tiles_dir, "expiretiles", tileset_config.name),
+            start_ts,
         )
     )
 
