@@ -4,7 +4,7 @@ services:
   postgres:
     # Custom image maintained by openmaptiles in https://github.com/openmaptiles/openmaptiles-tools
     # Based on postgres:9.6 and includes PostGIS and osml10n extensions
-    image: openmaptiles/postgis:1b0b981@sha256:f56869440250a81b15673ec7b9cc1729fc75b7dfaf8763ab09c5ea8d785ed639
+    image: openmaptiles/postgis:c310d1a@sha256:6d5156102748a134aa45a5feefc68b7178c8856952170fc55dd3cbbe165ce94c
     volumes:
       - "pgdata:/var/lib/postgresql/data"
     environment:

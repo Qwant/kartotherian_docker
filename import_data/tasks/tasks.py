@@ -213,7 +213,8 @@ def get_osm_data(ctx):
 
 def _run_imposm_import(ctx, tileset_config):
     ctx.run(
-        "time imposm3 import -write -diff -quiet -optimize -deployproduction -overwritecache"
+        "time imposm3 import -write -diff -quiet -deployproduction -overwritecache"
+        f' {"-optimize" if ctx.imposm.optimize else ""}'
         f' --connection "{_pg_conn_str(ctx, ctx.pg.import_database)}"'
         f" -read {ctx.osm.file}"
         f" -mapping {os.path.join(ctx.imposm_config_dir, tileset_config.mapping_filename)}"
@@ -235,16 +236,8 @@ def load_poi(ctx):
 
 @task
 def run_sql_script(ctx):
-    # disable Kanji transliteration (produces invalid utf8)
-    _execute_sql(
-        ctx,
-        db=ctx.pg.import_database,
-        sql="""
-            CREATE OR REPLACE FUNCTION osml10n_kanji_transcript(text) RETURNS text AS $$
-                SELECT NULL::text
-            $$ LANGUAGE SQL IMMUTABLE PARALLEL SAFE;
-        """,
-    )
+    # osml10n fixes
+    _run_sql_script(ctx, "sql-overrides/osml10n_overrides.sql")
 
     # load language-related functions
     _run_sql_script(ctx, "import-sql/language.sql")

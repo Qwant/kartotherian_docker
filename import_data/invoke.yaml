@@ -13,6 +13,9 @@ generated_files_dir: /data/imposm
 data_dir: /data
 update_tiles_dir: /data/update_tiles_data
 
+imposm:
+  optimize: True # Pass -optimize option to imposm commands
+
 ################################################
 # Data sources
 
