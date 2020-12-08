@@ -40,11 +40,19 @@ RETURNS REAL AS $$
             END;
         RETURN CASE
             WHEN views_count > min_views AND max_views - min_views > 1 THEN
-                0.5 + 0.5 * LOG(LEAST(max_views, views_count) - min_views)
-                             / LOG(max_views - min_views)
+                POWER(
+                    0.5 + 0.5
+                            * LOG(LEAST(max_views, views_count) - min_views)
+                            / LOG(max_views - min_views),
+                    3
+                )
             WHEN name <> '' THEN
-                0.5 * (
-                    1 - poi_class_rank(poi_class(subclass, mapping_key))::real / max_rank
+                POWER(
+                    0.5 * (
+                        1 - poi_class_rank(poi_class(subclass, mapping_key))::real
+                              / max_rank
+                    ),
+                    3
                 )
             ELSE
                 0.0
