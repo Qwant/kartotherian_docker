@@ -35,6 +35,8 @@ jobs:
       DOCKER_IMAGE_PREFIX: qwantresearch/kartotherian
     steps:
       - uses: actions/checkout@v2
+        with:
+          submodules: true
 
       - name: Set env variables
         run: |
