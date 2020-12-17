@@ -25,6 +25,9 @@ RETURNS REAL AS $$
         -- greater number of views will have a weight of 1.
         max_views CONSTANT REAL := {{ max_views }};
 
+        -- Exponent used to increase importance of very well-known POIs.
+        weight_exponent CONSTANT REAL := {{ weight_exponent }};
+
         views_count REAL;
     BEGIN
         SELECT INTO views_count
@@ -44,7 +47,7 @@ RETURNS REAL AS $$
                     0.5 + 0.5
                             * LOG(LEAST(max_views, views_count) - min_views)
                             / LOG(max_views - min_views),
-                    3
+                    weight_exponent
                 )
             WHEN name <> '' THEN
                 POWER(
@@ -52,7 +55,7 @@ RETURNS REAL AS $$
                         1 - poi_class_rank(poi_class(subclass, mapping_key))::real
                               / max_rank
                     ),
-                    3
+                    weight_exponent
                 )
             ELSE
                 0.0

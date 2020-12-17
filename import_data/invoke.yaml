@@ -50,6 +50,7 @@ wikidata:
     url: https://github.com/QwantResearch/wikimedia-dumps/releases/download/082019-102019/stats.csv.gz
     file: stats.csv.gz
     table: wm_stats
+    poi_weight_exponent: "3.0"
 
   labels:
     enabled: false
