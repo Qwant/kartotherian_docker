@@ -1,0 +1,63 @@
+on: [push, pull_request]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: "3.6"
+      
+      - name: Lint
+        run: |
+          python -m pip install --pre black=="20.8b1"
+          black --diff --check .
+
+      - name: Run import
+        run: |
+          ./exec.py --debug load-db \
+            --env INVOKE_WIKIDATA_STATS_ENABLED=0 \
+            --osm-file https://download.geofabrik.de/europe/monaco-latest.osm.pbf \
+            --tiles-coords "[[266, 186, 9]]"
+
+      - name: Run tests
+        run: ./exec.py --debug --no-build test
+
+  docker_images:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        service: [load_db, tilerator, kartotherian, telegraf]
+    env:
+      DOCKER_IMAGE_PREFIX: qwantresearch/kartotherian
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          submodules: true
+
+      - name: Set env variables
+        run: |
+          echo "DOCKER_IMAGE=${DOCKER_IMAGE_PREFIX}_$SERVICE" >> $GITHUB_ENV
+          echo "SERVICE=$SERVICE" >> $GITHUB_ENV
+        env:
+          SERVICE: ${{ matrix.service }}
+
+      - name: Login to DockerHub
+        uses: docker/login-action@v1
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Docker build
+        run: |
+          docker build --label "org.label-schema.vcs-ref=$GITHUB_SHA" -t $DOCKER_IMAGE -f ./$SERVICE/Dockerfile .
+
+      - name: Docker push
+        if: github.ref == 'refs/heads/master'
+        run: |
+          docker push $DOCKER_IMAGE
+
+
