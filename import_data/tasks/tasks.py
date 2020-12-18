@@ -452,6 +452,7 @@ def override_wikidata_weight_functions(ctx):
     params = {
         "min_views": compute_views_percentile(0.1),
         "max_views": compute_views_percentile(0.999),
+        "weight_exponent": ctx.wikidata.stats.poi_weight_exponent,
     }
 
     _run_sql_script(ctx, "import-wikidata/wikidata_functions.sql", template_params=params)
