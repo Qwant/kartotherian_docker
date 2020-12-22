@@ -2,11 +2,11 @@ FROM node:10-stretch as builder
 
 RUN apt update && apt install -y libstdc++6
 
-RUN cd /opt && git clone https://github.com/QwantResearch/qwant-basic-gl-style.git
+RUN cd /opt && git clone https://github.com/Qwant/qwant-basic-gl-style.git
 
 WORKDIR /opt/qwant-basic-gl-style
 
-RUN git clone https://github.com/QwantResearch/map-style-builder.git
+RUN git clone https://github.com/Qwant/map-style-builder.git
 
 COPY tileview_conf.json /opt/qwant-basic-gl-style/map-style-builder
 

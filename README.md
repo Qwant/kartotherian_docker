@@ -29,7 +29,7 @@ If you want to see the list of all available commands, use `-h` or `--help` opti
 
 ## Workflow
 
-If you want to update the generation process, you need to edit [QwantResearch/openmaptiles](https://github.com/QwantResearch/openmaptiles) then update the openmaptiles submodule.
+If you want to update the generation process, you need to edit [Qwant/openmaptiles](https://github.com/Qwant/openmaptiles) then update the openmaptiles submodule.
 
 ## running
 
@@ -47,9 +47,9 @@ to download a pbf and load data in postgres and generate tiles you need:
 
 Note that you can specify the PBF you want to give by using the `--osm-file` option.
 
-The different way to configure the import can be seen in [this readme](https://github.com/QwantResearch/kartotherian_docker/blob/master/import_data/README.md).
+The different way to configure the import can be seen in [this readme](./import_data/README.md).
 
-Note: the first import might be quite long are some additional data will be downloaded (cf [load_db](https://github.com/QwantResearch/kartotherian_docker/blob/master/load_db/README.md))
+Note: the first import might be quite long are some additional data will be downloaded (cf [load_db](./load_db/README.md))
 
 If you want to use already downloaded data (especially usefull for a quicker dev cycle), you can use a mounted docker volume.
 
@@ -79,7 +79,7 @@ The tiles generation is also handle by the `load_db` container.
 
 To only generate 1 tile, you can set `--tiles-coords [[x, y, z]]`. x, y, and z are based on the [Slippy Map Tile name](https://wiki.openstreetmap.org/wiki/Slippy_map_tilenames) system and you can use [Geofabrik's tool](https://tools.geofabrik.de/calc/#6/51.25727/10.45457&type=Mapnik&grid=1) to generate these for a specific location.
 
-The different ways to configure the tiles generation can be seen [in the default configuration file](https://github.com/QwantResearch/kartotherian_docker/blob/master/import_data/invoke.yaml).
+The different ways to configure the tiles generation can be seen [in the default configuration file](https://github.com/Qwant/kartotherian_docker/blob/master/import_data/invoke.yaml).
 
 If you have forwarded the port, you can check the tile generation at `http://localhost:16534/jobs` and check a vector tile based map on `http://localhost:8585`
 
@@ -111,4 +111,4 @@ The SQL and imposm mapping generation is quite straigthforward (cf. `generate-sq
 
 The `data_tm2source_*.xml` generation is a bit more complex. We use `generate-tm2source` to generate a `Carto` project `.yml` file. This file is transformed to a Mapnik `.xml` project using [kosmtik](https://github.com/kosmtik/kosmtik).
 
-See more details on https://github.com/QwantResearch/openmaptiles
+See more details on https://github.com/Qwant/openmaptiles

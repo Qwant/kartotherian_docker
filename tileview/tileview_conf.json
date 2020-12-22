@@ -5,6 +5,6 @@
   "tileserver_poi": [
     "http://localhost:6533/ozpoi/{z}/{x}/{y}.pbf"
   ],
-  "spriteserver": "https://qwantresearch.github.io/qwant-basic-gl-style/",
-  "fontserver": "https://qwantresearch.github.io/fonts/"
+  "spriteserver": "https://qwant.github.io/qwant-basic-gl-style/",
+  "fontserver": "https://qwant.github.io/qwant-maps-fonts/"
 }

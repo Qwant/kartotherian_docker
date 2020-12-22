@@ -1,5 +1,5 @@
 -- Override default `poi_display_weight` function from
--- https://github.com/QwantResearch/openmaptiles/.
+-- https://github.com/Qwant/openmaptiles/.
 --
 -- Primarily, this function relies on the count of page views for the Wikipedia
 -- pages of a POI, if no Wikipedia page is found, this will fallback on the
@@ -13,7 +13,7 @@ CREATE OR REPLACE FUNCTION poi_display_weight(
 RETURNS REAL AS $$
     DECLARE
         -- Maximum rank for the class of a POI as defined in
-        -- https://github.com/QwantResearch/openmaptiles/blob/master/layers/poi/class.sql
+        -- https://github.com/Qwant/openmaptiles/blob/master/layers/poi/class.sql
         max_rank  CONSTANT REAL := 1000.;
 
         -- Lower limit to the number of view of a Wikipedia page to consider it
