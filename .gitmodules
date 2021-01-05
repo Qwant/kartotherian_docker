@@ -1,6 +1,6 @@
 [submodule "openmaptiles"]
 	path = openmaptiles
-	url = https://github.com/QwantResearch/openmaptiles
+	url = https://github.com/Qwant/openmaptiles
 [submodule "import_data/import-osmborder"]
 	path = import_data/import-osmborder
 	url = https://github.com/openmaptiles/import-osmborder.git

@@ -464,7 +464,7 @@ def override_wikidata_weight_functions(ctx):
 def run_post_sql_scripts(ctx):
     """
     load the sql file with all the functions to generate the layers
-    this file has been generated using https://github.com/QwantResearch/openmaptiles
+    this file has been generated using https://github.com/Qwant/openmaptiles
     """
     logging.info("running postsql scripts")
     _run_sql_script(ctx, "generated_base.sql")

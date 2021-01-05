@@ -19,7 +19,7 @@ RUN apt-get update && \
         locales \
     && npm i npm@latest -g
 
-RUN git clone https://github.com/QwantResearch/kartotherian.git /opt/kartotherian \
+RUN git clone https://github.com/Qwant/kartotherian.git /opt/kartotherian \
     && cd /opt/kartotherian \
     && git checkout 8ab9f2c2b1493420e8a892f7172c556bec09f63f \
     && npm install --production
