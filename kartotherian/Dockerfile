@@ -1,4 +1,4 @@
-FROM node:10-stretch@sha256:c46b41071ce455e47f205bf83b7ad6593ad22194639df1298a735f407ded1df6
+FROM node:14-stretch
 
 ENV NODE_ENV=production
 
@@ -12,8 +12,8 @@ USER node
 
 RUN git clone https://github.com/Qwant/kartotherian.git /opt/kartotherian \
     && cd /opt/kartotherian \
-    && git checkout 8ab9f2c2b1493420e8a892f7172c556bec09f63f \
-    && npm install --production
+    && git checkout 46dedb6d0c46d0f1dbf6ad4e029d676c63fc5eab \
+    && npm ci --production
 
 COPY kartotherian/config.yaml /etc/kartotherian
 COPY kartotherian/sources.yaml /etc/kartotherian

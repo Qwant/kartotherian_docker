@@ -26,7 +26,7 @@ water:
   polygons_url: https://osmdata.openstreetmap.de/download/water-polygons-split-3857.zip
 
 border:
-  osmborder_lines_url: https://github.com/openmaptiles/openmaptiles-tools/releases/download/v3.0.0-beta/osmborder_lines.csv.gz
+  osmborder_lines_url: https://github.com/Qwant/openmaptiles/releases/download/v3.11-qwant-2021-04-16/osmborder_lines_20210416.csv.gz
 
 osm:
   ## one of 'url' or 'file' needs to be configured
