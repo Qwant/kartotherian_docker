@@ -9,9 +9,7 @@ RUN apt-get update && \
         curl \
         osmctools \
         gdal-bin \
-        postgis \
         postgresql-client \
-        jq \
     && rm -rf /var/lib/apt/lists/* \
 # install imposm 0.11.0 (custom release, waiting for https://github.com/omniscale/imposm3/pull/206 to be merged)
     && wget https://github.com/amatissart/imposm3/releases/download/v0.11.0-qwant.0/imposm-0.11.0-qwant.0-linux-x86-64.tar.gz \
