@@ -12,8 +12,6 @@ worker_heartbeat_timeout: '{env(TILERATOR_WORKER_HEARTBEAT_TIMEOUT,7500)}'
 # Logger info
 logging:
   level: info
-  streams:
-    - type: debug
 #  streams:
 #  # Use gelf-stream -> logstash
 #  - type: gelf
