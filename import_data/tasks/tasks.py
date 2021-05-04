@@ -828,6 +828,19 @@ def run_osm_update(ctx):
 
         new_osm_timestamp = read_osm_timestamp(ctx, change_file_path)
 
+        tilerator_stats = requests.get(f"{ctx.tiles.tilerator_url}/jobs/stats").json()
+        active_tiles_jobs = tilerator_stats["activeCount"]
+        if active_tiles_jobs > 0:
+            # OMT scripts define triggers on the PG database that require exclusive locks
+            # on some tables. During tiles generation, a deadlock could be detected by Postgres,
+            # interrupting both imposm and tilerator jobs. At this point, some items could already
+            # have been overwritten in the OSM cache maintained on disk by imposm, and cause corruption
+            # on future updates (ineffective deletes, etc.).
+            # So it's safer to postpone the update.
+            raise Exception(
+                "Tiles generation is currenly in progress. The database cannot be updated for now."
+            )
+
         osm_update(ctx, _pg_conn_str(ctx, ctx.pg.database), change_file_path)
         write_new_state(ctx, new_osm_timestamp)
         os.remove(change_file_path)
