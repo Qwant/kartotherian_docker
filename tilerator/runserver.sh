@@ -7,11 +7,7 @@ CASSANDRA_PORT=9042
 
 TILERATOR_MODE="${TILERATOR_MODE:-worker}"
 
-if [[ "$TILERATOR_MODE" == "api" ]]; then
-    TILERATOR_CONFIG_FILE=config.api.yaml
-else
-    TILERATOR_CONFIG_FILE=config.worker.yaml
-fi
+TILERATOR_CONFIG_FILE=config.yaml
 
 function wait_for_cassandra() {(
     set +e
