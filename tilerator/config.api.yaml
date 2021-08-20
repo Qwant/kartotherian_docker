@@ -32,7 +32,7 @@ services:
     # version: ^0.4.0
     # per-service config
     conf:
-      port: 80
+      port: '{env(TILERATOR_PORT,80)}'
 
       # restrict to localhost access only
       # interface: '*'
@@ -81,6 +81,6 @@ services:
       uiOnly: true
 
       redis: {
-        'host': 'redis',
-        'port': 6379
+        'host': '{env(TILERATOR_REDIS_HOST,redis)}',
+        'port': '{env(TILERATOR_REDIS_PORT,6379)}'
       }
