@@ -56,8 +56,8 @@ jobs:
           docker build --label "org.label-schema.vcs-ref=$GITHUB_SHA" -t $DOCKER_IMAGE -f ./$SERVICE/Dockerfile .
 
       - name: Docker push
-        if: github.ref == 'refs/heads/master'
         run: |
-          docker push $DOCKER_IMAGE
+          GIT_BRANCH=${GITHUB_BASE_REF:-${GITHUB_REF#refs/heads/}}
+          docker push $DOCKER_IMAGE:$GIT_BRANCH
 
 
