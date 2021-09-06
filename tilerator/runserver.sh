@@ -2,8 +2,8 @@
 set -e
 
 # wait for cassandra to be up
-CASSANDRA_SERVER="${CASSANDRA_HOST:-cassandra}"
-CASSANDRA_PORT="${CASSANDRA_PORT:-9042}"
+CASSANDRA_SERVER=cassandra
+CASSANDRA_PORT=9042
 
 TILERATOR_MODE="${TILERATOR_MODE:-worker}"
 
