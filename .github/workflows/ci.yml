@@ -62,6 +62,7 @@ jobs:
           docker build --label "org.label-schema.vcs-ref=$GITHUB_SHA" -t $DOCKER_IMAGE -f ./$SERVICE/Dockerfile .
 
       - name: Docker push
+        if: github.event_name == 'push'
         run: |
           docker push $DOCKER_IMAGE
 
