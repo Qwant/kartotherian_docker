@@ -28,6 +28,9 @@ water:
 border:
   osmborder_lines_url: https://github.com/Qwant/openmaptiles/releases/download/v3.11-qwant-2021-04-16/osmborder_lines_20210416.csv.gz
 
+naturalearth:
+  sqlite_download_url: https://naturalearth.s3.amazonaws.com/packages/natural_earth_vector.sqlite.zip
+
 osm:
   ## one of 'url' or 'file' needs to be configured
   ## URL where to get the osm file
