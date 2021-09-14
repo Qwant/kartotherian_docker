@@ -265,7 +265,7 @@ def import_natural_earth(ctx):
     target_file = f"{ctx.data_dir}/natural_earth_vector.sqlite"
 
     if needs_to_download(ctx, target_file, max_age=timedelta(days=30)):
-        download_url = "http://naciscdn.org/naturalearth/packages/natural_earth_vector.sqlite.zip"
+        download_url = ctx.naturalearth.sqlite_download_url
         downloaded_zip = "natural_earth_vector.sqlite.zip"
         ctx.run(
             f"wget --progress=dot:giga {download_url}"
