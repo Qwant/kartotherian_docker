@@ -2,7 +2,7 @@
 set -e
 
 # wait for cassandra to be up
-CASSANDRA_PORT="${CASSANDRA_PORT:-9042}"
+CASSANDRA_PORT=9042
 
 TILERATOR_MODE="${TILERATOR_MODE:-worker}"
 
