@@ -44,7 +44,8 @@ jobs:
           if [ "$REF" == "master" ]; then
             IMAGE_TAG=latest
           else
-            IMAGE_TAG=$REF
+            # Replace '/' with '__'
+            IMAGE_TAG=${REF//\//__}
           fi
           echo "DOCKER_IMAGE=${DOCKER_IMAGE_PREFIX}_$SERVICE:$IMAGE_TAG" >> $GITHUB_ENV
           echo "SERVICE=$SERVICE" >> $GITHUB_ENV
