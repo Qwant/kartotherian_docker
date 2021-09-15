@@ -80,7 +80,4 @@ services:
       # This could be good for queue management
       uiOnly: true
 
-      redis: {
-        'host': '{env(TILERATOR_REDIS_HOST,redis)}',
-        'port': '{env(TILERATOR_REDIS_PORT,6379)}'
-      }
+      redis: '{env(TILERATOR_REDIS_URL)}'
