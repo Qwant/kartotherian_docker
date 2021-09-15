@@ -55,11 +55,13 @@ RUN chmod +x /gen_tiles.sh
 COPY tilerator/runserver.sh /runserver.sh
 RUN chmod +x /runserver.sh
 
+ENV TILERATOR_PORT=80
 ENV TILERATOR_OSMDB_HOST=postgres
 ENV TILERATOR_OSMDB_USER=gis
 ENV TILERATOR_OSMDB_PSWD=gis
 ENV TILERATOR_CASSANDRA_SERVERS=cassandra
 ENV TILERATOR_CASSANDRA_USER=gis
 ENV TILERATOR_CASSANDRA_PSWD=
+ENV TILERATOR_REDIS_URL=redis://redis:6379
 
 CMD ["/runserver.sh"]

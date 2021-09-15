@@ -32,7 +32,7 @@ services:
     # version: ^0.4.0
     # per-service config
     conf:
-      port: 80
+      port: '{env(TILERATOR_PORT)}'
 
       # restrict to localhost access only
       # interface: '*'
@@ -80,10 +80,7 @@ services:
       # This could be good for queue management
       uiOnly: false
 
-      redis: {
-        'host': 'redis',
-        'port': 6379
-      }
+      redis: '{env(TILERATOR_REDIS_URL)}'
 
       # Timeout for tile generation in case mapnik stuck on
       # locked resource while reading Postgres

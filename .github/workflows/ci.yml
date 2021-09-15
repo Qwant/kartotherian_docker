@@ -40,7 +40,14 @@ jobs:
 
       - name: Set env variables
         run: |
-          echo "DOCKER_IMAGE=${DOCKER_IMAGE_PREFIX}_$SERVICE" >> $GITHUB_ENV
+          REF=${GITHUB_REF#refs/*/}
+          if [ "$REF" == "master" ]; then
+            IMAGE_TAG=latest
+          else
+            # Replace '/' with '__'
+            IMAGE_TAG=${REF//\//__}
+          fi
+          echo "DOCKER_IMAGE=${DOCKER_IMAGE_PREFIX}_$SERVICE:$IMAGE_TAG" >> $GITHUB_ENV
           echo "SERVICE=$SERVICE" >> $GITHUB_ENV
         env:
           SERVICE: ${{ matrix.service }}
@@ -56,8 +63,6 @@ jobs:
           docker build --label "org.label-schema.vcs-ref=$GITHUB_SHA" -t $DOCKER_IMAGE -f ./$SERVICE/Dockerfile .
 
       - name: Docker push
-        if: github.ref == 'refs/heads/master'
+        if: github.event_name == 'push'
         run: |
           docker push $DOCKER_IMAGE
-
-
