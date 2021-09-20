@@ -266,9 +266,9 @@ def import_natural_earth(ctx):
 
     if needs_to_download(ctx, target_file, max_age=timedelta(days=30)):
         download_url = ctx.naturalearth.sqlite_download_url
-        downloaded_zip = "natural_earth_vector.sqlite.zip"
+        downloaded_zip = os.path.join(ctx.data_dir, "natural_earth_vector.sqlite.zip")
         ctx.run(
-            f"wget --progress=dot:giga {download_url}"
+            f"wget --progress=dot:giga {download_url} -O {downloaded_zip}"
             f" && unzip -oj {downloaded_zip} -d {ctx.data_dir}"
             f" && rm {downloaded_zip}"
         )
@@ -293,9 +293,9 @@ def import_water_polygon(ctx):
 
     target_file = f"{ctx.data_dir}/water_polygons.shp"
     if needs_to_download(ctx, target_file, max_age=timedelta(days=30)):
-        downloaded_zip = "water-polygons-split-3857.zip"
+        downloaded_zip = os.path.join(ctx.data_dir, "water-polygons-split-3857.zip")
         ctx.run(
-            f"wget --progress=dot:giga {ctx.water.polygons_url}"
+            f"wget --progress=dot:giga {ctx.water.polygons_url} -O {downloaded_zip}"
             f" && unzip -oj {downloaded_zip} -d {ctx.data_dir}"
             f" && rm {downloaded_zip}"
         )
