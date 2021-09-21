@@ -51,8 +51,11 @@ services:
     build:
       context: .
       dockerfile: load_db/Dockerfile
+    read_only: true
     environment:
       - INVOKE_CONFIG_FILE=config.yml
+    tmpfs:
+      - /tmp
     volumes:
       - input_data:/data/input
       - imposm_generated_data:/data/generated
