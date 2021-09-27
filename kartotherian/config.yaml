@@ -16,15 +16,15 @@ logging:
 metrics:
   name: kartotherian
   type: debug
-  host: telegraf
-  port: 8125
+  host: '{env(KARTOTHERIAN_TELEGRAF_HOST,)}'
+  port: '{env(KARTOTHERIAN_TELEGRAF_PORT,8125)}'
 
 services:
   - name: kartotherian
     module: kartotherian
 
     conf:
-      port: 6533
+      port: '{env(KARTOTHERIAN_PORT, 6533)}'
       cors: '{env(KARTOTHERIAN_CORS_ORIGIN,*)}'
 
       # Comment this out to allow connections from everywhere
