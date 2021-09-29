@@ -8,7 +8,7 @@ import os
 from itertools import chain
 
 # Commands that will require a load db
-LOAD_DB_COMMANDS = ["load-db", "load-db-france", "tileview"]
+LOAD_DB_COMMANDS = ["load-db", "load-db-france"]
 
 
 def exec_command(command, debug=False):
@@ -71,7 +71,6 @@ def build_argparser():
         description="""
             Generally, it runs in this order: build > load-db(-france) > kartotherian (> logs)
             To update, it runs in this order: build > load-db(-france) > update-tiles (> logs)
-            To debug, it runs in this order:  build > load-db(-france) > tileview (> logs)
         """,
     )
 
@@ -90,7 +89,6 @@ def build_argparser():
             ("kartotherian", "launch (and build) kartotherian"),
             ("load-db", "load data from the given `--osm-file` (luxembourg by default)"),
             ("load-db-france", "load data (tiles too) for the french country"),
-            ("tileview", "run a map server which allows to get detailed tiles information"),
             ("update-tiles", "update the tiles data"),
             ("stop", "stop kartotherian"),
             ("clean", "stop and remove running docker instances"),
@@ -160,9 +158,6 @@ def main():
         env[file_key] = args.osm_file
 
         docker_run(["load_db"], args.namespace, args.debug, env=env)
-
-    if args.command == "tileview":
-        docker_exec(["up", "-d", "tileview"], args.namespace, args.debug)
 
     if args.command == "update-tiles":
         docker_run(["load_db", "run-osm-update"], args.namespace, args.debug)
