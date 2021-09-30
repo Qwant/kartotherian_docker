@@ -1,9 +1,8 @@
-FROM python:3.6-stretch
+FROM python:3.6-bullseye
 
 ENV MAIN_DIR=/srv
 
 RUN apt-get update && \
-    apt-get upgrade -y openssl && \
     apt-get install -y --no-install-recommends \
         git \
         unzip \
