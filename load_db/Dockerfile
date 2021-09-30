@@ -3,6 +3,7 @@ FROM python:3.6-stretch
 ENV MAIN_DIR=/srv/import_data
 
 RUN apt-get update && \
+    apt-get upgrade -y openssl && \
     apt-get install -y --no-install-recommends \
         git \
         unzip \
