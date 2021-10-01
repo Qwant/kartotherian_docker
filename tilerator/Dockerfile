@@ -14,7 +14,6 @@ RUN apt-get update && \
         nmap \
         netcat \
         redis-tools \
-        python3.5 \
         python3-pip \
         locales \
     && npm i npm@latest -g
@@ -22,11 +21,11 @@ RUN apt-get update && \
 RUN git clone https://github.com/Qwant/kartotherian.git /opt/kartotherian \
     && cd /opt/kartotherian \
     && git checkout 46dedb6d0c46d0f1dbf6ad4e029d676c63fc5eab \
-    && npm ci --production
+    && npm ci --production --python=python3
 
 # install openmaptiles-tools
-RUN python3.5 -m pip install --upgrade pip \
-    && python3.5 -m pip install openmaptiles-tools==0.9.2
+RUN python3 -m pip install --upgrade pip \
+    && python3 -m pip install openmaptiles-tools==0.9.2
 # install openmaptiles
 COPY openmaptiles /opt/openmaptiles
 # setup needed directories

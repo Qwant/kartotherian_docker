@@ -13,7 +13,7 @@ USER node
 RUN git clone https://github.com/Qwant/kartotherian.git /opt/kartotherian \
     && cd /opt/kartotherian \
     && git checkout 46dedb6d0c46d0f1dbf6ad4e029d676c63fc5eab \
-    && npm ci --production
+    && npm ci --production --python=python3
 
 COPY kartotherian/config.yaml /etc/kartotherian
 COPY kartotherian/sources.yaml /etc/kartotherian
