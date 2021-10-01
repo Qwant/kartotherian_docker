@@ -756,7 +756,14 @@ def init_osm_update(ctx):
     latest state.txt file before .pbf timestamp
     """
     logging.info("initializing osm update from osm file timestamp:")
+
+    # In containers with restricted permissions, this 'mkdir' command may fail even
+    # though the folder already exists. That's why the error is ignored.
+    # In most cases, this folder is the mount point of the volume "update_tiles_data",
+    # but creating 'update_tiles_dir' may be necessary in a different volume configuration.
+    # If this directory cannot be created, thistask will fail anyway on 'write_new_state()'.
     ctx.run(f"mkdir -p {ctx.update_tiles_dir} || true")
+
     raw_osm_datetime = read_osm_timestamp(ctx, ctx.osm.file)
     write_new_state(ctx, raw_osm_datetime)
 
