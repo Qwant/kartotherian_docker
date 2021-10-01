@@ -165,7 +165,10 @@ def _get_osmupdate_options(ctx, box=None):
         bot_left = box.bottom_left
         top_right = box.top_right
         bbox_filter = f"-b={bot_left.lon},{bot_left.lat},{top_right.lon},{top_right.lat}"
-    return f"-v --day --hour --base-url={ctx.osm_update.replication_url} {bbox_filter}"
+    return (
+        f"-v --day --hour --base-url={ctx.osm_update.replication_url} {bbox_filter}"
+        f" --tempfiles={ctx.update_tiles_dir}/temp"
+    )
 
 
 @task
