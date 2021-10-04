@@ -767,7 +767,7 @@ def init_osm_update(ctx, file=None):
     # If this directory cannot be created, thistask will fail anyway on 'write_new_state()'.
     ctx.run(f"mkdir -p {ctx.update_tiles_dir} || true")
 
-    if file not None:
+    if file is not None:
         file=ctx.osm.file
     
     raw_osm_datetime = read_osm_timestamp(ctx, file)
