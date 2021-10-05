@@ -753,7 +753,7 @@ def read_osm_timestamp(ctx, osm_file_path):
 
 @task
 @format_stdout
-def init_osm_update(ctx, osm_file_path):
+def init_osm_update(ctx, osm_file_path=None):
     """
     Init osmosis folder with configuration files and
     latest state.txt file before .pbf timestamp
