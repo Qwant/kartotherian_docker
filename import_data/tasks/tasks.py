@@ -753,7 +753,7 @@ def read_osm_timestamp(ctx, osm_file_path):
 
 @task
 @format_stdout
-def init_osm_update(ctx, osm_file_path=None):
+def init_osm_update(ctx):
     """
     Init osmosis folder with configuration files and
     latest state.txt file before .pbf timestamp
@@ -767,10 +767,7 @@ def init_osm_update(ctx, osm_file_path=None):
     # If this directory cannot be created, thistask will fail anyway on 'write_new_state()'.
     ctx.run(f"mkdir -p {ctx.update_tiles_dir} || true")
 
-    if osm_file_path is None:
-        osm_file_path=ctx.osm.file
-    
-    raw_osm_datetime = read_osm_timestamp(ctx, osm_file_path)
+    raw_osm_datetime = read_osm_timestamp(ctx, ctx.osm.file)
     write_new_state(ctx, raw_osm_datetime)
 
 
