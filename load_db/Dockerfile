@@ -1,6 +1,6 @@
 FROM python:3.6-stretch
 
-ENV MAIN_DIR=/srv/import_data
+ENV MAIN_DIR=/srv
 
 RUN apt-get update && \
     apt-get upgrade -y openssl && \
