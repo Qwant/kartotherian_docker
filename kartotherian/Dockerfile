@@ -1,4 +1,9 @@
-FROM node:14-stretch
+FROM node:14-buster-slim
+
+RUN apt-get update \
+        && DEBIAN_FRONTEND=noninteractive apt-get install --assume-yes --quiet --no-install-recommends \
+            git python3.6 build-essential \
+        && apt-get clean
 
 ENV NODE_ENV=production
 
