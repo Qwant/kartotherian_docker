@@ -53,7 +53,9 @@ services:
       dockerfile: load_db/Dockerfile
     read_only: true
     environment:
-      - INVOKE_CONFIG_FILE=config.yml
+      - INVOKE_GENERATED_FILES_DIR=/data/generated
+      - INVOKE_DATA_DIR=/data/input
+      - INVOKE_UPDATE_TILES_DIR=/data/update_tiles_data
     tmpfs:
       - /tmp
     volumes:

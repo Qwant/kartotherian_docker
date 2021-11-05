@@ -1,9 +1,7 @@
-FROM node:14-stretch
-
-ENV NODE_ENV=production
+FROM node:14-buster-slim
 
 RUN apt-get update && \
-    apt-get install -y \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y \
         git \
         unzip \
         curl \
@@ -14,9 +12,11 @@ RUN apt-get update && \
         nmap \
         netcat \
         redis-tools \
-        python3.5 \
         python3-pip \
         locales \
+        python3.6 \
+        build-essential \
+    && apt-get clean \
     && npm i npm@latest -g
 
 RUN git clone https://github.com/Qwant/kartotherian.git /opt/kartotherian \
@@ -25,8 +25,9 @@ RUN git clone https://github.com/Qwant/kartotherian.git /opt/kartotherian \
     && npm ci --production
 
 # install openmaptiles-tools
-RUN python3.5 -m pip install --upgrade pip \
-    && python3.5 -m pip install openmaptiles-tools==0.9.2
+RUN python3 -m pip install --upgrade pip \
+    && python3 -m pip install git+https://github.com/openmaptiles/openmaptiles-tools@v0.12.0
+    
 # install openmaptiles
 COPY openmaptiles /opt/openmaptiles
 # setup needed directories
