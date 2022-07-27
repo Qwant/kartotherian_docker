@@ -26,7 +26,9 @@ RUN git clone https://github.com/Qwant/kartotherian.git /opt/kartotherian \
 
 # install openmaptiles-tools
 RUN python3 -m pip install --upgrade pip \
-    && python3 -m pip install git+https://github.com/openmaptiles/openmaptiles-tools@v0.12.0
+    && python3 -m pip install git+https://github.com/openmaptiles/openmaptiles-tools@v0.9.2
+
+RUN python3 -m pip install "pyyaml<6"
     
 # install openmaptiles
 COPY openmaptiles /opt/openmaptiles
