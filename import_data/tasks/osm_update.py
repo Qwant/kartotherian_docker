@@ -49,7 +49,7 @@ def run_imposm_update(ctx, tileset, change_file, pg_connection):
 
     try:
         ctx.run(
-            f'imposm3 diff -quiet \
+            f'imposm3 diff \
                 -connection {pg_connection} \
                 -mapping {mapping_path} \
                 -cachedir {path.join(ctx.generated_files_dir, "cache", imposm_folder_name)} \
