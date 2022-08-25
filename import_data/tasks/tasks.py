@@ -54,7 +54,7 @@ def _pg_env(ctx):
 
 def _pg_conn_str(ctx, db):
     pg = ctx.pg
-    return f"postgis://{pg.user}:{pg.password}@{pg.host}:{pg.port}/{db}"
+    return f"postgis://{pg.user}:{pg.password}@{pg.host}:{pg.port}/{db}?sslmode=require"
 
 
 def _open_sql_connection(ctx, db):
@@ -141,8 +141,6 @@ def prepare_db(ctx):
     """
     create the import database and remove the old backup one
     """
-    if _db_exists(ctx, ctx.pg.import_database):
-        kill_all_access_to_db(ctx, ctx.pg.import_database, db="postgres")
     _execute_sql(ctx, sql=f"DROP DATABASE IF EXISTS {ctx.pg.import_database};")
 
     logging.info(f"creating {ctx.pg.import_database} database")
