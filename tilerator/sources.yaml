@@ -15,6 +15,7 @@ gen-lite:
       host: {env: TILERATOR_OSMDB_HOST}
       user: {env: TILERATOR_OSMDB_USER}
       password: {env: TILERATOR_OSMDB_PSWD}
+      dbname: {env: TILERATOR_OSMDB_DATABASE}
 
 ozgen-lite:
   public: true
@@ -61,6 +62,7 @@ gen_basemap:
       host: {env: TILERATOR_OSMDB_HOST}
       user: {env: TILERATOR_OSMDB_USER}
       password: {env: TILERATOR_OSMDB_PSWD}
+      dbname: {env: TILERATOR_OSMDB_DATABASE}
 
 basemap:
   public: true
@@ -102,6 +104,7 @@ gen_poi:
       host: {env: TILERATOR_OSMDB_HOST}
       user: {env: TILERATOR_OSMDB_USER}
       password: {env: TILERATOR_OSMDB_PSWD}
+      dbname: {env: TILERATOR_OSMDB_DATABASE}
 
 poi:
   public: true
