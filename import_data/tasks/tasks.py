@@ -563,17 +563,19 @@ def rotate_database(ctx):
     """
     if not _db_exists(ctx, ctx.pg.import_database):
         return
-    kill_all_access_to_db(ctx, ctx.pg.database, ctx.pg.import_database)
     if _db_exists(ctx, ctx.pg.database):
+        print("DEBUG")
+        kill_all_access_to_db(ctx, ctx.pg.database, db="postgres")
         logging.info(f"rotating database, moving {ctx.pg.database} -> {ctx.pg.backup_database}")
         _execute_sql(
             ctx,
             f"ALTER DATABASE {ctx.pg.database} RENAME TO {ctx.pg.backup_database};",
             db=ctx.pg.import_database,
         )
+
     logging.info(f"rotating database, moving {ctx.pg.import_database} -> {ctx.pg.database}")
     kill_all_access_to_db(ctx, ctx.pg.backup_database, db="postgres")
-    _execute_sql(ctx,
+    _execute_sql(
         ctx,
         f"ALTER DATABASE {ctx.pg.import_database} ALLOW_CONNECTIONS false;",
         db=ctx.pg.backup_database,
