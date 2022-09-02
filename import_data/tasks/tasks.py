@@ -114,6 +114,7 @@ def _db_exists(ctx, db_name):
         f"SELECT 1 FROM pg_database WHERE datname='{db_name}';",
         additional_options="-tA",
         quiet=True,
+        db="postgres",
     )
     return has_db.stdout == "1\n"
 
@@ -574,7 +575,7 @@ def rotate_database(ctx):
         )
 
     logging.info(f"rotating database, moving {ctx.pg.import_database} -> {ctx.pg.database}")
-    kill_all_access_to_db(ctx, ctx.pg.backup_database, db="postgres")
+    kill_all_access_to_db(ctx, ctx.pg.import_database, db="postgres")
     _execute_sql(
         ctx,
         f"ALTER DATABASE {ctx.pg.import_database} ALLOW_CONNECTIONS false;",
@@ -585,7 +586,7 @@ def rotate_database(ctx):
         f"ALTER DATABASE {ctx.pg.import_database} RENAME TO {ctx.pg.database};",
         db=ctx.pg.backup_database,
     )
-    _execute_sql(ctx,
+    _execute_sql(
         ctx,
         f"ALTER DATABASE {ctx.pg.database} ALLOW_CONNECTIONS true;",
         db=ctx.pg.backup_database,
