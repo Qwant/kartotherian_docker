@@ -54,7 +54,7 @@ def _pg_env(ctx):
 
 def _pg_conn_str(ctx, db):
     pg = ctx.pg
-    return f"postgis://{pg.user}:{pg.password}@{pg.host}:{pg.port}/{db}"
+    return f"postgis://{pg.user}:{pg.password}@{pg.host}:{pg.port}/{db}?sslmode=require"
 
 
 def _open_sql_connection(ctx, db):
@@ -114,6 +114,7 @@ def _db_exists(ctx, db_name):
         f"SELECT 1 FROM pg_database WHERE datname='{db_name}';",
         additional_options="-tA",
         quiet=True,
+        db="postgres",
     )
     return has_db.stdout == "1\n"
 
@@ -140,10 +141,10 @@ def prepare_db(ctx):
     """
     create the import database and remove the old backup one
     """
-    _execute_sql(ctx, f"DROP DATABASE IF EXISTS {ctx.pg.import_database};")
+    _execute_sql(ctx, sql=f"DROP DATABASE IF EXISTS {ctx.pg.import_database};")
 
     logging.info(f"creating {ctx.pg.import_database} database")
-    _execute_sql(ctx, f"CREATE DATABASE {ctx.pg.import_database};")
+    _execute_sql(ctx, sql=f"CREATE DATABASE {ctx.pg.import_database};")
     _execute_sql(
         ctx,
         db=ctx.pg.import_database,
@@ -156,6 +157,8 @@ def prepare_db(ctx):
         """,
     )
 
+    if _db_exists(ctx, ctx.pg.backup_database):
+        kill_all_access_to_db(ctx, ctx.pg.backup_database, db="postgres")
     _execute_sql(ctx, f"DROP DATABASE IF EXISTS {ctx.pg.backup_database};")
 
 
@@ -500,7 +503,8 @@ def load_osm(ctx):
     if ctx.osm.url:
         get_osm_data(ctx)
 
-    join(cc_exec.submit(load_basemap, ctx), cc_exec.submit(load_poi, ctx))
+    load_poi(ctx)
+    load_basemap(ctx)
     run_sql_script(ctx)
 
 
@@ -530,19 +534,21 @@ def load_additional_data(ctx):
 
 @task
 @format_stdout
-def kill_all_access_to_main_db(ctx):
+def kill_all_access_to_db(ctx, datname, db=None):
     """
     close all connections to the main database
     """
-    logging.info(f"killing all connections to the main database")
+    logging.info(f"killing all connections to the {datname} database")
+    if not db:
+        db = ctx.pg.database
     _execute_sql(
         ctx,
         f"""
         SELECT pid, pg_terminate_backend (pid)
         FROM pg_stat_activity
-        WHERE datname = '{ctx.pg.database}';
+        WHERE datname = '{datname}';
         """,
-        db=ctx.pg.import_database,
+        db=db,
     )
 
 
@@ -557,18 +563,30 @@ def rotate_database(ctx):
     """
     if not _db_exists(ctx, ctx.pg.import_database):
         return
-    kill_all_access_to_main_db(ctx)
     if _db_exists(ctx, ctx.pg.database):
+        kill_all_access_to_db(ctx, ctx.pg.database, db="postgres")
         logging.info(f"rotating database, moving {ctx.pg.database} -> {ctx.pg.backup_database}")
         _execute_sql(
             ctx,
             f"ALTER DATABASE {ctx.pg.database} RENAME TO {ctx.pg.backup_database};",
             db=ctx.pg.import_database,
         )
+
     logging.info(f"rotating database, moving {ctx.pg.import_database} -> {ctx.pg.database}")
+    kill_all_access_to_db(ctx, ctx.pg.import_database, db="postgres")
+    _execute_sql(
+        ctx,
+        f"ALTER DATABASE {ctx.pg.import_database} ALLOW_CONNECTIONS false;",
+        db=ctx.pg.backup_database,
+    )
     _execute_sql(
         ctx,
         f"ALTER DATABASE {ctx.pg.import_database} RENAME TO {ctx.pg.database};",
+        db=ctx.pg.backup_database,
+    )
+    _execute_sql(
+        ctx,
+        f"ALTER DATABASE {ctx.pg.database} ALLOW_CONNECTIONS true;",
         db=ctx.pg.backup_database,
     )
 
