@@ -505,7 +505,8 @@ def load_osm(ctx):
     if ctx.osm.url:
         get_osm_data(ctx)
 
-    join(cc_exec.submit(load_basemap, ctx), cc_exec.submit(load_poi, ctx))
+    load_poi(ctx)
+    load_basemap(ctx)
     run_sql_script(ctx)
 
 
