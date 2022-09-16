@@ -56,6 +56,10 @@ RUN chmod +x /gen_tiles.sh
 COPY tilerator/runserver.sh /runserver.sh
 RUN chmod +x /runserver.sh
 
+RUN chown -R node:node /opt/kartotherian
+
+USER node
+
 ENV TILERATOR_PORT=80
 ENV TILERATOR_OSMDB_HOST=postgres
 ENV TILERATOR_OSMDB_USER=gis
