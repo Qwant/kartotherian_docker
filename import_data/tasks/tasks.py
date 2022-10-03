@@ -167,7 +167,7 @@ def _get_osmupdate_options(ctx, box=None):
     # if box is not None:
     #     bot_left = box.bottom_left
     #     top_right = box.top_right
-    #Force bbox filter on Le-Puy-En-Velay for faster workflow
+    # Force bbox filter on Le-Puy-En-Velay for faster workflow
     bbox_filter = f"-b=3.85,45,3.91,45.1"
     return (
         f"-v --day --hour --base-url={ctx.osm_update.replication_url} {bbox_filter}"
