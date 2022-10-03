@@ -867,7 +867,7 @@ def run_osm_update(ctx):
     with FileLock(lock_path) as _lock:
         current_osm_timestamp = read_current_state(ctx)
         try:
-            osmupdate_opts = _get_osmupdate_options(ctx, box=)
+            osmupdate_opts = _get_osmupdate_options(ctx)
             ctx.run(f"osmupdate {osmupdate_opts} {current_osm_timestamp} {change_file_path}")
         except Failure as exc:
             if exc.result.return_code == 21:
