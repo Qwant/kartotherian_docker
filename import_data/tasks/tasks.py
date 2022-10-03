@@ -164,10 +164,11 @@ def prepare_db(ctx):
 
 def _get_osmupdate_options(ctx, box=None):
     bbox_filter = ""
-    if box is not None:
-        bot_left = box.bottom_left
-        top_right = box.top_right
-        bbox_filter = f"-b={bot_left.lon},{bot_left.lat},{top_right.lon},{top_right.lat}"
+    # if box is not None:
+    #     bot_left = box.bottom_left
+    #     top_right = box.top_right
+    #Force bbox filter on Le-Puy-En-Velay for faster workflow
+    bbox_filter = f"-b=3.85,45,3.91,45.1"
     return (
         f"-v --day --hour --base-url={ctx.osm_update.replication_url} {bbox_filter}"
         f" --tempfiles={ctx.update_tiles_dir}/temp"
@@ -866,7 +867,7 @@ def run_osm_update(ctx):
     with FileLock(lock_path) as _lock:
         current_osm_timestamp = read_current_state(ctx)
         try:
-            osmupdate_opts = _get_osmupdate_options(ctx)
+            osmupdate_opts = _get_osmupdate_options(ctx, box=)
             ctx.run(f"osmupdate {osmupdate_opts} {current_osm_timestamp} {change_file_path}")
         except Failure as exc:
             if exc.result.return_code == 21:
