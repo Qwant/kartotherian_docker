@@ -54,7 +54,7 @@ def _pg_env(ctx):
 
 def _pg_conn_str(ctx, db):
     pg = ctx.pg
-    return f"postgis://{pg.user}:{pg.password}@{pg.host}:{pg.port}/{db}?sslmode=require"
+    return f"postgis://{pg.user}:{pg.password}@{pg.host}:{pg.port}/{db}"
 
 
 def _open_sql_connection(ctx, db):
