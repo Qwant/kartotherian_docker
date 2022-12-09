@@ -9,11 +9,11 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v2
         with:
-          python-version: "3.6"
+          python-version: "3.9"
       
       - name: Lint
         run: |
-          python -m pip install --pre black=="20.8b1"
+          python -m pip install --pre black
           black --diff --check .
 
       - name: Run import
