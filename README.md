@@ -49,7 +49,7 @@ Note that you can specify the PBF you want to give by using the `--osm-file` opt
 
 The different way to configure the import can be seen in [this readme](./import_data/README.md).
 
-Note: the first import might be quite long are some additional data will be downloaded (cf [load_db](./load_db/README.md))
+Notes: the first import might be quite long are some additional data will be downloaded (cf [load_db](./load_db/README.md))
 
 If you want to use already downloaded data (especially usefull for a quicker dev cycle), you can use a mounted docker volume.
 
