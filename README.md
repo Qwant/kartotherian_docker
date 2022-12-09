@@ -65,7 +65,7 @@ For example with this setup you can also provide an already downloaded pbf (it n
 ./exec.py --osm-file /data/input/luxembourg-latest.osm.pbf load-db
 ```
 
-Note: even if the local directoy in `./data` the osm file path is "/data/**input**/" because it's the directory path inside the container.
+Note: even if the local directory in `./data` the osm file path is "/data/**input**/" because it's the directory path inside the container.
 
 You can also specify a download url:
 
