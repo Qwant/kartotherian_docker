@@ -16,8 +16,9 @@ RUN apt-get update && \
         locales \
         python3.6 \
         build-essential \
-    && apt-get clean \
-    && npm i npm@latest -g
+    && apt-get clean
+
+RUN npm i npm@8.5.0 -g
 
 RUN git clone https://github.com/Qwant/kartotherian.git /opt/kartotherian \
     && cd /opt/kartotherian \
@@ -27,7 +28,7 @@ RUN git clone https://github.com/Qwant/kartotherian.git /opt/kartotherian \
 # install openmaptiles-tools
 RUN python3 -m pip install --upgrade pip \
     && python3 -m pip install git+https://github.com/openmaptiles/openmaptiles-tools@v0.12.0
-    
+
 # install openmaptiles
 COPY openmaptiles /opt/openmaptiles
 # setup needed directories
