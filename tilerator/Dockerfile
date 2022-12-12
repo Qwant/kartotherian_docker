@@ -17,7 +17,7 @@ RUN apt-get update && \
         python3.6 \
         build-essential \
     && apt-get clean \
-    && npm i npm@latest -g
+    && npm i npm@8.5.0 -g
 
 RUN git clone https://github.com/Qwant/kartotherian.git /opt/kartotherian \
     && cd /opt/kartotherian \

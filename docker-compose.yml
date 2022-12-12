@@ -35,6 +35,7 @@ services:
       context: .
       dockerfile: tilerator/Dockerfile
     environment:
+      - TILERATOR_MODE=worker
       - TILERATOR_NUM_WORKERS=ncpu # Number of workers (or ncpu by default)
     depends_on:
       - cassandra
