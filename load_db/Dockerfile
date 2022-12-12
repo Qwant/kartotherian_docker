@@ -1,4 +1,4 @@
-FROM python:3.9-bullseye
+FROM python:3.6-stretch
 
 ENV MAIN_DIR=/srv
 
@@ -46,7 +46,7 @@ RUN mkdir -p ${MAIN_DIR}/tilerator \
     && ln -s ${MAIN_DIR}/import_data/* ${MAIN_DIR}/imposm/ \
     && cd /opt/openmaptiles \
     && rm -f /usr/bin/python3 \
-    && ln -s `which python3.8` /usr/bin/python3 \
+    && ln -s `which python3.6` /usr/bin/python3 \
     && CONFIG_DIR=${MAIN_DIR} make qwant
 
 WORKDIR ${MAIN_DIR}/import_data
