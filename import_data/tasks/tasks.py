@@ -137,10 +137,10 @@ def _wait_until_postgresql_is_ready(ctx):
 
 @task
 def prepare_db(ctx):
+    """
+    Create the import database and remove the old backup one
+    """
     _wait_until_postgresql_is_ready(ctx)
-    """
-    create the import database and remove the old backup one
-    """
     _execute_sql(ctx, sql=f"DROP DATABASE IF EXISTS {ctx.pg.import_database};")
 
     logging.info(f"creating {ctx.pg.import_database} database")
@@ -246,7 +246,7 @@ def run_sql_script(ctx):
     _run_sql_script(ctx, "sql-overrides/osml10n_overrides.sql")
 
     # load language-related functions
-    _run_sql_script(ctx, "import-sql/language.sql")
+    _run_sql_script(ctx, f"{ctx.imposm_config_dir}/openmaptiles-tools/sql/zzz_language.sql")
 
     # load vector tiles related functions
     _run_sql_script(ctx, "postgis-vt-util/postgis-vt-util.sql")
@@ -302,13 +302,13 @@ def import_water_polygon(ctx):
         downloaded_zip = os.path.join(ctx.data_dir, "water-polygons-split-3857.zip")
         ctx.run(
             f"wget --progress=dot:giga {ctx.water.polygons_url} -O {downloaded_zip}"
-            f" && unzip -oj {downloaded_zip} -d {ctx.data_dir}"
+            f" && unzip -oj {downloaded_zip} -d {ctx.data_dir}/water_polygons"
             f" && rm {downloaded_zip}"
         )
-
     env = _pg_env(ctx)
-    env["IMPORT_DATA_DIR"] = ctx.data_dir
-    ctx.run(f"{ctx.imposm_config_dir}/import-water/import-water.sh", env=env)
+    env["DATA_DIR"] = ctx.data_dir
+    import_script = f"{ctx.imposm_config_dir}/openmaptiles-tools/docker/import-data/import_data.sh"
+    ctx.run(f"{import_script} water-polygons", env=env)
 
 
 @task
@@ -342,7 +342,8 @@ def import_border(ctx):
 
     env = _pg_env(ctx)
     env["IMPORT_DIR"] = ctx.data_dir
-    ctx.run(f"{ctx.imposm_config_dir}/import-osmborder/import/import_osmborder_lines.sh", env=env)
+    import_script = f"{ctx.imposm_config_dir}/openmaptiles-tools/bin/import-borders"
+    ctx.run(f"{import_script} load {target_file}", env=env)
 
 
 # Wikimedia sites
