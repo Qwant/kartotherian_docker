@@ -16,16 +16,6 @@ jobs:
           python -m pip install --pre black=="20.8b1"
           black --diff --check .
 
-      - name: Run import
-        run: |
-          ./exec.py --debug load-db \
-            --env INVOKE_WIKIDATA_STATS_ENABLED=0 \
-            --osm-file https://download.geofabrik.de/europe/monaco-latest.osm.pbf \
-            --tiles-coords "[[266, 186, 9]]"
-
-      - name: Run tests
-        run: ./exec.py --debug --no-build test
-
   docker_images:
     runs-on: ubuntu-latest
     strategy:
