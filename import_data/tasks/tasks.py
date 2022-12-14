@@ -297,7 +297,7 @@ def import_natural_earth(ctx):
 def import_water_polygon(ctx):
     logging.info("importing water polygon shapes in postgres")
 
-    target_file = f"{ctx.data_dir}/water_polygons.shp"
+    target_file = f"{ctx.data_dir}/water_polygons/water_polygons.shp"
     if needs_to_download(ctx, target_file, max_age=timedelta(days=30)):
         downloaded_zip = os.path.join(ctx.data_dir, "water-polygons-split-3857.zip")
         ctx.run(
