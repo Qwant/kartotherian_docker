@@ -516,7 +516,7 @@ def load_additional_data(ctx):
         cc_exec.submit(import_natural_earth, ctx),
         cc_exec.submit(import_water_polygon, ctx),
         cc_exec.submit(import_lake, ctx),
-        cc_exec.submit(import_border, ctx),
+        # cc_exec.submit(import_border, ctx),
     ]
 
     if ctx.wikidata.stats.enabled:
