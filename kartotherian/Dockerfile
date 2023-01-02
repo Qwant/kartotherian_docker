@@ -8,7 +8,7 @@ RUN apt-get update \
 ENV NODE_ENV=production
 
 # Upgrade npm
-RUN npm i npm@latest -g \
+RUN npm i npm@8.5.0 -g \
     && mkdir -p /etc/kartotherian \
     && chown node /etc/kartotherian \
     && chown node /opt

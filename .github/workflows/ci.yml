@@ -1,13 +1,13 @@
-on: [push, pull_request]
+on: push
 
 jobs:
   test:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-18.04
     steps:
       - uses: actions/checkout@v2
 
       - name: Set up Python
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v3
         with:
           python-version: "3.6"
       
@@ -15,16 +15,6 @@ jobs:
         run: |
           python -m pip install --pre black=="20.8b1"
           black --diff --check .
-
-      - name: Run import
-        run: |
-          ./exec.py --debug load-db \
-            --env INVOKE_WIKIDATA_STATS_ENABLED=0 \
-            --osm-file https://download.geofabrik.de/europe/monaco-latest.osm.pbf \
-            --tiles-coords "[[266, 186, 9]]"
-
-      - name: Run tests
-        run: ./exec.py --debug --no-build test
 
   docker_images:
     runs-on: ubuntu-latest

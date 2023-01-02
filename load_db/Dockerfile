@@ -1,4 +1,4 @@
-FROM python:3.6-stretch
+FROM python:3.8-bullseye
 
 ENV MAIN_DIR=/srv
 
@@ -20,7 +20,7 @@ RUN apt-get update && \
     && ln -sf /imposm-0.11.0-qwant.1-linux-x86-64/imposm /usr/local/bin/imposm3 \
     && wget -O /usr/local/bin/pgfutter https://github.com/lukasmartinelli/pgfutter/releases/download/v1.1/pgfutter_linux_amd64 \
     && chmod +x /usr/local/bin/pgfutter \
-    && pip install pipenv==2018.11.26
+    && pip install pipenv
 
 # install openmaptiles
 COPY openmaptiles /opt/openmaptiles
@@ -36,12 +36,14 @@ ENV LC_ALL C.UTF-8
 RUN cd ${MAIN_DIR}/import_data \
     && pipenv install --system --deploy
 
+RUN python3 -m pip install git+https://github.com/openmaptiles/openmaptiles-tools
+
 # generate imposm files \
 RUN mkdir -p ${MAIN_DIR}/tilerator \
     && ln -s ${MAIN_DIR}/import_data/* ${MAIN_DIR}/imposm/ \
     && cd /opt/openmaptiles \
     && rm -f /usr/bin/python3 \
-    && ln -s `which python3.6` /usr/bin/python3 \
+    && ln -s `which python3.8` /usr/bin/python3 \
     && CONFIG_DIR=${MAIN_DIR} make qwant
 
 WORKDIR ${MAIN_DIR}/import_data
